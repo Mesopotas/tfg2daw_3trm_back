@@ -1,0 +1,6 @@
+@back_2_trimestre_2_daw_HostAddress = http://localhost:5263
+
+GET {{back_2_trimestre_2_daw_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

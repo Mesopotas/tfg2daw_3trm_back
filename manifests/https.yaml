@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-deployment
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <ARN of your certificate from the aws create certificate command>
+    # Only run TLS on the port named "https" below.
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+spec:
+  selector:
+    app: api
+  ports:
+    - name: http
+      port: 8080         # puerto expuesto para trafico no encriptado
+      targetPort: 8080 # 
+    - name: https
+      port: 443        # acabará saliendo por el 443
+      targetPort: 8080
+  type: LoadBalancer
