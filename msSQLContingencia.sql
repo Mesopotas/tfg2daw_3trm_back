@@ -95,27 +95,27 @@ CREATE TABLE PuestosTrabajo ( -- puestos de trabajo dentro de cada zona de traba
 
 CREATE TABLE TramosHorarios ( -- intervalos de tiempo en los que hay disponibilidad
     IdTramoHorario INT IDENTITY(1,1) PRIMARY KEY,
-    HoraInicio VARCHAR(5),
-    HoraFin VARCHAR(5)
+    HoraInicio TIME, -- time guardará la hora pero no el dia
+    HoraFin TIME
 );
 
 CREATE TABLE Disponibilidades ( -- disponibilidad de puestos de trabajo o salas en una hora espcifica
     IdDisponibilidad INT IDENTITY(1,1) PRIMARY KEY,
-    Fecha INT,
+    Fecha DATE, -- dare guardará el dia sin hora, se complementará con el tramo horario
     Estado BIT DEFAULT 1, -- por defecto estará disponible
     IdTramoHorario INT,
     IdPuestoTrabajo INT,
     FOREIGN KEY (IdTramoHorario) REFERENCES TramosHorarios(IdTramoHorario),
     FOREIGN KEY (IdPuestoTrabajo) REFERENCES PuestosTrabajo(IdPuestoTrabajo)
 );
-
-CREATE TABLE DetallesReservas ( -- reserva puestos de trabajo
+/*
+CREATE TABLE DetallesReservas ( -- ELIMINAR, Lineas cubrirá esa función
     IdDetalleReserva INT IDENTITY(1,1) PRIMARY KEY,
     Descripcion VARCHAR(250),
     IdPuestoTrabajo INT,
     FOREIGN KEY (IdPuestoTrabajo) REFERENCES PuestosTrabajo(IdPuestoTrabajo)
 );
-
+*/
 CREATE TABLE Roles ( -- roles de usuario (admin y cliente de base)
     IdRol INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(100),
@@ -152,11 +152,49 @@ CREATE TABLE Reservas ( -- reservas realizadas por los usuarios
 CREATE TABLE Lineas ( -- reserva relacionada con sus detalles especificos, aquello que veria el usuario a modo factura
     IdLinea INT IDENTITY(1,1) PRIMARY KEY,
     IdReserva INT,
-    IdDetalleReserva INT,
+    IdPuestoTrabajo INT,
     Precio DECIMAL(10,2) DEFAULT (0),
     FOREIGN KEY (IdReserva) REFERENCES Reservas(IdReserva),
-    FOREIGN KEY (IdDetalleReserva) REFERENCES DetallesReservas(IdDetalleReserva)
+    FOREIGN KEY (IdPuestoTrabajo) REFERENCES PuestosTrabajo(IdPuestoTrabajo)
 );
+
+
+
+
+-- inserts tramos horarios, como base serian estos en todos los dias q este abierto
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('08:00', '09:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('09:00', '10:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('10:00', '11:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('11:00', '12:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('12:00', '13:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('13:00', '14:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('14:00', '15:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('15:00', '16:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('16:00', '17:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('17:00', '18:00');
+
+INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+VALUES ('18:00', '19:00');
+
 
 /* AÑADIR PROXIMAMENTE CONFORME TODO ESTE HECHO 
 CREATE TABLE Descuentos ( 
