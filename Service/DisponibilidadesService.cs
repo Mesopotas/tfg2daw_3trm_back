@@ -39,7 +39,10 @@ namespace CoWorking.Service
             await _disponibilidadesRepository.UpdateDisponibilidadAsync(disponibilidad);
         }
 
-      
+          public async Task AddDisponibilidadesAsync(int anio)
+        {
+            await _disponibilidadesRepository.AddDisponibilidadesAsync(anio);
+        }
 
 
     }

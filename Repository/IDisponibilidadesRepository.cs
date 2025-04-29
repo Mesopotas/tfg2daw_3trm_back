@@ -10,6 +10,6 @@ namespace CoWorking.Repositories
         Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id);
 
        Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad);
-
+       Task AddDisponibilidadesAsync(int anio);
     }
 }

@@ -66,5 +66,33 @@ namespace CoWorking.Controllers
             return NoContent();
         }
 
+
+        // POST api/disponibilidades/add/{anio}
+        [HttpPost("add/{anio}")]
+        public async Task<IActionResult> AddDisponibilidades(int anio)
+        {
+            try
+            {
+                int anioActual = DateTime.Now.Year;
+                if (anio < anioActual)
+                {
+                    return BadRequest(new { message = "El año introducido ya ha terminado" });
+                }
+
+                if (anio > 2050)
+                {
+                    return BadRequest(new { message = "Dato demasiado grande" });
+                }
+
+                await _serviceDisponibilidad.AddDisponibilidadesAsync(anio);
+                return Ok(new { message = "Disponibilidades agregadas correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Hubo un error al agregar las disponibilidades.", error = ex.Message });
+            }
+        }
+
+
     }
 }
