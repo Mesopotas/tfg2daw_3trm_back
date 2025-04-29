@@ -72,6 +72,22 @@ CREATE TABLE Salas ( -- salas dentro de cada sede
     FOREIGN KEY (IdTipoSala) REFERENCES TiposSalas(IdTipoSala)
 );
 
+CREATE TABLE CaracteristicasSala ( -- complementos de la sala
+    IdCaracteristica INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre VARCHAR(100), -- Ejemplo: "Internet", "Proyector"
+    Descripcion VARCHAR(250),
+    PrecioAniadido DECIMAL(3,2), -- será un %, eg. si es 1,5: el precio total de las sillas + su 1,5%, 
+
+)
+
+CREATE TABLE SalaConCaracteristicas( -- tabla intermedia para evitar la relacion N:N, cada sala 
+    FOREIGN KEY (IdSala) REFERENCES Salas(IdSala),
+    FOREIGN KEY (IdCaracteristica) REFERENCES SalaCaracteristicas(IdCaracteristica),
+
+
+) 
+
+
 CREATE TABLE ZonasTrabajo ( -- aforo dentro de cada sala y sus detalles
     IdZonaTrabajo INT IDENTITY(1,1) PRIMARY KEY,
     Descripcion VARCHAR(250),
