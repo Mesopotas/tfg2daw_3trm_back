@@ -1,51 +1,26 @@
 using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace CoWorking.Repositories
 {
     public class UsuariosRepository : IUsuariosRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public UsuariosRepository(string connectionString)
+
+        public UsuariosRepository(CoworkingDBContext context) // referencia al data.CoworkingDBContext.cs en lugar de cadena de conexión, el EF hará las sentencias sin ponerlas explicitamente
         {
-            _connectionString = connectionString;
+            _context = context;
         }
+ 
 
-        public async Task<List<Usuarios>> GetAllAsync()
+             public async Task<List<Usuarios>> GetAllAsync()
         {
-            var usuarios = new List<Usuarios>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdUsuario, Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol FROM Usuarios";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var usuario = new Usuarios
-                            {
-                                IdUsuario = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                Apellidos = reader.GetString(2),
-                                Email = reader.GetString(3),
-                                Contrasenia = reader.GetString(4),
-                                FechaRegistro = reader.GetDateTime(5),
-                                IdRol = reader.GetInt32(6)
-
-                            };
-
-                            usuarios.Add(usuario);
-                        }
-                    }
-                }
-            }
-            return usuarios;
+            return await _context.Usuarios.ToListAsync(); // el ToListAsync hará una sentencia que devuelva todos los datos de la tabla Usuarios, equivalente a SELECT * FROM Usuarios
         }
 
         public async Task<Usuarios> GetByIdAsync(int id)

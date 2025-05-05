@@ -19,7 +19,7 @@ public class Usuarios{
         Apellidos = apellidos;
         Email = email;
         Contrasenia = contrasenia;
-        FechaRegistro = FechaRegistro;
+        FechaRegistro = fechaRegistro;
         IdRol = idRol;
 
     }
