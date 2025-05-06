@@ -1,152 +1,60 @@
 using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace CoWorking.Repositories
 {
     public class UsuariosRepository : IUsuariosRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public UsuariosRepository(string connectionString)
+
+        public UsuariosRepository(CoworkingDBContext context) // referencia al data.CoworkingDBContext.cs en lugar de cadena de conexión, el EF hará las sentencias sin ponerlas explicitamente
         {
-            _connectionString = connectionString;
+            _context = context;
         }
+ 
 
-        public async Task<List<Usuarios>> GetAllAsync()
+             public async Task<List<Usuarios>> GetAllAsync()
         {
-            var usuarios = new List<Usuarios>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdUsuario, Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol FROM Usuarios";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var usuario = new Usuarios
-                            {
-                                IdUsuario = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                Apellidos = reader.GetString(2),
-                                Email = reader.GetString(3),
-                                Contrasenia = reader.GetString(4),
-                                FechaRegistro = reader.GetDateTime(5),
-                                IdRol = reader.GetInt32(6)
-
-                            };
-
-                            usuarios.Add(usuario);
-                        }
-                    }
-                }
-            }
-            return usuarios;
+            return await _context.Usuarios.ToListAsync(); // el ToListAsync hará una sentencia que devuelva todos los datos de la tabla Usuarios, equivalente a SELECT * FROM Usuarios
         }
 
         public async Task<Usuarios> GetByIdAsync(int id)
         {
-            Usuarios usuario = null;
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdUsuario, Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol FROM Usuarios WHERE idUsuario = @Id";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            usuario = new Usuarios
-                            {
-                                IdUsuario = reader.GetInt32(0),
-                                Nombre = reader.GetString(1),
-                                Apellidos = reader.GetString(2),
-                                Email = reader.GetString(3),
-                                Contrasenia = reader.GetString(4),
-                                FechaRegistro = reader.GetDateTime(5),
-                                IdRol = reader.GetInt32(6)
-
-                            };
-
-                        }
-                    }
-                }
-            }
-            return usuario;
+                return await _context.Usuarios.FirstOrDefaultAsync(usuario => usuario.IdUsuario == id); // funcion flecha, usuario recoge todos los usuarios quer cumple que IdUsuario == id
         }
-
         public async Task AddAsync(Usuarios usuario)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+             {
 
-                string query = "INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol) VALUES (@Nombre, @Apellidos, @Email, @Contrasenia, @FechaRegistro, @IdRol)";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Nombre", usuario.Nombre);
-                    command.Parameters.AddWithValue("@Apellidos", usuario.Apellidos);
-                    command.Parameters.AddWithValue("@Email", usuario.Email.ToLower());
-                    command.Parameters.AddWithValue("@Contrasenia", usuario.Contrasenia);
-                    command.Parameters.AddWithValue("@FechaRegistro", DateTime.Now); // dado que es un nuevo registro a la bbdd y por tanto nuevo usuario, su fecha de unión será siempre la fecha actual de ese momento  
-                    command.Parameters.AddWithValue("@IdRol", usuario.IdRol);
-                    await command.ExecuteNonQueryAsync();
-                }
+            await _context.Usuarios.AddAsync(usuario); // AddAsync es metodo propio de EF, no hace el insert en si, solo lo prepara
+            await _context.SaveChangesAsync(); // otro metodo de EF, esto si hace el insert con los datos del add, ambos son imprescindibles para el insert
             }
-        }
+
 
         public async Task UpdateAsync(Usuarios usuario)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                // La columna FechaRegistro no está incluida ya que no debe ser modificada
-                string query = "UPDATE Usuarios SET nombre = @Nombre, apellidos = @Apellidos,  email = @Email, contrasenia = @Contrasenia, idRol = @IdRol WHERE idUsuario = @IdUsuario";
-                // si el idRol asignado no existe dará error (Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint "FK__Usuarios__IdRol__276EDEB3". The conflict occurred in database "CoworkingDB", table "dbo.Roles", column 'IdRol'.)
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdUsuario", usuario.IdUsuario);
-                    command.Parameters.AddWithValue("@Nombre", usuario.Nombre);
-                    command.Parameters.AddWithValue("@Apellidos", usuario.Apellidos);
-                    command.Parameters.AddWithValue("@Email", usuario.Email);
-                    command.Parameters.AddWithValue("@Contrasenia", usuario.Contrasenia);
-                    command.Parameters.AddWithValue("@IdRol", usuario.IdRol);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+              {
+            _context.Usuarios.Update(usuario); // igual que el add pero haciendo un update
+            await _context.SaveChangesAsync(); 
         }
 
         public async Task DeleteAsync(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+                        var usuario = await GetByIdAsync(id); // primero busca el id del usuario
+                if (usuario != null) {// si existe, pasa a ejecutar
 
-                string query = "DELETE FROM Usuarios WHERE idUsuario = @IdUsuario";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdUsuario", id);
-
-                    await command.ExecuteNonQueryAsync();
+                   _context.Usuarios.Remove(usuario); // metodo de EF para eliminar registros (los prepara para eliminacion)
+                await _context.SaveChangesAsync();
                 }
             }
-        }
+    
 
 
 
-
+/*
         public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string Email)
         {
             var clientes = new List<UsuarioClienteDTO>();
@@ -392,7 +300,6 @@ namespace CoWorking.Repositories
                 }
             }
 
-
+*/
         }
     }
-}

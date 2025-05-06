@@ -19,7 +19,7 @@ namespace CoWorking.Service
             _configuration = configuration;
             _repository = repository;
         }
-
+/*
         public async Task<string> Login(LoginDto login)
         {
             var user =  await _repository.GetUserFromCredentialsAsync(login);
@@ -94,6 +94,6 @@ namespace CoWorking.Service
 
         return await _repository.ChangePasswordAsync(changePasswordDTO);
     }
-
+*/
     }
 }

@@ -1,15 +1,16 @@
 using CoWorking.Controllers;
 using CoWorking.Repositories;
 using CoWorking.Service;
+using CoWorking.Data;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 // dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("coworking");
 
 // Configuración de autenticación y validación de JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -33,10 +34,15 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
 });
 
+builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
+string connectionString = builder.Configuration.GetConnectionString("coworking");
+builder.Services.AddDbContext<CoworkingDBContext>(options =>
+    options.UseSqlServer(connectionString));
+
 // Configuración de servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>(provider =>
-        new UsuariosRepository(connectionString));
+
+
 
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));

@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
+
 namespace Models;
 
 public class Usuarios{
-
+    [Key]
     public int IdUsuario{get; set;}
     public string  Nombre  {get; set;}
     public string Apellidos {get; set;}
@@ -19,7 +22,7 @@ public class Usuarios{
         Apellidos = apellidos;
         Email = email;
         Contrasenia = contrasenia;
-        FechaRegistro = FechaRegistro;
+        FechaRegistro = fechaRegistro;
         IdRol = idRol;
 
     }
