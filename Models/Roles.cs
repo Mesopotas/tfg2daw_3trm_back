@@ -1,10 +1,12 @@
 using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models;
 
 public class Roles{
 
+    [Key]
     public int IdRol{get; set;}
     public string  Nombre  {get; set;}
     public string  Descripcion {get; set;}

@@ -15,7 +15,7 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-
+/*
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginDto login)
     {
@@ -57,7 +57,7 @@ public class AuthController : ControllerBase
         try
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); 
-            /* valida los datos como el minimo de chars de la contraseña etc */
+            /* valida los datos como el minimo de chars de la contraseña etc *
             }
 
             bool exito = await _authService.ChangePasswordAsync(changePasswordDTO, User);
@@ -72,6 +72,6 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Error cambiando la contraseña: " + ex.Message);
         }
-    }
+    }*/
 
 }

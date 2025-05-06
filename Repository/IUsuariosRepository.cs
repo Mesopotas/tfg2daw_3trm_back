@@ -10,6 +10,7 @@ namespace CoWorking.Repositories
         Task AddAsync(Usuarios usuario);
         Task UpdateAsync(Usuarios usuario);
         Task DeleteAsync(int id);
+        /*
         Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email);
 
          Task<UserDTOOut> GetUserFromCredentialsAsync(LoginDto login);
@@ -19,5 +20,6 @@ namespace CoWorking.Repositories
         Task<bool> ChangeUserRoleAsync(string email);
 
         Task<bool> QuitarAdminAsync(string email);
+        */
     }
 }
