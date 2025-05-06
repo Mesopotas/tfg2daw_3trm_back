@@ -81,8 +81,11 @@ CREATE TABLE CaracteristicasSala ( -- complementos de la sala
 )
 
 CREATE TABLE SalaConCaracteristicas( -- tabla intermedia para evitar la relacion N:N, cada sala 
+    IdSalaConCaracteristica INT IDENTITY(1,1) PRIMARY KEY, 
+    IdSala INT,
+    IdCaracteristica INT,
     FOREIGN KEY (IdSala) REFERENCES Salas(IdSala),
-    FOREIGN KEY (IdCaracteristica) REFERENCES SalaCaracteristicas(IdCaracteristica),
+    FOREIGN KEY (IdCaracteristica) REFERENCES CaracteristicasSala(IdCaracteristica),
 
 
 ) 
@@ -178,37 +181,37 @@ CREATE TABLE Lineas ( -- reserva relacionada con sus detalles especificos, aquel
 
 
 -- inserts tramos horarios, como base serian estos en todos los dias q este abierto
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('08:00', '09:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('09:00', '10:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('10:00', '11:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('11:00', '12:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('12:00', '13:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('13:00', '14:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('14:00', '15:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('15:00', '16:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('16:00', '17:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('17:00', '18:00');
 
-INSERT INTO tramos_horarios (hora_inicio, hora_fin)
+INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('18:00', '19:00');
 
 
