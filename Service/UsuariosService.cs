@@ -49,11 +49,12 @@ namespace CoWorking.Service
             await _usuariosRepository.DeleteAsync(id);
             //return NoContent();
         }
-/*
+
         public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email)
         {
             return await _usuariosRepository.GetClientesByEmailAsync(email);
         }
+        /*
         // metodo para hacer elget por id pero sin tener que completarlo manual, sino que lo extrae del JWT
         public async Task<Usuarios> GetUsuarioFromJwtAsync(ClaimsPrincipal user)
         {

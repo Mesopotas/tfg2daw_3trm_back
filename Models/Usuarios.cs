@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Models;
@@ -13,6 +14,8 @@ public class Usuarios{
     public DateTime FechaRegistro  {get; set;}
     public int IdRol  {get; set;}
 
+    [ForeignKey("IdRol")]
+    public Roles Rol { get; set; } // relacion a la tabla roles para hacer joins
     public Usuarios(){} // CONTRUCTOR VACIO INYECCION DE DEPENDENCIAS
 
     public Usuarios(int idUsuario, string nombre, string apellidos, string email, string contrasenia, DateTime fechaRegistro, int idRol){

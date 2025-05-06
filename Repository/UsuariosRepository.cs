@@ -20,7 +20,9 @@ namespace CoWorking.Repositories
 
              public async Task<List<Usuarios>> GetAllAsync()
         {
-            return await _context.Usuarios.ToListAsync(); // el ToListAsync hará una sentencia que devuelva todos los datos de la tabla Usuarios, equivalente a SELECT * FROM Usuarios
+            return await _context.Usuarios
+            //  .Include(u => u.Rol) , con este inner sacaria tb los detalles de roles asociado a ese campo, sin el lo sacará como null de momento
+            .ToListAsync(); // el ToListAsync hará una sentencia que devuelva todos los datos de la tabla Usuarios, equivalente a SELECT * FROM Usuarios
         }
 
         public async Task<Usuarios> GetByIdAsync(int id)
@@ -54,36 +56,25 @@ namespace CoWorking.Repositories
 
 
 
-/*
-        public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string Email)
+
+public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email)
+{
+    var usuarios = await _context.Usuarios
+        .Include(u => u.Rol) // Inner joi
+        .Where(u => u.Email == email)
+        .Select(u => new UsuarioClienteDTO
         {
-            var clientes = new List<UsuarioClienteDTO>();
+            Nombre = u.Nombre,
+            Apellidos = u.Apellidos,
+            Email = u.Email,
+            RolNombre = u.Rol.Nombre
+        })
+        .ToListAsync();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+    return usuarios;
+}
 
-                string query = "SELECT Nombre, Apellidos, Email, Contrasenia FROM Usuarios WHERE Email = @Email";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Email".ToLower(), Email);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            var cliente = new UsuarioClienteDTO
-                            {
-                                Email = reader.GetString(2),
-                                Contrasenia = reader.GetString(3)
-                            };
-                            clientes.Add(cliente);
-                        }
-                    }
-                }
-            }
-            return clientes;
-        }
+        /*
         public async Task<UserDTOOut> GetUserFromCredentialsAsync(LoginDto login)
         {
             using (var connection = new SqlConnection(_connectionString))
