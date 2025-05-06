@@ -20,18 +20,16 @@ namespace CoWorking.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-
+                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
                 string query = @"
                  SELECT  
                 reserva.IdReserva, reserva.Fecha, reserva.Descripcion, reserva.PrecioTotal,
                 usuario.IdUsuario, usuario.Nombre , usuario.Email,
-                detallesr.IdDetalleReserva, puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
-                puesto.URL_Imagen, detallesr.Descripcion
+                 puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
+                puesto.URL_Imagen, 
                 FROM Reservas reserva
                 INNER JOIN Usuarios usuario ON reserva.IdUsuario = usuario.IdUsuario
-                INNER JOIN Lineas linea ON reserva.IdReserva = linea.IdReserva
-                INNER JOIN DetallesReservas detallesr ON linea.IdDetalleReserva = detallesr.IdDetalleReserva
-                INNER JOIN PuestosTrabajo puesto ON detallesr.IdPuestoTrabajo = puesto.IdPuestoTrabajo;";
+                INNER JOIN Lineas linea ON reserva.IdReserva = linea.IdReserva";
 
 
                 using (var command = new SqlCommand(query, connection))
@@ -51,17 +49,6 @@ namespace CoWorking.Repositories
                             DetallesReservas = new List<DetalleReservaDTO>()
                         };
 
-                        if (!reader.IsDBNull(7))   // busca el detalle de la reserva si existe
-                        {
-                            reserva.DetallesReservas.Add(new DetalleReservaDTO
-                            {
-                                IdDetalleReserva = reader.GetInt32(7),
-                                IdPuestoTrabajo = reader.GetInt32(8),
-                                CodigoPuesto = reader.GetString(9),
-                                ImagenPuesto = reader.GetString(10),
-                                Descripcion = reader.GetString(11)
-                            });
-                        }
 
                         reservas.Add(reserva);
                     }
@@ -77,18 +64,17 @@ namespace CoWorking.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
+                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
 
                 string query = @"
             SELECT  
                 reserva.IdReserva, reserva.Fecha, reserva.Descripcion, reserva.PrecioTotal,
                 usuario.IdUsuario, usuario.Nombre , usuario.Email,
-                detallesr.IdDetalleReserva, puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
-                puesto.URL_Imagen, detallesr.Descripcion
+               puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
+                puesto.URL_Imagen,
             FROM Reservas reserva
             INNER JOIN Usuarios usuario ON reserva.IdUsuario = usuario.IdUsuario
             INNER JOIN Lineas linea ON reserva.IdReserva = linea.IdReserva
-            INNER JOIN DetallesReservas detallesr ON linea.IdDetalleReserva = detallesr.IdDetalleReserva
-            INNER JOIN PuestosTrabajo puesto ON detallesr.IdPuestoTrabajo = puesto.IdPuestoTrabajo
             WHERE reserva.IdReserva = @Id";
 
                 using (var command = new SqlCommand(query, connection))
@@ -108,21 +94,9 @@ namespace CoWorking.Repositories
                                 UsuarioId = reader.GetInt32(4),
                                 UsuarioNombre = reader.GetString(5),
                                 UsuarioEmail = reader.GetString(6),
-                                DetallesReservas = new List<DetalleReservaDTO>()
                             };
 
 
-                            if (!reader.IsDBNull(7))
-                            {
-                                reserva.DetallesReservas.Add(new DetalleReservaDTO
-                                {
-                                    IdDetalleReserva = reader.GetInt32(7),
-                                    IdPuestoTrabajo = reader.GetInt32(8),
-                                    CodigoPuesto = reader.GetString(9),
-                                    ImagenPuesto = reader.GetString(10),
-                                    Descripcion = reader.GetString(11)
-                                });
-                            }
                         }
                     }
                 }
@@ -202,31 +176,30 @@ namespace CoWorking.Repositories
                 }
             }
         }
-        public async Task<ReservasClienteInfoDTO> GetDetallesPedidoAsync(int idReserva, int idDetalleReserva)
+        public async Task<ReservasClienteInfoDTO> GetDetallesPedidoAsync(int idReserva)
         {
             ReservasClienteInfoDTO reserva = null;
 
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
+                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
 
                 string query = @"SELECT r.PrecioTotal, u.Nombre AS UsuarioNombre, u.Apellidos AS UsuarioApellidos, 
        u.Email AS UsuarioEmail, pt.NumeroAsiento, s.Nombre AS NombreSala, 
        ts.Nombre AS TipoSala, tpt.Precio AS PrecioPuesto
-FROM Reservas r, Usuarios u, DetallesReservas dr, PuestosTrabajo pt, Salas s, 
+FROM Reservas r, Usuarios u, PuestosTrabajo pt, Salas s, 
      TiposSalas ts, TiposPuestosTrabajo tpt
 WHERE r.IdUsuario = u.IdUsuario
   AND dr.IdPuestoTrabajo = pt.IdPuestoTrabajo
   AND pt.IdSala = s.IdSala
   AND s.IdTipoSala = ts.IdTipoSala 
   AND ts.IdTipoPuestoTrabajo = tpt.IdTipoPuestoTrabajo 
-  AND r.IdReserva = @IdReserva 
-  AND dr.IdDetalleReserva = @IdDetalleReserva;";
+  AND r.IdReserva = @IdReserva ;";
 
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@IdReserva", idReserva);
-                    command.Parameters.AddWithValue("@IdDetalleReserva", idDetalleReserva);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -240,18 +213,10 @@ WHERE r.IdUsuario = u.IdUsuario
                                     UsuarioNombre = reader.GetString(1),    
                                     UsuarioApellidos = reader.GetString(2), 
                                     UsuarioEmail = reader.GetString(3),     
-                                    Detalles = new List<DetallesReservaClienteDTO>()
                                 };
                             }
 
-                            // informacion del asiento escogido
-                            reserva.Detalles.Add(new DetallesReservaClienteDTO
-                            {
-                                NumeroAsiento = reader.GetInt32(4),   
-                                NombreSala = reader.GetString(5),    
-                                TipoSala = reader.GetString(6),    
-                                PrecioPuesto = reader.GetDecimal(7) 
-                            });
+                          
                         }
                     }
                 }

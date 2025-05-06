@@ -21,7 +21,7 @@ namespace CoWorking.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT IdLinea, IdReserva, IdDetalleReserva, Precio FROM Lineas";
+                string query = "SELECT IdLinea, IdReserva, Precio FROM Lineas";
                 using (var command = new SqlCommand(query, connection))
                 {
                     using (var reader = await command.ExecuteReaderAsync())
@@ -32,8 +32,7 @@ namespace CoWorking.Repositories
                             {
                                 IdLinea = reader.GetInt32(0),
                                 IdReserva = reader.GetInt32(1),
-                                IdDetalleReserva = reader.GetInt32(2),
-                                Precio = (double)reader.GetDecimal(3)
+                                Precio = (double)reader.GetDecimal(2)
                             };
 
                             lineas.Add(linea);
@@ -52,7 +51,7 @@ namespace CoWorking.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT IdLinea, IdReserva, IdDetalleReserva, Precio FROM Lineas WHERE IdLinea = @Id";
+                string query = "SELECT IdLinea, IdReserva, Precio FROM Lineas WHERE IdLinea = @Id";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
@@ -65,8 +64,7 @@ namespace CoWorking.Repositories
                             {
                                 IdLinea = reader.GetInt32(0),
                                 IdReserva = reader.GetInt32(1),
-                                IdDetalleReserva = reader.GetInt32(2),
-                                Precio = (double)reader.GetDecimal(3)
+                                Precio = (double)reader.GetDecimal(2)
                             };
                         }
                     }
@@ -93,11 +91,10 @@ public async Task AddAsync(Lineas linea)
         }
 
         // insert con el precio obtenido una vez le asigne id de reserva
-        string queryInsert = "INSERT INTO Lineas (IdReserva, IdDetalleReserva, Precio) VALUES (@IdReserva, @IdDetalleReserva, @Precio)";
+        string queryInsert = "INSERT INTO Lineas (IdReserva, Precio) VALUES (@IdReserva, @Precio)";
         using (var commandInsert = new SqlCommand(queryInsert, connection))
         {
             commandInsert.Parameters.AddWithValue("@IdReserva", linea.IdReserva);
-            commandInsert.Parameters.AddWithValue("@IdDetalleReserva", linea.IdDetalleReserva);
             commandInsert.Parameters.AddWithValue("@Precio", linea.Precio);
 
             await commandInsert.ExecuteNonQueryAsync();

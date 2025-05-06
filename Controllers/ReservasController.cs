@@ -73,10 +73,11 @@ namespace CoWorking.Controllers
             await _serviceReservas.DeleteAsync(id);
             return NoContent();
         }
-[HttpGet("detalles/{idReserva}/{idDetalleReserva}")]
-public async Task<ActionResult<ReservasClienteInfoDTO>> GetDetallesPedido(int idReserva, int idDetalleReserva)
+        // este endpoint habrá q cambiarlo, ya no tomará 2 parametros, sino uno solo, el idReserva
+[HttpGet("detalles/{idReserva}/")]
+public async Task<ActionResult<ReservasClienteInfoDTO>> GetDetallesPedido(int idReserva)
 {
-    var reservaDetalles = await _serviceReservas.GetDetallesPedido(idReserva, idDetalleReserva);
+    var reservaDetalles = await _serviceReservas.GetDetallesPedido(idReserva);
     if (reservaDetalles == null)
     {
         return NotFound();
