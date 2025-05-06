@@ -34,7 +34,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
 });
 
-builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
 string connectionString = builder.Configuration.GetConnectionString("coworking");
 builder.Services.AddDbContext<CoworkingDBContext>(options =>
     options.UseSqlServer(connectionString));
@@ -44,6 +43,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 
+
+
+builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
+
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
 
@@ -51,10 +56,7 @@ builder.Services.AddScoped<ISedesRepository, SedesRepository>(provider =>
     new SedesRepository(connectionString));
 
 builder.Services.AddScoped<ISalasRepository, SalasRepository>(provider =>
-    new SalasRepository(connectionString));  
-
-builder.Services.AddScoped<IRolesRepository, RolesRepository>(provider =>
-    new RolesRepository(connectionString));    
+    new SalasRepository(connectionString));   
 
 builder.Services.AddScoped<ITramosHorariosRepository, TramosHorariosRepository>(provider =>
     new TramosHorariosRepository(connectionString)); 
