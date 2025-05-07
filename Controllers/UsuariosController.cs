@@ -90,7 +90,7 @@ namespace CoWorking.Controllers
             }
             return Ok(clientes);
         }
-/*
+
         [HttpGet("byIdConJWT")]
         public async Task<IActionResult> GetUsuarioFromJwt()
         {
@@ -106,6 +106,8 @@ namespace CoWorking.Controllers
 
             return Ok(usuario);
         }
+
+       
         [Authorize(Roles = "Admin")]
             [HttpPost("cambiar-rol")]
         public async Task<IActionResult> ChangeUserRole( string email)
@@ -132,6 +134,6 @@ namespace CoWorking.Controllers
 
             return Ok("Rol del usuario cambiado correctamente.");
         }
-        */
+        
     }
 }

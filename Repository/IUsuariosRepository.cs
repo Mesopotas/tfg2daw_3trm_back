@@ -20,8 +20,8 @@ namespace CoWorking.Repositories
         Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO);
 
         Task<bool> ChangeUserRoleAsync(string email);
-/*
+
         Task<bool> QuitarAdminAsync(string email);
-        */
+        
     }
 }

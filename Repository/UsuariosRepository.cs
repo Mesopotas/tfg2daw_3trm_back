@@ -193,41 +193,30 @@ namespace CoWorking.Repositories
         }
 
 
-        /*
-                        public async Task<bool> QuitarAdminAsync(string email)
-                        {
-                            using (var connection = new SqlConnection(_connectionString))
-                            {
-                                await connection.OpenAsync();
+public async Task<bool> QuitarAdminAsync(string email)
+{
+    var emailMinuscula = email.ToLower();
 
-                                // Verificar si el usuario existe y tiene el rol de id 2
-                                string checkRoleQuery = "SELECT IdRol FROM Usuarios WHERE Email = @Email";
-                                using (var command = new SqlCommand(checkRoleQuery, connection))
-                                {
-                                    command.Parameters.AddWithValue("@Email", email.ToLower());
+    // buscar  por email
+    var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == emailMinuscula);
 
-                                    var rol = await command.ExecuteScalarAsync();
-                                    if (rol == null) // si no encuentra id rol es que no existe usuario con ese email registrado
-                                    {
-                                        throw new HttpRequestException("Usuario no encontrado.");
-                                    }
+    if (usuario == null)
+    {
+        throw new HttpRequestException("Usuario no encontrado.");
+    }
 
-                                    if ((int)rol != 1) // si no es 1, solo puede ser rol 2 osea ya es usuario
-                                    {
-                                        throw new HttpRequestException("El usuario no tiene el rol de admin (IdRol = 1).");
-                                    }
-                                }
+    //checkear que el rol sea admin (Id = 1)
+    if (usuario.IdRol != 1)
+    {
+        throw new HttpRequestException("El usuario no tiene el rol de admin (IdRol = 1).");
+    }
 
-                                string updateRoleQuery = "UPDATE Usuarios SET IdRol = 2 WHERE Email = @Email"; // id rol de 1 será el de admin
-                                using (var command = new SqlCommand(updateRoleQuery, connection))
-                                {
-                                    command.Parameters.AddWithValue("@Email", email.ToLower());
+    // cambiar el rol a cliente (Id = 2)
+    usuario.IdRol = 2;
+    await _context.SaveChangesAsync(); // guardar
 
-                                    int rowsAffected = await command.ExecuteNonQueryAsync();
-                                    return rowsAffected > 0;
-                                }
-                            }
+    return true;
+}
 
-                */
     }
 }
