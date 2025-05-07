@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace CoWorking.Service
 {
-    public class CaracteristicasSala : ICaracteristicasSalaService
+    public class CaracteristicasSalaService : ICaracteristicasSalaService
     {
         private readonly ICaracteristicasSalaRepository _caracteristicasSalaRepository;
 
