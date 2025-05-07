@@ -74,7 +74,7 @@ namespace CoWorking.Repositories
 
             return usuarios;
         }
-            // se usa para el login en Auth para obtener el token de JWT, no va en el service de usuarios sino en AuthService
+        // se usa para el login en Auth para obtener el token de JWT, no va en el service de usuarios sino en AuthService
         public async Task<UserDTOOut> GetUserFromCredentialsAsync(LoginDto login)
         {
             var usuario = await _context.Usuarios
@@ -105,147 +105,129 @@ namespace CoWorking.Repositories
                 Rol = usuario.Rol.Nombre
             };
         }
-    public async Task<UserDTOOut> AddUserFromCredentialsAsync(RegisterDTO register)
-{
-    // revisar si existe ese correo
-    var emailExisteYa = await _context.Usuarios.AnyAsync(u => u.Email == register.Email);
-    if (emailExisteYa)
-    {
-        throw new HttpRequestException("Este email ya fue registrado");
-    }
+        public async Task<UserDTOOut> AddUserFromCredentialsAsync(RegisterDTO register)
+        {
+            // revisar si existe ese correo
+            var emailExisteYa = await _context.Usuarios.AnyAsync(u => u.Email == register.Email);
+            if (emailExisteYa)
+            {
+                throw new HttpRequestException("Este email ya fue registrado");
+            }
 
-    // insert nuevo user
-    var nuevoUsuario = new Usuarios
-    {
-        Nombre = register.Nombre,
-        Apellidos = register.Apellidos,
-        Email = register.Email,
-        Contrasenia = register.Contrasenia,
-        IdRol = 2 // este endpoint será el signup, asi q siempre será rol cliente (2)
-    };
+            // insert nuevo user
+            var nuevoUsuario = new Usuarios
+            {
+                Nombre = register.Nombre,
+                Apellidos = register.Apellidos,
+                Email = register.Email,
+                Contrasenia = register.Contrasenia,
+                IdRol = 2 // este endpoint será el signup, asi q siempre será rol cliente (2)
+            };
 
-    // POST + guardado
-    _context.Usuarios.Add(nuevoUsuario);
-    await _context.SaveChangesAsync();
+            // POST + guardado
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
 
-    // Obtener nombre del rol
-    var rolNombre = await _context.Roles
-        .Where(r => r.IdRol == nuevoUsuario.IdRol)
-        .Select(r => r.Nombre)
-        .FirstOrDefaultAsync();
+            // obtener nombre del rol
+            var rolNombre = await _context.Roles
+                .Where(r => r.IdRol == nuevoUsuario.IdRol)
+                .Select(r => r.Nombre).FirstOrDefaultAsync();
 
-    return new UserDTOOut
-    {
-        IdUsuario = nuevoUsuario.IdUsuario,
-        Nombre = nuevoUsuario.Nombre,
-        Apellidos = nuevoUsuario.Apellidos,
-        Email = nuevoUsuario.Email,
-        Rol = rolNombre
-    };
-}
-/*
-                public async Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
-                {
-                    using (var connection = new SqlConnection(_connectionString))
-                    {
-                        await connection.OpenAsync();
+            return new UserDTOOut
+            {
+                IdUsuario = nuevoUsuario.IdUsuario,
+                Nombre = nuevoUsuario.Nombre,
+                Apellidos = nuevoUsuario.Apellidos,
+                Email = nuevoUsuario.Email,
+                Rol = rolNombre
+            };
+        }
 
-                        // contraseña antigua comparativa
-                        string comprobarContraseniaActual = "SELECT Contrasenia FROM Usuarios WHERE IdUsuario = @IdUsuario";
-                        using (var command = new SqlCommand(comprobarContraseniaActual, connection))
+        public async Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
+        {
+            // buscar usuario por su ID
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.IdUsuario == changePasswordDTO.IdUsuario);
+
+            if (usuario == null)
+            {
+                throw new HttpRequestException("Usuario no encontrado.");
+            }
+
+            // comprobar q coincidan
+            if (usuario.Contrasenia != changePasswordDTO.OldPassword)
+            {
+                throw new HttpRequestException("La contraseña actual es incorrecta.");
+            }
+
+            // hacer y guardar el cambio en la bbdd
+            usuario.Contrasenia = changePasswordDTO.NewPassword;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        // endpoint para nombrar nuevos admins
+        public async Task<bool> ChangeUserRoleAsync(string email)
+        {
+            // evitar case sensitive
+            var emailMinuscula = email.ToLower();
+
+            // Buscar al usuario por email
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == emailMinuscula);
+
+            if (usuario == null)
+            {
+                throw new HttpRequestException("Usuario no encontrado.");
+            }
+
+            if (usuario.IdRol != 2)
+            {
+                throw new HttpRequestException("El usuario no tiene el rol de cliente (IdRol = 2).");
+            }
+
+            // Cambiar el rol a administrador (IdRol = 1)
+            usuario.IdRol = 1;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+        /*
+                        public async Task<bool> QuitarAdminAsync(string email)
                         {
-                            command.Parameters.AddWithValue("@IdUsuario", changePasswordDTO.IdUsuario);
-                            var contraseniaActual = (string)await command.ExecuteScalarAsync();
-
-                            if (contraseniaActual == null || contraseniaActual != changePasswordDTO.OldPassword) // si es null o no coincide con la actual, dará error
+                            using (var connection = new SqlConnection(_connectionString))
                             {
-                                throw new HttpRequestException("La contraseña actual es incorrecta.");
-                            }
-                        }
+                                await connection.OpenAsync();
 
-                        // Actualizar la contraseña
-                        string updateContrasenia = "UPDATE Usuarios SET Contrasenia = @NewPassword WHERE IdUsuario = @IdUsuario";
-                        using (var command = new SqlCommand(updateContrasenia, connection))
-                        {
-                            command.Parameters.AddWithValue("@NewPassword", changePasswordDTO.NewPassword);
-                            command.Parameters.AddWithValue("@IdUsuario", changePasswordDTO.IdUsuario);
+                                // Verificar si el usuario existe y tiene el rol de id 2
+                                string checkRoleQuery = "SELECT IdRol FROM Usuarios WHERE Email = @Email";
+                                using (var command = new SqlCommand(checkRoleQuery, connection))
+                                {
+                                    command.Parameters.AddWithValue("@Email", email.ToLower());
 
-                            int rowsAffected = await command.ExecuteNonQueryAsync();
-                            return rowsAffected > 0;
-                        }
-                    }
-                }
+                                    var rol = await command.ExecuteScalarAsync();
+                                    if (rol == null) // si no encuentra id rol es que no existe usuario con ese email registrado
+                                    {
+                                        throw new HttpRequestException("Usuario no encontrado.");
+                                    }
 
-                public async Task<bool> ChangeUserRoleAsync(string email)
-                {
-                    using (var connection = new SqlConnection(_connectionString))
-                    {
-                        await connection.OpenAsync();
+                                    if ((int)rol != 1) // si no es 1, solo puede ser rol 2 osea ya es usuario
+                                    {
+                                        throw new HttpRequestException("El usuario no tiene el rol de admin (IdRol = 1).");
+                                    }
+                                }
 
-                        // Verificar si el usuario existe y tiene el rol de id 2
-                        string checkRoleQuery = "SELECT IdRol FROM Usuarios WHERE Email = @Email";
-                        using (var command = new SqlCommand(checkRoleQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Email", email.ToLower());
+                                string updateRoleQuery = "UPDATE Usuarios SET IdRol = 2 WHERE Email = @Email"; // id rol de 1 será el de admin
+                                using (var command = new SqlCommand(updateRoleQuery, connection))
+                                {
+                                    command.Parameters.AddWithValue("@Email", email.ToLower());
 
-                            var rol = await command.ExecuteScalarAsync();
-                            if (rol == null) // si no encuentra id rol es que no existe usuario con ese email registrado
-                            {
-                                throw new HttpRequestException("Usuario no encontrado.");
-                            }
-
-                            if ((int)rol != 2) // si no es 2, solo puede ser rol 1 osea ya es admin
-                            {
-                                throw new HttpRequestException("El usuario no tiene el rol de cliente (IdRol = 2).");
-                            }
-                        }
-
-                        string updateRoleQuery = "UPDATE Usuarios SET IdRol = 1 WHERE Email = @Email"; // id rol de 1 será el de admin
-                        using (var command = new SqlCommand(updateRoleQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Email", email.ToLower());
-
-                            int rowsAffected = await command.ExecuteNonQueryAsync();
-                            return rowsAffected > 0;
-                        }
-                    }
-                }
-
-
-                public async Task<bool> QuitarAdminAsync(string email)
-                {
-                    using (var connection = new SqlConnection(_connectionString))
-                    {
-                        await connection.OpenAsync();
-
-                        // Verificar si el usuario existe y tiene el rol de id 2
-                        string checkRoleQuery = "SELECT IdRol FROM Usuarios WHERE Email = @Email";
-                        using (var command = new SqlCommand(checkRoleQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Email", email.ToLower());
-
-                            var rol = await command.ExecuteScalarAsync();
-                            if (rol == null) // si no encuentra id rol es que no existe usuario con ese email registrado
-                            {
-                                throw new HttpRequestException("Usuario no encontrado.");
+                                    int rowsAffected = await command.ExecuteNonQueryAsync();
+                                    return rowsAffected > 0;
+                                }
                             }
 
-                            if ((int)rol != 1) // si no es 1, solo puede ser rol 2 osea ya es usuario
-                            {
-                                throw new HttpRequestException("El usuario no tiene el rol de admin (IdRol = 1).");
-                            }
-                        }
-
-                        string updateRoleQuery = "UPDATE Usuarios SET IdRol = 2 WHERE Email = @Email"; // id rol de 1 será el de admin
-                        using (var command = new SqlCommand(updateRoleQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Email", email.ToLower());
-
-                            int rowsAffected = await command.ExecuteNonQueryAsync();
-                            return rowsAffected > 0;
-                        }
-                    }
-
-        */
+                */
     }
 }

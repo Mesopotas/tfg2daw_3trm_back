@@ -51,14 +51,14 @@ public class AuthController : ControllerBase
             return BadRequest("Error generating the token: " + ex.Message);
         }
     }
-    /*
-    [HttpPost("ChangePassword")]
+    
+    [HttpPost("ChangePassword")] // necesita mandar el token JWT en cabeceras para que funcione
     public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
     {
         try
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); 
-            /* valida los datos como el minimo de chars de la contraseña etc *
+            // valida los datos como el minimo de chars de la contraseña etc
             }
 
             bool exito = await _authService.ChangePasswordAsync(changePasswordDTO, User);
@@ -73,6 +73,6 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Error cambiando la contraseña: " + ex.Message);
         }
-    }*/
+    }
 
 }

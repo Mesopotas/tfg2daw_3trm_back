@@ -12,9 +12,9 @@ namespace CoWorking.Service
         Task<string> Login(LoginDto login);
 
        Task<string> Register(RegisterDTO register);
-       /*
+       
         Task<bool> HasAccessToResource(int requestedUserID, ClaimsPrincipal user);
         Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO, ClaimsPrincipal user);
-*/
+
     }
 }

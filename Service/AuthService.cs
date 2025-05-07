@@ -59,7 +59,7 @@ namespace CoWorking.Service
                 return await GenerateToken(user);
             }
 
-       /*
+       
 
         public Task<bool> HasAccessToResource(int requestedUserID, ClaimsPrincipal user)
         {
@@ -96,6 +96,6 @@ namespace CoWorking.Service
 
         return await _repository.ChangePasswordAsync(changePasswordDTO);
     }
-*/
+
     }
 }
