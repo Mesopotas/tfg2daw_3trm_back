@@ -15,7 +15,7 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-/*
+
     [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginDto login)
     {
@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
             return BadRequest("Error generating the token: " + ex.Message);
         }
     }
-
+/*
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterDTO register)
     {

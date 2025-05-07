@@ -12,8 +12,9 @@ namespace CoWorking.Repositories
         Task DeleteAsync(int id);
      
         Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email);
-   /*
+   
          Task<UserDTOOut> GetUserFromCredentialsAsync(LoginDto login);
+   /*
          Task<UserDTOOut> AddUserFromCredentialsAsync(RegisterDTO register);
         Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO);
 
