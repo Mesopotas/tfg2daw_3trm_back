@@ -19,22 +19,9 @@ namespace CoWorking.Service
             _configuration = configuration;
             _repository = repository;
         }
-/*
-        public async Task<string> Login(LoginDto login)
-        {
-            var user =  await _repository.GetUserFromCredentialsAsync(login);
-            if (user == null) return null; // Error al recibir el usuario / no existe
-            return await GenerateToken(user);
-        }
-        
-            public async Task<string> Register(RegisterDTO register)
-            {
-                var user = await _repository.AddUserFromCredentialsAsync(register);
-                if (user == null) return null; // Error al registrar usuario
-                return await GenerateToken(user);
-            }
 
-        public async Task<string> GenerateToken(UserDTOOut userDTOOut)
+
+ public async Task<string> GenerateToken(UserDTOOut userDTOOut)
         {
             var key = Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -58,6 +45,21 @@ namespace CoWorking.Service
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+        public async Task<string> Login(LoginDto login)
+        {
+            var user =  await _repository.GetUserFromCredentialsAsync(login);
+            if (user == null) return null; // Error al recibir el usuario / no existe
+            return await GenerateToken(user);
+        }
+        
+            public async Task<string> Register(RegisterDTO register)
+            {
+                var user = await _repository.AddUserFromCredentialsAsync(register);
+                if (user == null) return null; // Error al registrar usuario
+                return await GenerateToken(user);
+            }
+
+       
 
         public Task<bool> HasAccessToResource(int requestedUserID, ClaimsPrincipal user)
         {
@@ -94,6 +96,6 @@ namespace CoWorking.Service
 
         return await _repository.ChangePasswordAsync(changePasswordDTO);
     }
-*/
+
     }
 }
