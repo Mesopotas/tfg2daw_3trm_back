@@ -49,6 +49,8 @@ builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
 
 builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 
+builder.Services.AddScoped<ICaracteristicasSalaRepository, CaracteristicasSalaRepository>();
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
 
@@ -80,6 +82,7 @@ builder.Services.AddScoped<ITramosHorariosService, TramosHorariosService>();
 builder.Services.AddScoped<IReservasService, ReservasService>();
 builder.Services.AddScoped<ILineasService, LineasService>();
 builder.Services.AddScoped<IDisponibilidadesService, DisponibilidadesService>();
+builder.Services.AddScoped<ICaracteristicasSalaService, CaracteristicasSalaService>();
 
 
 // Configuración de controladores
