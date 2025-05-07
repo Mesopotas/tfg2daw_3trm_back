@@ -4,6 +4,8 @@ using CoWorking.Service;
 using CoWorking.DTO;
 using Models;
 using Microsoft.AspNetCore.Authorization;
+using CaracteristicasSalaModel = Models.CaracteristicasSala;
+
 
 
 namespace CoWorking.Controllers
@@ -12,7 +14,7 @@ namespace CoWorking.Controllers
     [ApiController]
     public class CaracteristicasSalaController : ControllerBase
     {
-        private static List<CaracteristicasSala> caracteristicasSala = new List<CaracteristicasSala>();
+        private static List<CaracteristicasSalaModel> caracteristicasSala = new List<CaracteristicasSala>();
 
         private readonly ICaracteristicasSalaService _serviceCaracteristicasSala;
 
@@ -22,7 +24,7 @@ namespace CoWorking.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CaracteristicasSala>>> GetCaracteristicasSala()
+        public async Task<ActionResult<List<CaracteristicasSalaModel>>> GetCaracteristicasSala()
         {
             var caracteristicasSala = await _serviceCaracteristicasSala.GetAllAsync();
             return Ok(caracteristicasSala);
@@ -30,7 +32,7 @@ namespace CoWorking.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CaracteristicasSala>> GetCaracteristicaSala(int id)
+        public async Task<ActionResult<CaracteristicasSalaModel>> GetCaracteristicaSala(int id)
         {
             var caracteristicaSala = await _serviceCaracteristicasSala.GetByIdAsync(id);
             if (caracteristicaSala == null)
@@ -42,7 +44,7 @@ namespace CoWorking.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<CaracteristicasSala>> CreateCaracteristicaSala(CaracteristicasSala caracteristicasSala)
+        public async Task<ActionResult<CaracteristicasSalaModel>> CreateCaracteristicaSala(CaracteristicasSalaModel caracteristicasSala)
         {
             await _serviceCaracteristicasSala.AddAsync(caracteristicasSala);
             return CreatedAtAction(nameof(CreateCaracteristicaSala), new { id = caracteristicasSala.IdCaracteristica }, caracteristicasSala);
@@ -50,7 +52,7 @@ namespace CoWorking.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCaracteristicaSala(int id, CaracteristicasSala updatedCaracteristicasSala)
+        public async Task<IActionResult> UpdateCaracteristicaSala(int id, CaracteristicasSalaModel updatedCaracteristicasSala)
         {
             var existingCaracteristicaSala = await _serviceCaracteristicasSala.GetByIdAsync(id);
             if (existingCaracteristicaSala == null)
