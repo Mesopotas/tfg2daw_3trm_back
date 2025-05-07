@@ -51,7 +51,7 @@ namespace CoWorking.Service
             if (user == null) return null; // Error al recibir el usuario / no existe
             return await GenerateToken(user);
         }
-        /*
+        
             public async Task<string> Register(RegisterDTO register)
             {
                 var user = await _repository.AddUserFromCredentialsAsync(register);
@@ -59,7 +59,7 @@ namespace CoWorking.Service
                 return await GenerateToken(user);
             }
 
-       
+       /*
 
         public Task<bool> HasAccessToResource(int requestedUserID, ClaimsPrincipal user)
         {

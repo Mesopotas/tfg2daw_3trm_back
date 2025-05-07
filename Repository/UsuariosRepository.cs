@@ -105,62 +105,45 @@ namespace CoWorking.Repositories
                 Rol = usuario.Rol.Nombre
             };
         }
-        /*
-                public async Task<UserDTOOut> AddUserFromCredentialsAsync(RegisterDTO register)
-                {
-                    using (var connection = new SqlConnection(_connectionString))
-                    {
-                        await connection.OpenAsync();
+    public async Task<UserDTOOut> AddUserFromCredentialsAsync(RegisterDTO register)
+{
+    // revisar si existe ese correo
+    var emailExisteYa = await _context.Usuarios.AnyAsync(u => u.Email == register.Email);
+    if (emailExisteYa)
+    {
+        throw new HttpRequestException("Este email ya fue registrado");
+    }
 
-                        // Verificar si el email ya existe
-                        string checkEmailQuery = "SELECT COUNT(Email) FROM Usuarios WHERE Email = @Email";
-                        using (var comprobarEmail = new SqlCommand(checkEmailQuery, connection))
-                        {
-                            comprobarEmail.Parameters.AddWithValue("@Email", register.Email);
+    // insert nuevo user
+    var nuevoUsuario = new Usuarios
+    {
+        Nombre = register.Nombre,
+        Apellidos = register.Apellidos,
+        Email = register.Email,
+        Contrasenia = register.Contrasenia,
+        IdRol = 2 // este endpoint será el signup, asi q siempre será rol cliente (2)
+    };
 
-                            var count = await comprobarEmail.ExecuteScalarAsync();
-                            if ((int)count > 0) // si el resultado es mayor q 0, significará que ya hay un registro con ese email en la bbdd
-                            {
-                                throw new HttpRequestException("Este email ya esta asociado a una cuenta");
-                            }
-                        }
+    // POST + guardado
+    _context.Usuarios.Add(nuevoUsuario);
+    await _context.SaveChangesAsync();
 
-                        string insertUserQuery = "INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, IdRol) " +
-                                                 "VALUES (@Nombre, @Apellidos, @Email, @Contrasenia, 2); SELECT SCOPE_IDENTITY();"; // el id de rol siempre será 2 que es cliente, ya que solo el administrador podrá registrar otros admins
+    // Obtener nombre del rol
+    var rolNombre = await _context.Roles
+        .Where(r => r.IdRol == nuevoUsuario.IdRol)
+        .Select(r => r.Nombre)
+        .FirstOrDefaultAsync();
 
-                        using (var command = new SqlCommand(insertUserQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Nombre", register.Nombre);
-                            command.Parameters.AddWithValue("@Apellidos", register.Apellidos);
-                            command.Parameters.AddWithValue("@Email", register.Email);
-                            command.Parameters.AddWithValue("@Contrasenia", register.Contrasenia);
-
-                            var nuevoIdUsuario = await command.ExecuteScalarAsync();
-
-                            if (nuevoIdUsuario == null)
-                            {
-                                throw new HttpRequestException("Error al crear el usuario");
-                            }
-
-                            string RolNombreQuery = "SELECT Nombre FROM Roles WHERE IdRol = IdRol"; // query para obtener el nombre del rol de la tabla roles
-                            string rolNombre;
-
-                            using (var rolCommand = new SqlCommand(RolNombreQuery, connection))
-                            {
-                                rolNombre = (string)await rolCommand.ExecuteScalarAsync(); // se asigna el nombre recibido de la bbdd a la variable
-                            }
-
-                            return new UserDTOOut
-                            {
-                                IdUsuario = Convert.ToInt32(nuevoIdUsuario),
-                                Nombre = register.Nombre,
-                                Apellidos = register.Apellidos,
-                                Email = register.Email,
-                                Rol = rolNombre
-                            };
-                        }
-                    }
-                }
+    return new UserDTOOut
+    {
+        IdUsuario = nuevoUsuario.IdUsuario,
+        Nombre = nuevoUsuario.Nombre,
+        Apellidos = nuevoUsuario.Apellidos,
+        Email = nuevoUsuario.Email,
+        Rol = rolNombre
+    };
+}
+/*
                 public async Task<bool> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
                 {
                     using (var connection = new SqlConnection(_connectionString))

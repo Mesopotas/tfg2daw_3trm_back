@@ -11,7 +11,7 @@ public class Usuarios{
     public string Apellidos {get; set;}
     public string Email  {get; set;}
     public string Contrasenia  {get; set;}
-    public DateTime FechaRegistro  {get; set;}
+    public DateTime FechaRegistro  {get; set;} = DateTime.Now; // siempre será datetime now cuando un usuario se registre
     public int IdRol  {get; set;}
 
     [ForeignKey("IdRol")]

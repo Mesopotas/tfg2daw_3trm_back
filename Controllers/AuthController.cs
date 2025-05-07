@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
             return BadRequest("Error generating the token: " + ex.Message);
         }
     }
-/*
+
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterDTO register)
     {
@@ -51,6 +51,7 @@ public class AuthController : ControllerBase
             return BadRequest("Error generating the token: " + ex.Message);
         }
     }
+    /*
     [HttpPost("ChangePassword")]
     public async Task<IActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
     {
