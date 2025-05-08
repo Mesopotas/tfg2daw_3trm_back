@@ -1,10 +1,12 @@
 using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models;
 
 public class Sedes{
 
+    [Key]
     public int IdSede{get; set;}
     public string  Pais  {get; set;}
     public string  Ciudad {get; set;}
