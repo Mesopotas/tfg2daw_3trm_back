@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace Models;
@@ -10,9 +11,11 @@ public class Usuarios{
     public string Apellidos {get; set;}
     public string Email  {get; set;}
     public string Contrasenia  {get; set;}
-    public DateTime FechaRegistro  {get; set;}
+    public DateTime FechaRegistro  {get; set;} = DateTime.Now; // siempre será datetime now cuando un usuario se registre
     public int IdRol  {get; set;}
 
+    [ForeignKey("IdRol")]
+    public Roles Rol { get; set; } // relacion a la tabla roles para hacer joins
     public Usuarios(){} // CONTRUCTOR VACIO INYECCION DE DEPENDENCIAS
 
     public Usuarios(int idUsuario, string nombre, string apellidos, string email, string contrasenia, DateTime fechaRegistro, int idRol){
