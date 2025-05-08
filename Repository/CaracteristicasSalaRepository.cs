@@ -34,10 +34,24 @@ namespace CoWorking.Repositories
             return caracteristicasSala;
         }
 
-        public async Task<CaracteristicasSala> GetByIdAsync(int id)
+
+        public async Task<CaracteristicasSala?> GetByIdAsync(int id)
         {
-            return await _context.CaracteristicasSala.FirstOrDefaultAsync(caracteristicaSala => caracteristicaSala.IdCaracteristica == id); // funcion flecha, usuario recoge todos los usuarios quer cumple que IdUsuario == id
+            var caracteristicasSala = await _context.CaracteristicasSala
+                .Where(u => u.IdCaracteristica == id)
+                .Select(u => new CaracteristicasSala
+                {
+                    IdCaracteristica = u.IdCaracteristica,
+                    Nombre = u.Nombre,
+                    Descripcion = u.Descripcion,
+                    PrecioAniadido = Convert.ToDouble(u.PrecioAniadido), // le llega un decimal pero la api maneja un double
+                })
+                .FirstOrDefaultAsync();
+
+            return caracteristicasSala;
         }
+
+
         public async Task AddAsync(CaracteristicasSala caracteristicaSala)
         {
 
