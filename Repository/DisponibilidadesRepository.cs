@@ -102,31 +102,50 @@ namespace CoWorking.Repositories
                     !festivosEspania.Contains(fecha.Date)) // que no sea festivo, de la lista previamente obtenida arriba con Nager.Date
                 .ToList();
 
-            // Obtener ya existentes en BBDD para evitar duplicados
-            var existentes = await _context.Disponibilidades
-                .Where(d => d.Fecha.Year == anio && d.IdTramoHorario == 1 && d.IdPuestoTrabajo == 1)
-                .Select(d => d.Fecha)
-             .ToListAsync();
+            // Obtener los IdPuestoTrabajo disponibles para los ids de los puestos de trabajo
+    var puestosTrabajo = await _context.PuestosTrabajo.ToListAsync();
 
-            // Crear solo los que no existen
-            var nuevasDisponibilidades = diasLaborables
-                .Where(fecha => !existentes.Contains(fecha))
-                .Select(fecha => new Disponibilidad
-                {
-                    Fecha = fecha,
-                    Estado = true,
-                    IdTramoHorario = 1,    // luego se dinamizará con un bucle
-                    IdPuestoTrabajo = 6
-                })
-                .ToList();
+        // Obtener ya existentes en BBDD para evitar duplicados
+    var existentes = await _context.Disponibilidades
+        .Where(d => d.Fecha.Year == anio && d.IdTramoHorario >= 1 && d.IdTramoHorario <= 11)
+        .Select(d => new { d.Fecha, d.IdPuestoTrabajo, d.IdTramoHorario })
+        .ToListAsync();
 
-            if (nuevasDisponibilidades.Any()) // si hay 1 o mas cambios por añadir, ejecutará su insert
+    // crear nuevas disponibilidades
+    var nuevasDisponibilidades = new List<Disponibilidad>();
+
+    // recorrer cada puesto de trabajo
+    foreach (var puesto in puestosTrabajo)
+    {
+        // recorrer cada dia laborable
+        foreach (var fecha in diasLaborables)
+        {
+            // recorrer cada tramo horario (de 1 a 11) ya que habrá 11 tramos predefinidos en la bbdd al momento de crearla, por lo tanto 11 ids del 1 al 11
+            for (int i = 1; i <= 11; i++)
             {
-                await _context.Disponibilidades.AddRangeAsync(nuevasDisponibilidades);
-                await _context.SaveChangesAsync();
+                // checkear que no exista para evitar repetidos
+                if (!existentes.Any(d => d.Fecha.Date == fecha.Date && d.IdPuestoTrabajo == puesto.IdPuestoTrabajo && d.IdTramoHorario == i))
+                {
+                    // Crear nueva disponibilidad
+                    nuevasDisponibilidades.Add(new Disponibilidad
+                    {
+                        Fecha = fecha,
+                        Estado = true, // siempre estarán disponibles al crearlo
+                        IdTramoHorario = i,
+                        IdPuestoTrabajo = puesto.IdPuestoTrabajo // será el id del puesto de trabajo que estamos recorriendo dentro del foreach
+                    });
+                }
             }
         }
+    }
 
+    // Si hay nuevas disponibilidades, se añaden
+    if (nuevasDisponibilidades.Any())
+    {
+        await _context.Disponibilidades.AddRangeAsync(nuevasDisponibilidades);
+        await _context.SaveChangesAsync();
+    }
+}
     }
 
 

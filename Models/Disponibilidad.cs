@@ -12,10 +12,10 @@ namespace Models
 
         public bool Estado { get; set; } = true;
 
-        [ForeignKey(nameof(TramosHorarios))]
+        [ForeignKey(nameof(TramoHorario))]
         public int IdTramoHorario { get; set; }
 
-        [ForeignKey(nameof(PuestosTrabajo))]
+        [ForeignKey(nameof(PuestoTrabajo))]
         public int IdPuestoTrabajo { get; set; }
 
         // para los joins
