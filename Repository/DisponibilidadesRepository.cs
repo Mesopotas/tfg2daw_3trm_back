@@ -25,69 +25,28 @@ namespace CoWorking.Repositories
 }
 
 
-        public async Task<DisponibilidadDTO> GetByIdAsync(int id)
-        {
-            DisponibilidadDTO disponibilidad = null;
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdDisponibilidad, Fecha, Estado FROM Disponibilidades WHERE IdDisponibilidad = @Id";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Fecha = reader.GetInt32(1),
-                                Estado = reader.GetBoolean(2)
-                            };
-
-                        }
-                    }
-                }
-            }
-            return disponibilidad;
+        public async Task<Disponibilidad> GetByIdAsync(int id)
+     {
+            return await _context.Disponibilidades.FirstOrDefaultAsync(disponibilidad => disponibilidad.IdDisponibilidad == id); // funcion flecha, usuario recoge todos los usuarios quer cumple que IdUsuario == id
         }
 
 
 
 
-        public async Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id)
+public async Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id)
+{
+    var disponibilidades = await _context.Disponibilidades
+        .Where(d => d.IdPuestoTrabajo == id)
+        .Select(d => new DisponibilidadDTO
         {
-            List<DisponibilidadDTO> disponibilidades = new List<DisponibilidadDTO>();
+            IdDisponibilidad = d.IdDisponibilidad,
+            Estado = d.Estado,
+            IdTramoHorario = d.IdTramoHorario
+        })
+        .ToListAsync();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-                string query = "SELECT IdDisponibilidad, Fecha, Estado, IdTramoHorario FROM Disponibilidades WHERE IdPuestoTrabajo = @Id  AND fecha >= DAY(GETDATE());;";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Estado = reader.GetBoolean(2),
-                                IdTramoHorario = reader.GetInt32(3)
-                            };
-
-                            disponibilidades.Add(disponibilidad);
-                        }
-                    }
-                }
-            }
-            return disponibilidades;
-        }
+    return disponibilidades;
+}
 
 
 
