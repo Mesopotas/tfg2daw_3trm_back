@@ -2,49 +2,28 @@ using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
 using System.Data;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoWorking.Repositories
 {
     public class DisponibilidadesRepository : IDisponibilidadesRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public DisponibilidadesRepository(string connectionString)
+        public DisponibilidadesRepository(CoworkingDBContext context)
         {
-            _connectionString = connectionString;
+            _context = context;
         }
-        /*    public int IdDisponibilidad { get; set; }
-                public int Fecha { get; set; }
-                public bool Estado { get; set; }*/
-        public async Task<List<DisponibilidadDTO>> GetAllAsync()
-        {
-            var disponibilidades = new List<DisponibilidadDTO>();
+     
+    public async Task<List<Disponibilidad>> GetAllAsync()
+{
+  {
+            return await _context.Disponibilidades
+            .ToListAsync();
+        };
+}
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdDisponibilidad, Fecha, Estado FROM Disponibilidades WHERE fecha >= DAY(GETDATE());";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Fecha = reader.GetInt32(1),
-                                Estado = reader.GetBoolean(2)
-                            };
-
-                            disponibilidades.Add(disponibilidad);
-                        }
-                    }
-                }
-            }
-            return disponibilidades;
-        }
 
         public async Task<DisponibilidadDTO> GetByIdAsync(int id)
         {

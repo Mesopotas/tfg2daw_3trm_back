@@ -9,6 +9,7 @@ namespace CoWorking.Data
 
         public DbSet<Usuarios> Usuarios { get; set; }
         public DbSet<Roles> Roles { get; set; }
+        public DbSet<Disponibilidad> Disponibilidades { get; set; }        
 
     }
 }
