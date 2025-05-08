@@ -1,144 +1,55 @@
 using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoWorking.Repositories
 {
     public class SedesRepository : ISedesRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public SedesRepository(string connectionString)
+        public SedesRepository(CoworkingDBContext context)
         {
-            _connectionString = connectionString;
+            _context = context;
         }
 
         public async Task<List<Sedes>> GetAllAsync()
         {
-            var sedes = new List<Sedes>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdSede, Pais, Ciudad, Direccion, CodigoPostal, Planta, Observaciones FROM Sedes";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var sede = new Sedes
-                            {
-                                IdSede = reader.GetInt32(0),
-                                Pais = reader.GetString(1),
-                                Ciudad = reader.GetString(2),
-                                Direccion = reader.GetString(3),
-                                CodigoPostal = reader.GetString(4),
-                                Planta = reader.GetString(5),
-                                Observaciones = reader.GetString(6),
-                            };
-
-                            sedes.Add(sede);
-                        }
-                    }
-                }
-            }
-            return sedes;
+            return await _context.Sedes
+            .ToListAsync();
         }
 
         public async Task<Sedes> GetByIdAsync(int id)
         {
-            Sedes sede = null;
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdSede, Pais, Ciudad, Direccion, CodigoPostal, Planta, Observaciones FROM Sedes WHERE idSede = @Id";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            sede = new Sedes
-                            {
-                                IdSede = reader.GetInt32(0),
-                                Pais = reader.GetString(1),
-                                Ciudad = reader.GetString(2),
-                                Direccion = reader.GetString(3),
-                                CodigoPostal = reader.GetString(4),
-                                Planta = reader.GetString(5),
-                                Observaciones = reader.GetString(6),
-                            };
-
-                        }
-                    }
-                }
-            }
-            return sede;
+            return await _context.Sedes.FirstOrDefaultAsync(sedes => sedes.IdSede == id); // funcion flecha, usuario recoge todos los usuarios quer cumple que IdUsuario == id
         }
 
         public async Task AddAsync(Sedes sede)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
 
-                string query = "INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, Observaciones) VALUES (@Pais, @Ciudad, @Direccion, @CodigoPostal, @Planta, @Observaciones)";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Pais", sede.Pais);
-                    command.Parameters.AddWithValue("@Ciudad", sede.Ciudad);
-                    command.Parameters.AddWithValue("@Direccion", sede.Direccion);
-                    command.Parameters.AddWithValue("@CodigoPostal", sede.CodigoPostal);
-                    command.Parameters.AddWithValue("@Planta", sede.Planta);
-                    command.Parameters.AddWithValue("@Observaciones", sede.Observaciones);
-                    
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            await _context.Sedes.AddAsync(sede); // AddAsync es metodo propio de EF, no hace el insert en si, solo lo prepara
+            await _context.SaveChangesAsync(); // otro metodo de EF, esto si hace el insert con los datos del add, ambos son imprescindibles para el insert
         }
+
+
 
         public async Task UpdateAsync(Sedes sede)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "UPDATE Sedes SET Pais = @Pais, Ciudad = @Ciudad, Direccion = @Direccion, CodigoPostal = @CodigoPostal, Planta = @Planta, Observaciones = @Observaciones WHERE idSede = @IdSede";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdSede", sede.IdSede);
-                    command.Parameters.AddWithValue("@Pais", sede.Pais);
-                    command.Parameters.AddWithValue("@Ciudad", sede.Ciudad);
-                    command.Parameters.AddWithValue("@Direccion", sede.Direccion);
-                    command.Parameters.AddWithValue("@CodigoPostal", sede.CodigoPostal);
-                    command.Parameters.AddWithValue("@Planta", sede.Planta);
-                    command.Parameters.AddWithValue("@Observaciones", sede.Observaciones);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            _context.Sedes.Update(sede); // igual que el add pero haciendo un update
+            await _context.SaveChangesAsync();
         }
+
 
         public async Task DeleteAsync(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+            var sede = await GetByIdAsync(id); // primero busca el id del usuario
+            if (sede != null)
+            {// si existe, pasa a ejecutar
 
-                string query = "DELETE FROM Sedes WHERE idSede = @IdSede";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdSede", id);
-
-                    await command.ExecuteNonQueryAsync();
-                }
+                _context.Sedes.Remove(sede); // metodo de EF para eliminar registros (los prepara para eliminacion)
+                await _context.SaveChangesAsync();
             }
         }
     }
