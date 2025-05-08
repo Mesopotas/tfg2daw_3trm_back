@@ -20,7 +20,18 @@ namespace CoWorking.Repositories
 
         public async Task<List<CaracteristicasSala>> GetAllAsync()
         {
-            return await _context.CaracteristicasSala.ToListAsync(); // el ToListAsync hará una sentencia que devuelva todos los datos de la tabla Usuarios, equivalente a SELECT * FROM Usuarios
+            var caracteristicasSala = await _context.CaracteristicasSala
+
+                .Select(u => new CaracteristicasSala
+                {
+                    IdCaracteristica = u.IdCaracteristica,
+                    Nombre = u.Nombre,
+                    Descripcion = u.Descripcion,
+                    PrecioAniadido = Convert.ToDouble(u.PrecioAniadido), // le llega un decimal pero la api maneja un double
+                })
+                .ToListAsync();
+
+            return caracteristicasSala;
         }
 
         public async Task<CaracteristicasSala> GetByIdAsync(int id)
