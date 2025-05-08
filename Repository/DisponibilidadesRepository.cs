@@ -15,86 +15,96 @@ namespace CoWorking.Repositories
         {
             _context = context;
         }
-     
-    public async Task<List<Disponibilidad>> GetAllAsync()
+
+    public async Task<List<DisponibilidadDTO>> GetAllAsync()
 {
-  {
-            return await _context.Disponibilidades
-            .ToListAsync();
-        };
+    return await _context.Disponibilidades
+        .Select(d => new DisponibilidadDTO
+        {
+            IdDisponibilidad = d.IdDisponibilidad,
+            Fecha = d.Fecha,
+            Estado = d.Estado,
+            IdTramoHorario = d.IdTramoHorario
+        })
+        .ToListAsync();
 }
 
 
-        public async Task<Disponibilidad> GetByIdAsync(int id)
-     {
-            return await _context.Disponibilidades.FirstOrDefaultAsync(disponibilidad => disponibilidad.IdDisponibilidad == id); // funcion flecha, usuario recoge todos los usuarios quer cumple que IdUsuario == id
+
+        public async Task<DisponibilidadDTO> GetByIdAsync(int id)
+        {
+            return await _context.Disponibilidades
+                .Where(d => d.IdDisponibilidad == id)
+                .Select(d => new DisponibilidadDTO
+                {
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario
+                })
+                .FirstOrDefaultAsync();
         }
 
 
 
 
-public async Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id)
-{
-    var disponibilidades = await _context.Disponibilidades
-        .Where(d => d.IdPuestoTrabajo == id)
-        .Select(d => new DisponibilidadDTO
+        public async Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id)
         {
-            IdDisponibilidad = d.IdDisponibilidad,
-            Estado = d.Estado,
-            IdTramoHorario = d.IdTramoHorario
-        })
-        .ToListAsync();
+            var disponibilidades = await _context.Disponibilidades
+                .Where(d => d.IdPuestoTrabajo == id)
+                .Select(d => new DisponibilidadDTO
+                {
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario
+                })
+                .ToListAsync();
 
-    return disponibilidades;
+            return disponibilidades;
+        }
+
+
+
+// para reservas
+public async Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad)
+{
+    var disponibilidadObjeto = await _context.Disponibilidades
+        .FirstOrDefaultAsync(d => d.IdDisponibilidad == disponibilidad.IdDisponibilidad);
+
+    if (disponibilidadObjeto != null)
+    {
+        disponibilidadObjeto.Estado = false;
+        await _context.SaveChangesAsync();
+    }
 }
 
 
-
-
-        public async Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad)
+        public async Task AddDisponibilidadesAsync(int anio)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
 
-                string query = "UPDATE Disponibilidades SET Estado = @Estado WHERE IdDisponibilidad = @IdDisponibilidad";
+                DateTime fechaIncio = new DateTime(anio, 1, 1); // pendiente filtrado en festivos
+                DateTime fechaFin = new DateTime(anio, 12, 31);
 
-                using (var command = new SqlCommand(query, connection))
+                for (DateTime fechaIncremental = fechaIncio; fechaIncremental <= fechaFin; fechaIncremental = fechaIncremental.AddDays(1)) // del 1 de enero al 31 de diciembre sumando 1 dia cada vez
                 {
-                    command.Parameters.AddWithValue("@IdDisponibilidad", disponibilidad.IdDisponibilidad);
-                    command.Parameters.AddWithValue("@Estado", false);
+                    string queryInsert = "INSERT INTO Disponibilidades (Fecha, Estado, IdPuestoTrabajo, IdTramoHorario ) VALUES (@Fecha, @Estado, @IdPuestoTrabajo, @IdTramoHorario)";
 
-                    await command.ExecuteNonQueryAsync();
+                    using (var commandInsert = new SqlCommand(queryInsert, connection))
+                    {
+                        commandInsert.Parameters.AddWithValue("@Fecha", fechaIncremental.Date);
+                        commandInsert.Parameters.AddWithValue("@Estado", true); // Siempre será true de inicio
+                        commandInsert.Parameters.AddWithValue("@IdPuestoTrabajo", 1);      // Datos de prueba, luego se dinamizaran en un bucle autoincremental
+                        commandInsert.Parameters.AddWithValue("@IdTramoHorario", 1);       // Datos de prueba
+
+                        await commandInsert.ExecuteNonQueryAsync();
+                    }
                 }
             }
         }
-
-
-        public async Task AddDisponibilidadesAsync(int anio) 
-{
-    using (var connection = new SqlConnection(_connectionString))
-    {
-        await connection.OpenAsync();
-
-        DateTime fechaIncio = new DateTime(anio, 1, 1); // pendiente filtrado en festivos
-        DateTime fechaFin = new DateTime(anio, 12, 31);
-
-        for (DateTime fechaIncremental = fechaIncio; fechaIncremental <= fechaFin; fechaIncremental = fechaIncremental.AddDays(1)) // del 1 de enero al 31 de diciembre sumando 1 dia cada vez
-        {
-            string queryInsert = "INSERT INTO Disponibilidades (Fecha, Estado, IdPuestoTrabajo, IdTramoHorario ) VALUES (@Fecha, @Estado, @IdPuestoTrabajo, @IdTramoHorario)";
-            
-            using (var commandInsert = new SqlCommand(queryInsert, connection))
-            {
-                commandInsert.Parameters.AddWithValue("@Fecha", fechaIncremental.Date);  
-                commandInsert.Parameters.AddWithValue("@Estado", true); // Siempre será true de inicio
-                commandInsert.Parameters.AddWithValue("@IdPuestoTrabajo", 1);      // Datos de prueba, luego se dinamizaran en un bucle autoincremental
-                commandInsert.Parameters.AddWithValue("@IdTramoHorario", 1);       // Datos de prueba
-
-                await commandInsert.ExecuteNonQueryAsync();
-            }
-        }
-    }
-}
 
 
     }
