@@ -51,11 +51,10 @@ builder.Services.AddScoped<IRolesRepository, RolesRepository>();
 
 builder.Services.AddScoped<ICaracteristicasSalaRepository, CaracteristicasSalaRepository>();
 
+builder.Services.AddScoped<ISedesRepository, SedesRepository>();
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
-
-builder.Services.AddScoped<ISedesRepository, SedesRepository>(provider =>
-    new SedesRepository(connectionString));
 
 builder.Services.AddScoped<ISalasRepository, SalasRepository>(provider =>
     new SalasRepository(connectionString));   
