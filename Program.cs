@@ -53,6 +53,8 @@ builder.Services.AddScoped<ICaracteristicasSalaRepository, CaracteristicasSalaRe
 
 builder.Services.AddScoped<ISedesRepository, SedesRepository>();
 
+builder.Services.AddScoped<ITiposPuestosTrabajoRepository, TiposPuestosTrabajoRepository>();
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
 
@@ -75,6 +77,7 @@ builder.Services.AddScoped<IDisponibilidadesRepository, DisponibilidadesReposito
 builder.Services.AddScoped<IUsuariosService, UsuariosService>();
 builder.Services.AddScoped<ITipoSalasService, TipoSalasService>();
 builder.Services.AddScoped<ISedesService, SedesService>();
+builder.Services.AddScoped<ITiposPuestosTrabajoService, TiposPuestosTrabajoService>();
 builder.Services.AddScoped<ISalasService, SalasService>();
 builder.Services.AddScoped<IRolesService, RolesService>();
 builder.Services.AddScoped<ITramosHorariosService, TramosHorariosService>();
