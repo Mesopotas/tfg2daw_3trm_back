@@ -11,6 +11,7 @@ namespace CoWorking.Data
         public DbSet<Roles> Roles { get; set; }
         public DbSet<CaracteristicasSala> CaracteristicasSala { get; set; }
         public DbSet<Sedes> Sedes { get; set; }
+        public DbSet<TiposPuestosTrabajo> TiposPuestosTrabajo { get; set; }
 
     }
 }
