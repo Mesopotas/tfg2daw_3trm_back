@@ -84,7 +84,11 @@ namespace CoWorking.Repositories
 
         public async Task AddDisponibilidadesAsync(int anio)
         {
-            var fechaInicio = new DateTime(anio, 1, 1); // dia 1 de enero
+
+                var fechaInicio = (anio == DateTime.Now.Year) ? DateTime.Today: new DateTime(anio, 1, 1); 
+                /* si el año introducido coincide con el actual del sistema (DateTime.Now.Year), toma como dia de inicio el actual del sistema, si es diferente,
+                 osea uno o varios años mas como 2026 el dia de inicio es 1 de enero para recorrer el año entero */
+
             var fechaFin = new DateTime(anio, 12, 31); // dia 31 de diciembre
 
             // dotnet add package Nager.Date --version 1.28.0 IMPORTANTE la version, en algunas anteriores no admite el comando, que sea esa siempre

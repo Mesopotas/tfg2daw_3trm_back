@@ -1,16 +1,32 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models
 {
     public class Salas
     {
+        [Key]
         public int IdSala { get; set; }
+
         public string Nombre { get; set; }
+
         public string URL_Imagen { get; set; }
+
         public int Capacidad { get; set; }
+
         public int IdTipoSala { get; set; }
+
         public int IdSede { get; set; }
+
         public bool Bloqueado { get; set; }
+
+        [ForeignKey("IdSede")]
+        public Sedes Sede { get; set; }
+
+        [ForeignKey("IdTipoSala")]
+        public TipoSalas TipoSala { get; set; }
+
         public List<PuestosTrabajo> Puestos { get; set; } = new();
         public List<ZonasTrabajo> Zona { get; set; } = new();
 
