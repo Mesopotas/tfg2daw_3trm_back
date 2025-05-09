@@ -27,20 +27,8 @@ namespace CoWorking.Repositories
 
         public async Task AddAsync(TramosHorarios tramosHorario)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "INSERT INTO TramosHorarios (HoraInicio, HoraFin, DIASEMANAL) VALUES (@HoraInicio, @HoraFin, @DiaSemanal)";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@HoraInicio", tramosHorario.HoraInicio);
-                    command.Parameters.AddWithValue("@HoraFin", tramosHorario.HoraFin);
-                    //     command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+              await _context.TramosHorarios.AddAsync(tramosHorario);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(TramosHorarios tramosHorario)
