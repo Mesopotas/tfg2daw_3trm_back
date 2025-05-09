@@ -33,20 +33,8 @@ namespace CoWorking.Repositories
 
         public async Task UpdateAsync(TramosHorarios tramosHorario)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "UPDATE TramosHorarios SET HoraInicio = @HoraInicio, HoraFin = @HoraFin,  DIASEMANAL = @DiaSemanal WHERE idTramoHorario = @IdTramosHorario";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@HoraInicio", tramosHorario.HoraInicio);
-                    command.Parameters.AddWithValue("@HoraFin", tramosHorario.HoraFin);
-                    //   command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            _context.TramosHorarios.Update(tramosHorario);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
