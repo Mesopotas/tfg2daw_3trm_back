@@ -14,5 +14,7 @@ namespace CoWorking.Data
         public DbSet<Disponibilidad> Disponibilidades { get; set; }
 
          public DbSet<PuestosTrabajo> PuestosTrabajo { get; set; }
+        public DbSet<TramosHorarios> TramosHorarios { get; set; }
+
     }
 }
