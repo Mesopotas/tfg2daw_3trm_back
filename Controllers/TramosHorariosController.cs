@@ -57,7 +57,6 @@ namespace CoWorking.Controllers
             }
             existingTramosHorario.HoraInicio = updatedTramosHorarios.HoraInicio;
             existingTramosHorario.HoraFin = updatedTramosHorarios.HoraFin;
-            existingTramosHorario.DiaSemanal = updatedTramosHorarios.DiaSemanal;
 
 
             await _serviceTramosHorarios.UpdateAsync(existingTramosHorario);

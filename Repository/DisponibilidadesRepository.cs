@@ -2,79 +2,49 @@ using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
 using System.Data;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
+using Nager.Date;
+
 
 namespace CoWorking.Repositories
 {
     public class DisponibilidadesRepository : IDisponibilidadesRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public DisponibilidadesRepository(string connectionString)
+        public DisponibilidadesRepository(CoworkingDBContext context)
         {
-            _connectionString = connectionString;
+            _context = context;
         }
-        /*    public int IdDisponibilidad { get; set; }
-                public int Fecha { get; set; }
-                public bool Estado { get; set; }*/
+
         public async Task<List<DisponibilidadDTO>> GetAllAsync()
         {
-            var disponibilidades = new List<DisponibilidadDTO>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdDisponibilidad, Fecha, Estado FROM Disponibilidades WHERE fecha >= DAY(GETDATE());";
-                using (var command = new SqlCommand(query, connection))
+            return await _context.Disponibilidades
+                .Select(d => new DisponibilidadDTO
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Fecha = reader.GetInt32(1),
-                                Estado = reader.GetBoolean(2)
-                            };
-
-                            disponibilidades.Add(disponibilidad);
-                        }
-                    }
-                }
-            }
-            return disponibilidades;
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario
+                })
+                .ToListAsync();
         }
+
+
 
         public async Task<DisponibilidadDTO> GetByIdAsync(int id)
         {
-            DisponibilidadDTO disponibilidad = null;
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = "SELECT IdDisponibilidad, Fecha, Estado FROM Disponibilidades WHERE IdDisponibilidad = @Id";
-                using (var command = new SqlCommand(query, connection))
+            return await _context.Disponibilidades
+                .Where(d => d.IdDisponibilidad == id)
+                .Select(d => new DisponibilidadDTO
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Fecha = reader.GetInt32(1),
-                                Estado = reader.GetBoolean(2)
-                            };
-
-                        }
-                    }
-                }
-            }
-            return disponibilidad;
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario
+                })
+                .FirstOrDefaultAsync();
         }
 
 
@@ -82,82 +52,105 @@ namespace CoWorking.Repositories
 
         public async Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id)
         {
-            List<DisponibilidadDTO> disponibilidades = new List<DisponibilidadDTO>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-                string query = "SELECT IdDisponibilidad, Fecha, Estado, IdTramoHorario FROM Disponibilidades WHERE IdPuestoTrabajo = @Id  AND fecha >= DAY(GETDATE());;";
-                using (var command = new SqlCommand(query, connection))
+            var disponibilidades = await _context.Disponibilidades
+                .Where(d => d.IdPuestoTrabajo == id)
+                .Select(d => new DisponibilidadDTO
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var disponibilidad = new DisponibilidadDTO
-                            {
-                                IdDisponibilidad = reader.GetInt32(0),
-                                Estado = reader.GetBoolean(2),
-                                IdTramoHorario = reader.GetInt32(3)
-                            };
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario
+                })
+                .ToListAsync();
 
-                            disponibilidades.Add(disponibilidad);
-                        }
-                    }
-                }
-            }
             return disponibilidades;
         }
 
 
 
-
+        // para reservas
         public async Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            var disponibilidadObjeto = await _context.Disponibilidades
+                .FirstOrDefaultAsync(d => d.IdDisponibilidad == disponibilidad.IdDisponibilidad);
+
+            if (disponibilidadObjeto != null)
             {
-                await connection.OpenAsync();
+                disponibilidadObjeto.Estado = false;
+                await _context.SaveChangesAsync();
+            }
+        }
 
-                string query = "UPDATE Disponibilidades SET Estado = @Estado WHERE IdDisponibilidad = @IdDisponibilidad";
 
-                using (var command = new SqlCommand(query, connection))
+        public async Task AddDisponibilidadesAsync(int anio)
+        {
+
+                var fechaInicio = (anio == DateTime.Now.Year) ? DateTime.Today: new DateTime(anio, 1, 1); 
+                /* si el año introducido coincide con el actual del sistema (DateTime.Now.Year), toma como dia de inicio el actual del sistema, si es diferente,
+                 osea uno o varios años mas como 2026 el dia de inicio es 1 de enero para recorrer el año entero */
+
+            var fechaFin = new DateTime(anio, 12, 31); // dia 31 de diciembre
+
+            // dotnet add package Nager.Date --version 1.28.0 IMPORTANTE la version, en algunas anteriores no admite el comando, que sea esa siempre
+            // Obtener festivos nacionales en España con la libreria Nager.Date
+            var festivosEspania = DateSystem.GetPublicHoliday(anio, "ES")
+                .Select(festivo => festivo.Date)
+             .ToList();
+
+            // Generar lista de días laborables (lunes a viernes, que no sean festivos)
+            var diasLaborables = Enumerable.Range(0, (fechaFin - fechaInicio).Days + 1) // resta el fechaFin al fechaInicio y le suma 1 para incluir el ultimo dia, ya se tiene el listado de los dias
+                .Select(secuenciaDias => fechaInicio.AddDays(secuenciaDias)) // transforma ese listado en un listado de fechas
+                .Where(fecha =>
+                    fecha.DayOfWeek != DayOfWeek.Saturday && // DayOfWeek es una propiedad de DateTime que devuelve el dia de la semana, en este caso que sea diferente del sabado 
+                    fecha.DayOfWeek != DayOfWeek.Sunday && // diferente del domingo
+                    !festivosEspania.Contains(fecha.Date)) // que no sea festivo, de la lista previamente obtenida arriba con Nager.Date
+                .ToList();
+
+            // Obtener los IdPuestoTrabajo disponibles para los ids de los puestos de trabajo
+    var puestosTrabajo = await _context.PuestosTrabajo.ToListAsync();
+
+        // Obtener ya existentes en BBDD para evitar duplicados
+    var existentes = await _context.Disponibilidades
+        .Where(d => d.Fecha.Year == anio && d.IdTramoHorario >= 1 && d.IdTramoHorario <= 11)
+        .Select(d => new { d.Fecha, d.IdPuestoTrabajo, d.IdTramoHorario })
+        .ToListAsync();
+
+    // crear nuevas disponibilidades
+    var nuevasDisponibilidades = new List<Disponibilidad>();
+
+    // recorrer cada puesto de trabajo
+    foreach (var puesto in puestosTrabajo)
+    {
+        // recorrer cada dia laborable
+        foreach (var fecha in diasLaborables)
+        {
+            // recorrer cada tramo horario (de 1 a 11) ya que habrá 11 tramos predefinidos en la bbdd al momento de crearla, por lo tanto 11 ids del 1 al 11
+            for (int i = 1; i <= 11; i++)
+            {
+                // checkear que no exista para evitar repetidos
+                if (!existentes.Any(d => d.Fecha.Date == fecha.Date && d.IdPuestoTrabajo == puesto.IdPuestoTrabajo && d.IdTramoHorario == i))
                 {
-                    command.Parameters.AddWithValue("@IdDisponibilidad", disponibilidad.IdDisponibilidad);
-                    command.Parameters.AddWithValue("@Estado", false);
-
-                    await command.ExecuteNonQueryAsync();
+                    // Crear nueva disponibilidad
+                    nuevasDisponibilidades.Add(new Disponibilidad
+                    {
+                        Fecha = fecha,
+                        Estado = true, // siempre estarán disponibles al crearlo
+                        IdTramoHorario = i,
+                        IdPuestoTrabajo = puesto.IdPuestoTrabajo // será el id del puesto de trabajo que estamos recorriendo dentro del foreach
+                    });
                 }
             }
         }
+    }
 
-
-        public async Task AddDisponibilidadesAsync(int anio) 
-{
-    using (var connection = new SqlConnection(_connectionString))
+    // Si hay nuevas disponibilidades, se añaden
+    if (nuevasDisponibilidades.Any())
     {
-        await connection.OpenAsync();
-
-        DateTime fechaIncio = new DateTime(anio, 1, 1); // pendiente filtrado en festivos
-        DateTime fechaFin = new DateTime(anio, 12, 31);
-
-        for (DateTime fechaIncremental = fechaIncio; fechaIncremental <= fechaFin; fechaIncremental = fechaIncremental.AddDays(1)) // del 1 de enero al 31 de diciembre sumando 1 dia cada vez
-        {
-            string queryInsert = "INSERT INTO Disponibilidades (Fecha, Estado, IdPuestoTrabajo, IdTramoHorario ) VALUES (@Fecha, @Estado, @IdPuestoTrabajo, @IdTramoHorario)";
-            
-            using (var commandInsert = new SqlCommand(queryInsert, connection))
-            {
-                commandInsert.Parameters.AddWithValue("@Fecha", fechaIncremental.Date);  
-                commandInsert.Parameters.AddWithValue("@Estado", true); // Siempre será true de inicio
-                commandInsert.Parameters.AddWithValue("@IdPuestoTrabajo", 1);      // Datos de prueba, luego se dinamizaran en un bucle autoincremental
-                commandInsert.Parameters.AddWithValue("@IdTramoHorario", 1);       // Datos de prueba
-
-                await commandInsert.ExecuteNonQueryAsync();
-            }
-        }
+        await _context.Disponibilidades.AddRangeAsync(nuevasDisponibilidades);
+        await _context.SaveChangesAsync();
     }
 }
-
-
     }
+
+
 }

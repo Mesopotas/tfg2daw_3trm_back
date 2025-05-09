@@ -31,11 +31,5 @@ namespace Models
         public List<DisponibilidadDTO> Disponibilidades { get; set; } = new List<DisponibilidadDTO>();
     }
 
-    public class DisponibilidadDTO
-    {
-        public int IdDisponibilidad { get; set; }
-        public int Fecha { get; set; }
-        public bool Estado { get; set; }
-        public int IdTramoHorario { get; set; }
-    }
+
 }

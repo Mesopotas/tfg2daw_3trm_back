@@ -1,21 +1,36 @@
-namespace Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class Disponibilidad
+namespace Models
 {
-        public int IdDisponibilidad { get; set; }
-        public int Fecha { get; set; }
-        public bool Estado { get; set; }
-        public int IdTramoHorario { get; set; }
-        public int idPuestoTrabajo { get; set; }
-
-    public Disponibilidad() { }
-
-    public Disponibilidad(int idDisponibilidad, int fecha, bool estado, int idTramoHorario, int idPuestoTrabajo)
+    public class Disponibilidad
     {
-        IdDisponibilidad = idDisponibilidad;
-        Fecha = fecha;
-        Estado = estado;
-        IdTramoHorario = idTramoHorario;
-        this.idPuestoTrabajo = idPuestoTrabajo;
+        [Key]
+        public int IdDisponibilidad { get; set; }
+
+        public DateTime Fecha { get; set; }
+
+        public bool Estado { get; set; } = true;
+
+        [ForeignKey(nameof(TramoHorario))]
+        public int IdTramoHorario { get; set; }
+
+        [ForeignKey(nameof(PuestoTrabajo))]
+        public int IdPuestoTrabajo { get; set; }
+
+        // para los joins
+        public TramosHorarios TramoHorario { get; set; }
+        public PuestosTrabajo PuestoTrabajo { get; set; }
+
+        public Disponibilidad() { }
+
+        public Disponibilidad(int idDisponibilidad, DateTime fecha, bool estado, int idTramoHorario, int idPuestoTrabajo)
+        {
+            IdDisponibilidad = idDisponibilidad;
+            Fecha = fecha;
+            Estado = estado;
+            IdTramoHorario = idTramoHorario;
+            IdPuestoTrabajo = idPuestoTrabajo;
+        }
     }
 }

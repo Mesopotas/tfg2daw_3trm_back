@@ -31,9 +31,9 @@ namespace CoWorking.Repositories
                             var tramosHorario = new TramosHorarios
                             {
                                 IdTramoHorario = reader.GetInt32(0),
-                                HoraInicio = reader.GetString(1),
-                                HoraFin = reader.GetString(2),
-                                DiaSemanal = reader.GetInt32(3),
+                              //  HoraInicio = reader.GetString(1),
+                            //    HoraFin = reader.GetString(2),
+                             //   DiaSemanal = reader.GetInt32(3),
 
                             };
 
@@ -65,9 +65,9 @@ namespace CoWorking.Repositories
                             tramosHorario = new TramosHorarios
                             {
                                 IdTramoHorario = reader.GetInt32(0),
-                                HoraInicio = reader.GetString(1),
-                                HoraFin = reader.GetString(2),
-                                DiaSemanal = reader.GetInt32(3),
+                        //        HoraInicio = reader.GetString(1),
+                         //       HoraFin = reader.GetString(2),
+                         //       DiaSemanal = reader.GetInt32(3),
 
                             };
 
@@ -90,7 +90,7 @@ namespace CoWorking.Repositories
                 {
                     command.Parameters.AddWithValue("@HoraInicio", tramosHorario.HoraInicio);
                     command.Parameters.AddWithValue("@HoraFin", tramosHorario.HoraFin);
-                    command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
+               //     command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
                     await command.ExecuteNonQueryAsync();
                 }
             }
@@ -108,7 +108,7 @@ namespace CoWorking.Repositories
                 {
                     command.Parameters.AddWithValue("@HoraInicio", tramosHorario.HoraInicio);
                     command.Parameters.AddWithValue("@HoraFin", tramosHorario.HoraFin);
-                    command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
+                 //   command.Parameters.AddWithValue("@DiaSemanal", tramosHorario.DiaSemanal);
                     await command.ExecuteNonQueryAsync();
                 }
             }

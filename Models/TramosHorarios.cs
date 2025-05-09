@@ -1,20 +1,24 @@
-namespace Models;
+using System;
+using System.ComponentModel.DataAnnotations;
 
-public class TramosHorarios{
+namespace Models
+{
+    public class TramosHorarios
+    {
+        [Key]
+        public int IdTramoHorario { get; set; }
 
-    public int IdTramoHorario{get; set;}
-    public string HoraInicio  {get; set;}
-    public string HoraFin  {get; set;}
-    public int DiaSemanal  {get; set;}
-    public TramosHorarios(){} // CONTRUCTOR VACIO INYECCION DE DEPENDENCIAS
+        public TimeSpan HoraInicio { get; set; }
 
-    public TramosHorarios(int idTramoHorario, string horaInicio,string horaFin , int diaSemanal){
+        public TimeSpan HoraFin { get; set; }
 
-        IdTramoHorario = idTramoHorario;
-        HoraInicio = horaInicio;
-        HoraFin = horaFin;
-        DiaSemanal = diaSemanal;
+        public TramosHorarios() { }
+
+        public TramosHorarios(int idTramoHorario, TimeSpan horaInicio, TimeSpan horaFin)
+        {
+            IdTramoHorario = idTramoHorario;
+            HoraInicio = horaInicio;
+            HoraFin = horaFin;
+        }
     }
-
-
 }

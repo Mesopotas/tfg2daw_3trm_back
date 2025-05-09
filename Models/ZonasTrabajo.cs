@@ -1,20 +1,27 @@
-using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Models;
-
-public class ZonasTrabajo
+namespace Models
 {
-    public int IdZonaTrabajo { get; set; }
+    public class ZonasTrabajo
+    {
+        [Key]
+        public int IdZonaTrabajo { get; set; }
+
         public string Descripcion { get; set; }
 
+        public int IdSala { get; set; }
 
-    public ZonasTrabajo() { }
+        [ForeignKey("IdSala")]
+        public Salas Sala { get; set; }
 
-    public ZonasTrabajo(int idZonaTrabajo, string descripcion)
-    {
-        IdZonaTrabajo = idZonaTrabajo;
-        Descripcion = descripcion;
+        public ZonasTrabajo() { }
 
+        public ZonasTrabajo(int idZonaTrabajo, string descripcion, int idSala)
+        {
+            IdZonaTrabajo = idZonaTrabajo;
+            Descripcion = descripcion;
+            IdSala = idSala;
+        }
     }
 }
