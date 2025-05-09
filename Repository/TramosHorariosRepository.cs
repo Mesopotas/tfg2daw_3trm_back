@@ -39,17 +39,12 @@ namespace CoWorking.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+               var tramoHorario = await GetByIdAsync(id); // primero busca el id del tramo horario
+            if (tramoHorario != null)
+            {// si existe, pasa a ejecutar
 
-                string query = "DELETE FROM TramosHorarios WHERE idTramoHorario = @IdTramoHorario";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdTramoHorario", id);
-
-                    await command.ExecuteNonQueryAsync();
-                }
+                _context.TramosHorarios.Remove(tramoHorario); // metodo de EF para eliminar registros (los prepara para eliminacion)
+                await _context.SaveChangesAsync();
             }
         }
     }

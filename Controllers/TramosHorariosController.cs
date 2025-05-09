@@ -45,7 +45,14 @@ namespace CoWorking.Controllers
             await _serviceTramosHorarios.AddAsync(tramosHorarioss);
             return CreatedAtAction(nameof(CreateTramosHorario), new { id = tramosHorarioss.IdTramoHorario }, tramosHorarioss);
         }
+                /* EJEMPLO EN FORMATO CORRECTO 
+                {
+                "idTramoHorario": 0,
+                "horaInicio": "22:00:00",
+                "horaFin": "23:00:00"
+                }
 
+                */
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTramosHorario(int id, TramosHorarios updatedTramosHorarios)
