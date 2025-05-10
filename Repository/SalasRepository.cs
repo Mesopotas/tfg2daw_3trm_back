@@ -362,12 +362,12 @@ public async Task AddAsync(Salas sala)
                 // vborrar el tipo de sala, pero solo si no se usa en otra sala comprobandolo para evitar posibles errores, ya que al principio las posibles salas serán predefinidas
                 if (idTipoSala.HasValue)
                 {
-                    string comprobarUsoTipoSalas = "SELECT COUNT(*) FROM Salas WHERE IdTipoSala = @IdTipoSala";
-                    using (var command = new SqlCommand(comprobarUsoTipoSalas, connection))
+                    string comprobarUsoTiposSalas = "SELECT COUNT(*) FROM Salas WHERE IdTipoSala = @IdTipoSala";
+                    using (var command = new SqlCommand(comprobarUsoTiposSalas, connection))
                     {
                         command.Parameters.AddWithValue("@IdTipoSala", idTipoSala.Value);
-                        int conteoTipoSalas = (int)await command.ExecuteScalarAsync();
-                        if (conteoTipoSalas == 0) // si no se encuentran resultados, significa que no se esta usando por otros datos y por tanto se puede eliminar sin problemas
+                        int conteoTiposSalas = (int)await command.ExecuteScalarAsync();
+                        if (conteoTiposSalas == 0) // si no se encuentran resultados, significa que no se esta usando por otros datos y por tanto se puede eliminar sin problemas
                         {
                             string deleteTipoSala = "DELETE FROM TiposSalas WHERE IdTipoSala = @IdTipoSala";
                             using (var ejecutarBorradoTipoSala = new SqlCommand(deleteTipoSala, connection))

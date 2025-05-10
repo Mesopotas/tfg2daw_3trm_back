@@ -25,7 +25,7 @@ namespace Models
         public Sedes Sede { get; set; }
 
         [ForeignKey("IdTipoSala")]
-        public TipoSalas TipoSala { get; set; }
+        public TiposSalas TipoSala { get; set; }
 
         public List<PuestosTrabajo> Puestos { get; set; } = new();
         public List<ZonasTrabajo> Zona { get; set; } = new();

@@ -1,57 +1,93 @@
 using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
+using System.Data;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace CoWorking.Repositories
 {
-    public class TipoSalasRepository : ITipoSalasRepository
+    public class TiposSalasRepository : ITiposSalasRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public TipoSalasRepository(string connectionString)
+
+        public TiposSalasRepository(CoworkingDBContext context) // referencia al data.CoworkingDBContext.cs en lugar de cadena de conexión, el EF hará las sentencias sin ponerlas explicitamente
         {
-            _connectionString = connectionString;
+            _context = context;
         }
 
-        public async Task<List<TipoSalas>> GetAllAsync()
+    
+        public async Task<List<TiposSalas>> GetAllAsync()
         {
-            var tipoSalas = new List<TipoSalas>();
+            var tiposSalas = await _context.TiposSalas
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                string query = @"
-        SELECT IdTipoSala, Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo FROM TiposSalas";
-
-                using (var command = new SqlCommand(query, connection))
+                .Select(u => new TiposSalas
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var tipoSala = new TipoSalas
-                            {
-                                IdTipoSala = reader.GetInt32(0),
-                                Nombre = reader.IsDBNull(1) ? null : reader.GetString(1), // si es nulo le asigna 'null' para que no se colapse
-                                NumeroMesas = reader.GetInt32(2),
-                                CapacidadAsientos = reader.GetInt32(3),
-                                EsPrivada = reader.GetBoolean(4),
-                                Descripcion = reader.IsDBNull(5) ? null : reader.GetString(5),  // si es nulo le asigna 'null' para que no se colapse
-                                IdTipoPuestoTrabajo = reader.GetInt32(6)
-                            };
+                    IdTipoSala = u.IdTipoSala,
+                    Nombre = u.Nombre,
+                    NumeroMesas = u.NumeroMesas,
+                    CapacidadAsientos = u.CapacidadAsientos,
+                    EsPrivada = u.EsPrivada,
+                    Descripcion = u.Descripcion,
+                    IdTipoPuestoTrabajo = u.IdTipoPuestoTrabajo,
+                })
+                .ToListAsync();
 
-                            tipoSalas.Add(tipoSala);
-                        }
-                    }
-                }
-            }
-
-            return tipoSalas;
+            return tiposSalas;
         }
-        public async Task<TipoSalas> GetByIdAsync(int id)
+
+                public async Task<TiposSalas?> GetByIdAsync(int id)
         {
-            TipoSalas tipoSala = null;
+            var tiposSalas = await _context.TiposSalas
+                .Where(u => u.IdTipoSala == id)
+                .Select(u => new TiposSalas
+                {
+                    IdTipoSala = u.IdTipoSala,
+                    Nombre = u.Nombre,
+                    NumeroMesas = u.NumeroMesas,
+                    CapacidadAsientos = u.CapacidadAsientos,
+                    EsPrivada = u.EsPrivada,
+                    Descripcion = u.Descripcion,
+                    IdTipoPuestoTrabajo = u.IdTipoPuestoTrabajo,
+                })
+                .FirstOrDefaultAsync();
+
+            return tiposSalas;
+        }
+
+        
+        public async Task AddAsync(TiposSalas tipoSala)
+        {
+
+            await _context.TiposSalas.AddAsync(tipoSala); // AddAsync es metodo propio de EF, no hace el insert en si, solo lo prepara
+            await _context.SaveChangesAsync(); // otro metodo de EF, esto si hace el insert con los datos del add, ambos son imprescindibles para el insert
+        }
+
+
+        public async Task UpdateAsync(TiposSalas tipoSala)
+        {
+            _context.TiposSalas.Update(tipoSala); // igual que el add pero haciendo un update
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var tipoSala = await GetByIdAsync(id); // primero busca el id del usuario
+            if (tipoSala != null)
+            {// si existe, pasa a ejecutar
+
+                _context.TiposSalas.Remove(tipoSala); // metodo de EF para eliminar registros (los prepara para eliminacion)
+                await _context.SaveChangesAsync();
+            }
+        }
+
+/*
+    
+        public async Task<TiposSalas> GetByIdAsync(int id)
+        {
+            TiposSalas tipoSala = null;
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -68,7 +104,7 @@ namespace CoWorking.Repositories
                     {
                         if (await reader.ReadAsync())
                         {
-                            tipoSala = new TipoSalas
+                            tipoSala = new TiposSalas
                             {
                                 IdTipoSala = reader.GetInt32(0),
                                 Nombre = reader.IsDBNull(1) ? null : reader.GetString(1), // si es nulo le asigna 'null' para que no se colapse
@@ -85,7 +121,7 @@ namespace CoWorking.Repositories
 
             return tipoSala;
         }
-        public async Task AddAsync(TipoSalas tipoSala)
+        public async Task AddAsync(TiposSalas tipoSala)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -110,7 +146,7 @@ namespace CoWorking.Repositories
             }
         }
 
-        public async Task UpdateAsync(TipoSalas tipoSala)
+        public async Task UpdateAsync(TiposSalas tipoSala)
 {
     using (var connection = new SqlConnection(_connectionString))
     {
@@ -118,7 +154,7 @@ namespace CoWorking.Repositories
 
             // La columna FechaRegistro no está incluida ya que no debe ser modificada
         string query = "UPDATE TiposSalas SET Nombre = @Nombre, NumeroMesas = @NumeroMesas, CapacidadAsientos = @CapacidadAsientos, EsPrivada = @EsPrivada, Descripcion = @Descripcion, IdTipoPuestoTrabajo = @IdTipoPuestoTrabajo WHERE IdTipoSala = @IdTipoSala";
-            // si el idRol asignado no existe dará error (Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint "FK__TipoSalas__IdRol__276EDEB3". The conflict occurred in database "CoworkingDB", table "dbo.Roles", column 'IdRol'.)
+            // si el idRol asignado no existe dará error (Microsoft.Data.SqlClient.SqlException (0x80131904): The INSERT statement conflicted with the FOREIGN KEY constraint "FK__TiposSalas__IdRol__276EDEB3". The conflict occurred in database "CoworkingDB", table "dbo.Roles", column 'IdRol'.)
         using (var command = new SqlCommand(query, connection))
         {
             command.Parameters.AddWithValue("@IdTipoSala", tipoSala.IdTipoSala);
@@ -160,6 +196,6 @@ namespace CoWorking.Repositories
                     int rowsAffected = await command.ExecuteNonQueryAsync();
                 }
             }
-        }
+        }*/
     }
 }

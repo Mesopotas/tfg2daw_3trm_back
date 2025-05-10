@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models
 {
-    public class TipoSalas
+    public class TiposSalas
     {
         [Key]
         public int IdTipoSala { get; set; }
@@ -20,12 +20,11 @@ namespace Models
 
         public int IdTipoPuestoTrabajo { get; set; }
 
-        [ForeignKey("IdTipoPuestoTrabajo")]
-        public TiposPuestosTrabajo TipoPuestoTrabajo { get; set; }
 
-        public TipoSalas() { }
 
-        public TipoSalas(int idTipoSala, string nombre, int numeroMesas, int capacidadAsientos, bool esPrivada, string? descripcion, int idTipoPuestoTrabajo)
+        public TiposSalas() { }
+
+        public TiposSalas(int idTipoSala, string nombre, int numeroMesas, int capacidadAsientos, bool esPrivada, string? descripcion, int idTipoPuestoTrabajo)
         {
             IdTipoSala = idTipoSala;
             Nombre = nombre;
