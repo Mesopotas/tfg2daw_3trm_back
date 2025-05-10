@@ -62,8 +62,7 @@ builder.Services.AddScoped<ITramosHorariosRepository, TramosHorariosRepository>(
 
 builder.Services.AddScoped<ITiposSalasRepository, TiposSalasRepository>();
 
-builder.Services.AddScoped<ISalasRepository, SalasRepository>(provider =>
-    new SalasRepository(connectionString));   
+builder.Services.AddScoped<ISalasRepository, SalasRepository>();   
 
 builder.Services.AddScoped<IReservasRepository, ReservasRepository>(provider =>
     new ReservasRepository(connectionString));  

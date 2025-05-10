@@ -27,9 +27,6 @@ namespace Models
         [ForeignKey("IdTipoSala")]
         public TiposSalas TipoSala { get; set; }
 
-        public List<PuestosTrabajo> Puestos { get; set; } = new();
-        public List<ZonasTrabajo> Zona { get; set; } = new();
-
         public Salas() { }
 
         public Salas(int idSala, string nombre, string urlImagen, int capacidad, int idTipoSala, int idSede, bool bloqueado = false)
