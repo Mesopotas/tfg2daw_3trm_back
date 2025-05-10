@@ -55,6 +55,9 @@ builder.Services.AddScoped<ISedesRepository, SedesRepository>();
 
 builder.Services.AddScoped<ITiposPuestosTrabajoRepository, TiposPuestosTrabajoRepository>();
 
+builder.Services.AddScoped<ITramosHorariosRepository, TramosHorariosRepository>();
+
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
 
