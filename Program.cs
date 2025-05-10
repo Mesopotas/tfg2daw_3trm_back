@@ -53,11 +53,7 @@ builder.Services.AddScoped<ICaracteristicasSalaRepository, CaracteristicasSalaRe
 
 builder.Services.AddScoped<ISedesRepository, SedesRepository>();
 
-<<<<<<< HEAD
-builder.Services.AddScoped< ITramosHorariosRepository, TramosHorariosRepository>();
-=======
 builder.Services.AddScoped<ITiposPuestosTrabajoRepository, TiposPuestosTrabajoRepository>();
->>>>>>> TiposPuestosTrabajo
 
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));

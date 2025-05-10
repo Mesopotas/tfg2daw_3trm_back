@@ -4,77 +4,88 @@ using CoWorking.DTO;
 using CoWorking.Data;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace CoWorking.Repositories
 {
     public class TiposPuestosTrabajoRepository : ITiposPuestosTrabajoRepository
     {
         private readonly CoworkingDBContext _context;
 
-
-        public TiposPuestosTrabajoRepository(CoworkingDBContext context) // referencia al data.CoworkingDBContext.cs en lugar de cadena de conexión, el EF hará las sentencias sin ponerlas explicitamente
+        public TiposPuestosTrabajoRepository(CoworkingDBContext context)
         {
             _context = context;
         }
 
-
         public async Task<List<TiposPuestosTrabajo>> GetAllAsync()
         {
-            var tiposPuestosTrabajo = await _context.TiposPuestosTrabajo
-
-                .Select(u => new TiposPuestosTrabajo
+            var resultado = await _context.TiposPuestosTrabajo
+                .Select(u => new
                 {
-                    IdTipoPuestoTrabajo = u.IdTipoPuestoTrabajo,
-                    Nombre = u.Nombre,
-                    Imagen_URL = u.Imagen_URL,
-                    Descripcion = u.Descripcion,
-                    Precio = Convert.ToDouble(u.Precio), // le llega un decimal pero la api maneja un double
+                    u.IdTipoPuestoTrabajo,
+                    u.Nombre,
+                    u.Imagen_URL,
+                    u.Descripcion,
+                    Precio = Convert.ToDouble(u.Precio)
                 })
                 .ToListAsync();
 
+            var tiposPuestosTrabajo = resultado
+                .Select(r => new TiposPuestosTrabajo
+                {
+                    IdTipoPuestoTrabajo = r.IdTipoPuestoTrabajo,
+                    Nombre = r.Nombre,
+                    Imagen_URL = r.Imagen_URL,
+                    Descripcion = r.Descripcion,
+                    Precio = r.Precio
+                })
+                .ToList();
+
             return tiposPuestosTrabajo;
         }
-
 
         public async Task<TiposPuestosTrabajo?> GetByIdAsync(int id)
         {
-            var tiposPuestosTrabajo = await _context.TiposPuestosTrabajo
+            var resultado = await _context.TiposPuestosTrabajo
                 .Where(u => u.IdTipoPuestoTrabajo == id)
-                .Select(u => new TiposPuestosTrabajo
+                .Select(u => new
                 {
-                    IdTipoPuestoTrabajo = u.IdTipoPuestoTrabajo,
-                    Nombre = u.Nombre,
-                    Imagen_URL = u.Imagen_URL,
-                    Descripcion = u.Descripcion,
-                    Precio = Convert.ToDouble(u.Precio), // le llega un decimal pero la api maneja un double
+                    u.IdTipoPuestoTrabajo,
+                    u.Nombre,
+                    u.Imagen_URL,
+                    u.Descripcion,
+                    Precio = Convert.ToDouble(u.Precio)
                 })
                 .FirstOrDefaultAsync();
 
-            return tiposPuestosTrabajo;
-        }
+            if (resultado == null) return null;
 
+            return new TiposPuestosTrabajo
+            {
+                IdTipoPuestoTrabajo = resultado.IdTipoPuestoTrabajo,
+                Nombre = resultado.Nombre,
+                Imagen_URL = resultado.Imagen_URL,
+                Descripcion = resultado.Descripcion,
+                Precio = resultado.Precio
+            };
+        }
 
         public async Task AddAsync(TiposPuestosTrabajo tipoPuestoTrabajo)
         {
-
-            await _context.TiposPuestosTrabajo.AddAsync(tipoPuestoTrabajo); // AddAsync es metodo propio de EF, no hace el insert en si, solo lo prepara
-            await _context.SaveChangesAsync(); // otro metodo de EF, esto si hace el insert con los datos del add, ambos son imprescindibles para el insert
+            await _context.TiposPuestosTrabajo.AddAsync(tipoPuestoTrabajo);
+            await _context.SaveChangesAsync();
         }
-
 
         public async Task UpdateAsync(TiposPuestosTrabajo tipoPuestoTrabajo)
         {
-            _context.TiposPuestosTrabajo.Update(tipoPuestoTrabajo); // igual que el add pero haciendo un update
+            _context.TiposPuestosTrabajo.Update(tipoPuestoTrabajo);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var tipoPuestoTrabajo = await GetByIdAsync(id); // primero busca el id del usuario
+            var tipoPuestoTrabajo = await GetByIdAsync(id);
             if (tipoPuestoTrabajo != null)
-            {// si existe, pasa a ejecutar
-
-                _context.TiposPuestosTrabajo.Remove(tipoPuestoTrabajo); // metodo de EF para eliminar registros (los prepara para eliminacion)
+            {
+                _context.TiposPuestosTrabajo.Remove(tipoPuestoTrabajo);
                 await _context.SaveChangesAsync();
             }
         }
