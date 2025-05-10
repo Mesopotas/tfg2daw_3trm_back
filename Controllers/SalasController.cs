@@ -8,6 +8,86 @@ namespace CoWorking.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
+
+    public class SalasController : ControllerBase
+    {
+        private static List<Salas> Salas = new List<Salas>();
+
+        private readonly ISalasService _serviceSalas;
+
+        public SalasController(ISalasService service)
+        {
+            _serviceSalas = service;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<Salas>>> GetSalas()
+        {
+            var Salas = await _serviceSalas.GetAllAsync();
+            return Ok(Salas);
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Salas>> GetSala(int id)
+        {
+            var sala = await _serviceSalas.GetByIdAsync(id);
+            if (sala == null)
+            {
+                return NotFound();
+            }
+            return Ok(sala);
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult<SalasDTO>> CreateSala(SalasDTO Salas)
+        {
+            await _serviceSalas.AddAsync(Salas);
+            return CreatedAtAction(nameof(CreateSala), new { id = Salas.IdSala }, Salas);
+        }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateSala(int id, Salas updatedSalas)
+        {
+            var existingSala = await _serviceSalas.GetByIdAsync(id);
+            if (existingSala == null)
+            {
+                return NotFound();
+            }
+
+            existingSala.Nombre = updatedSalas.Nombre;
+            existingSala.URL_Imagen = updatedSalas.URL_Imagen;
+            existingSala.Capacidad = updatedSalas.Capacidad;
+            existingSala.IdTipoSala = updatedSalas.IdTipoSala;
+            existingSala.IdSede = updatedSalas.IdSede;
+            existingSala.Bloqueado = updatedSalas.Bloqueado;
+
+
+            await _serviceSalas.UpdateAsync(existingSala);
+            return NoContent();
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteSala(int id)
+        {
+            var sala = await _serviceSalas.GetByIdAsync(id);
+            if (sala == null)
+            {
+                return NotFound();
+            }
+            await _serviceSalas.DeleteAsync(id);
+            return NoContent();
+        }
+
+    }
+
+
+
+/*
     public class SalasController : ControllerBase
     {
         private static List<Salas> sala = new List<Salas>();
@@ -57,7 +137,7 @@ public async Task<ActionResult<List<SalasDTO>>> GetSalaBySede([FromQuery] int id
             return CreatedAtAction(nameof(CreateSala), new { id = salas.IdSala }, salas);
         }
 
-        /*
+        
                 [HttpPut("{id}")]
                 public async Task<IActionResult> UpdateSala(int id, Salas updatedSalas)
                 {
@@ -75,7 +155,7 @@ public async Task<ActionResult<List<SalasDTO>>> GetSalaBySede([FromQuery] int id
                     await _serviceSalas.UpdateAsync(existingSala);
                     return NoContent();
                 }
-        */
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSala(int id)
         {
@@ -87,6 +167,5 @@ public async Task<ActionResult<List<SalasDTO>>> GetSalaBySede([FromQuery] int id
             await _serviceSalas.DeleteAsync(id);
             return NoContent();
         }
-
-    }
+    } */
 }
