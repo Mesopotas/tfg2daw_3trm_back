@@ -27,12 +27,12 @@ namespace CoWorking.Service
         {
             return await _reservasRepository.GetByIdAsync(id);
         }
-/*
+
         public async Task CreateReservaAsync(Reservas reserva)
         {
             await _reservasRepository.CreateReservaAsync(reserva);
         }
-
+/*
         public async Task UpdateAsync(Reservas reserva)
         {
             await _reservasRepository.UpdateAsync(reserva);

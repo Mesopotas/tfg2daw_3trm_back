@@ -38,14 +38,14 @@ namespace CoWorking.Controllers
             return Ok(detalleReservas);
         }
 
-/*
+
         [HttpPost]
         public async Task<ActionResult<ReservasDTO>> CreateReserva(Reservas reservas)
         {
             await _serviceReservas.CreateReservaAsync(reservas);
             return CreatedAtAction(nameof(CreateReserva), new { id = reservas.IdReserva }, reservas);
         }
-
+/*
 
      /*   [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReserva(int id, Reservas updatedReservas)

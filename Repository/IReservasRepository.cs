@@ -7,11 +7,13 @@ namespace CoWorking.Repositories
     {
         Task<List<ReservasDTO>> GetAllAsync();
         Task<ReservasDTO> GetByIdAsync(int id);
-    /*    Task CreateReservaAsync(Reservas reserva);
-       // Task UpdateAsync(Reservas reservas);
-        Task DeleteAsync(int id);
+        Task<Reservas> CreateReservaAsync(Reservas reserva);
 
-    Task<ReservasClienteInfoDTO> GetDetallesPedidoAsync(int idReserva);
-*/
+
+       // Task UpdateAsync(Reservas reservas);
+    //    Task DeleteAsync(int id);
+
+ //    Task<ReservasClienteInfoDTO> GetDetallesPedidoAsync(int idReserva);
+
     }
 }
