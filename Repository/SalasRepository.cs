@@ -1,7 +1,105 @@
 using Microsoft.Data.SqlClient;
 using Models;
-using System.Threading.Tasks;
+using CoWorking.DTO;
+using System.Data;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
 
+
+namespace CoWorking.Repositories
+{
+    public class SalasRepository : ISalasRepository
+    {
+        private readonly CoworkingDBContext _context;
+
+
+        public SalasRepository(CoworkingDBContext context) // referencia al data.CoworkingDBContext.cs en lugar de cadena de conexión, el EF hará las sentencias sin ponerlas explicitamente
+        {
+            _context = context;
+        }
+
+
+        public async Task<List<Salas>> GetAllAsync()
+        {
+            var salas = await _context.Salas
+
+                .Select(u => new Salas
+                {
+                    IdSala = u.IdSala,
+                    Nombre = u.Nombre,
+                    URL_Imagen = u.URL_Imagen,
+                    Capacidad = u.Capacidad,
+                    IdTipoSala = u.IdTipoSala,
+                    IdSede = u.IdSede,
+                    Bloqueado = u.Bloqueado,
+                })
+                .ToListAsync();
+
+            return salas;
+        }
+
+        public async Task<Salas?> GetByIdAsync(int id)
+        {
+            var salas = await _context.Salas
+                .Where(u => u.IdSala == id)
+                .Select(u => new Salas
+                {
+                    IdSala = u.IdSala,
+                    Nombre = u.Nombre,
+                    URL_Imagen = u.URL_Imagen,
+                    Capacidad = u.Capacidad,
+                    IdTipoSala = u.IdTipoSala,
+                    IdSede = u.IdSede,
+                    Bloqueado = u.Bloqueado,
+                })
+                .FirstOrDefaultAsync();
+
+            return salas;
+        }
+
+
+        public async Task AddAsync(SalasDTO SalaDTO)
+        {
+            var salasEntidad = new Salas
+            {
+                    IdSala = SalaDTO.IdSala,
+                    Nombre = SalaDTO.Nombre,
+                    URL_Imagen = SalaDTO.URL_Imagen,
+                    Capacidad = SalaDTO.Capacidad,
+                    IdTipoSala = SalaDTO.IdTipoSala,
+                    IdSede = SalaDTO.IdSede,
+                    Bloqueado = SalaDTO.Bloqueado,
+            };
+
+            await _context.Salas.AddAsync(salasEntidad);
+            await _context.SaveChangesAsync();
+        }
+
+
+
+        public async Task UpdateAsync(Salas sala)
+        {
+            _context.Salas.Update(sala); // igual que el add pero haciendo un update
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var sala = await GetByIdAsync(id); // primero busca el id del usuario
+            if (sala != null)
+            {// si existe, pasa a ejecutar
+
+                _context.Salas.Remove(sala); // metodo de EF para eliminar registros (los prepara para eliminacion)
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}
+
+
+
+
+/*
 namespace CoWorking.Repositories
 {
     public class SalasRepository : ISalasRepository
@@ -217,7 +315,7 @@ public async Task AddAsync(Salas sala)
         int capacidadAsientos = 0;
 
         string queryTipoSala = @"
-        SELECT NumeroMesas, CapacidadAsientos FROM TiposSalas WHERE IdTipoSala = @IdTipoSala";
+        SELECT NumeroMesas, CapacidadAsientos FROM Salas WHERE IdTipoSala = @IdTipoSala";
 
         using (var command = new SqlCommand(queryTipoSala, connection))
         {
@@ -362,14 +460,14 @@ public async Task AddAsync(Salas sala)
                 // vborrar el tipo de sala, pero solo si no se usa en otra sala comprobandolo para evitar posibles errores, ya que al principio las posibles salas serán predefinidas
                 if (idTipoSala.HasValue)
                 {
-                    string comprobarUsoTiposSalas = "SELECT COUNT(*) FROM Salas WHERE IdTipoSala = @IdTipoSala";
-                    using (var command = new SqlCommand(comprobarUsoTiposSalas, connection))
+                    string comprobarUsoSalas = "SELECT COUNT(*) FROM Salas WHERE IdTipoSala = @IdTipoSala";
+                    using (var command = new SqlCommand(comprobarUsoSalas, connection))
                     {
                         command.Parameters.AddWithValue("@IdTipoSala", idTipoSala.Value);
-                        int conteoTiposSalas = (int)await command.ExecuteScalarAsync();
-                        if (conteoTiposSalas == 0) // si no se encuentran resultados, significa que no se esta usando por otros datos y por tanto se puede eliminar sin problemas
+                        int conteoSalas = (int)await command.ExecuteScalarAsync();
+                        if (conteoSalas == 0) // si no se encuentran resultados, significa que no se esta usando por otros datos y por tanto se puede eliminar sin problemas
                         {
-                            string deleteTipoSala = "DELETE FROM TiposSalas WHERE IdTipoSala = @IdTipoSala";
+                            string deleteTipoSala = "DELETE FROM Salas WHERE IdTipoSala = @IdTipoSala";
                             using (var ejecutarBorradoTipoSala = new SqlCommand(deleteTipoSala, connection))
                             {
                                 ejecutarBorradoTipoSala.Parameters.AddWithValue("@IdTipoSala", idTipoSala.Value);
@@ -382,3 +480,4 @@ public async Task AddAsync(Salas sala)
         }
     }
 }
+*/

@@ -3,6 +3,19 @@ using CoWorking.DTO;
 
 namespace CoWorking.Repositories
 {
+
+
+      public interface ISalasRepository
+    {
+        Task<List<Salas>> GetAllAsync();
+        Task<Salas?> GetByIdAsync(int id);
+        Task AddAsync(SalasDTO Sala);
+        Task UpdateAsync(Salas Sala);
+        Task DeleteAsync(int id);
+
+    }
+
+  /*
     public interface ISalasRepository
     {
         Task<List<SalasDetallesDTO>> GetAllAsync();
@@ -13,4 +26,6 @@ namespace CoWorking.Repositories
         Task DeleteAsync(int id);
 
     }
+
+  */  
 }
