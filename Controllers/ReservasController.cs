@@ -45,23 +45,29 @@ namespace CoWorking.Controllers
             await _serviceReservas.CreateReservaAsync(reservas);
             return CreatedAtAction(nameof(CreateReserva), new { id = reservas.IdReserva }, reservas);
         }
+
+
+ [HttpPut("{id}")]
+public async Task<IActionResult> UpdateReserva(int id, ReservasUpdateDTO updatedReservas)
+{
+    
+
+    try
+    {
+        await _serviceReservas.UpdateAsync(updatedReservas);
+        return NoContent();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error al actualizar la reserva: {ex.Message}");
+    }
+}
+
 /*
-
-     /*   [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateReserva(int id, Reservas updatedReservas)
-        {
-            var existingReserva = await _serviceReservas.GetByIdAsync(id);
-            if (existingReserva == null)
-            {
-                return NotFound();
-            }
-            existingReserva.Descripcion = updatedReservas.Descripcion;
-
-
-            await _serviceReservas.UpdateAsync(existingReserva);
-            return NoContent();
-        }
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {

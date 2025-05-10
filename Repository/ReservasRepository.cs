@@ -25,7 +25,7 @@ public async Task<List<ReservasDTO>> GetAllAsync()
             IdReserva = r.IdReserva,
             Fecha = r.Fecha,
             ReservaDescripcion = r.Descripcion,
-            PrecioTotal = Convert.ToDouble(r.PrecioTotal), // de decimal a double
+            PrecioTotal = r.PrecioTotal, 
             UsuarioId = r.Usuario.IdUsuario,
             UsuarioNombre = r.Usuario.Nombre,
             UsuarioEmail = r.Usuario.Email
@@ -45,7 +45,7 @@ public async Task<ReservasDTO?> GetByIdAsync(int id)
             IdReserva = r.IdReserva,
             Fecha = r.Fecha,
             ReservaDescripcion = r.Descripcion,
-            PrecioTotal = Convert.ToDouble(r.PrecioTotal), // de decimal a double
+            PrecioTotal = r.PrecioTotal,
             UsuarioId = r.Usuario.IdUsuario,
             UsuarioNombre = r.Usuario.Nombre,
             UsuarioEmail = r.Usuario.Email
@@ -60,6 +60,25 @@ public async Task<Reservas> CreateReservaAsync(Reservas reserva)
     await _context.SaveChangesAsync();
     return reserva;
 }
+
+
+public async Task UpdateAsync(ReservasUpdateDTO reservas)
+{
+    var reservaExistente = await _context.Reservas
+        .FirstOrDefaultAsync(r => r.IdReserva == reservas.IdReserva);
+
+    if (reservaExistente == null)
+        throw new InvalidOperationException("Reserva no encontrada");
+
+    reservaExistente.Fecha = reservas.Fecha;
+    reservaExistente.PrecioTotal = reservas.PrecioTotal;
+    reservaExistente.Descripcion = reservas.Descripcion;
+    reservaExistente.IdUsuario = reservas.IdUsuario;
+
+    await _context.SaveChangesAsync();
+}
+
+
 /*
 
         public async Task DeleteAsync(int id)

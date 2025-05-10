@@ -15,14 +15,15 @@ namespace Models
 
         public string Descripcion { get; set; }
 
-        public double PrecioTotal { get; set; }
+        public decimal PrecioTotal { get; set; }
 
         [ForeignKey("IdUsuario")]
         public Usuarios Usuario { get; set; }
+        public List<Lineas> Lineas { get; set; } = new();
 
         public Reservas() { }
 
-        public Reservas(int idReserva, int idUsuario, DateTime fecha, string descripcion, double precioTotal)
+        public Reservas(int idReserva, int idUsuario, DateTime fecha, string descripcion, decimal precioTotal)
         {
             IdReserva = idReserva;
             IdUsuario = idUsuario;

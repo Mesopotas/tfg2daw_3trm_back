@@ -3,7 +3,7 @@ public class ReservasDTO
     public int IdReserva { get; set; }
     public DateTime Fecha { get; set; }
     public string ReservaDescripcion { get; set; }
-    public double PrecioTotal { get; set; }    
+    public decimal PrecioTotal { get; set; }    
     // user info
     public int UsuarioId { get; set; } 
 
@@ -27,4 +27,13 @@ public class DetallesReservaClienteDTO
     public string NombreSala { get; set; }
     public string TipoSala { get; set; }
     public decimal PrecioPuesto { get; set; }
+}
+
+public class ReservasUpdateDTO
+{
+    public int IdReserva { get; set; }
+    public int IdUsuario { get; set; }
+    public DateTime Fecha { get; set; }
+    public string Descripcion { get; set; }
+    public decimal PrecioTotal { get; set; }
 }
