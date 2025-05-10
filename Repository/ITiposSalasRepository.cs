@@ -7,7 +7,7 @@ namespace CoWorking.Repositories
     {
         Task<List<TiposSalas>> GetAllAsync();
         Task<TiposSalas?> GetByIdAsync(int id);
-        Task AddAsync(TiposSalas tipoSala);
+        Task AddAsync(TiposSalasDTO tipoSala);
         Task UpdateAsync(TiposSalas tipoSala);
         Task DeleteAsync(int id);
 

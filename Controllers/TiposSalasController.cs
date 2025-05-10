@@ -40,7 +40,7 @@ namespace CoWorking.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<TiposSalas>> CreateTipoSala(TiposSalas TiposSalas)
+        public async Task<ActionResult<TiposSalasDTO>> CreateTipoSala(TiposSalasDTO TiposSalas)
         {
             await _serviceTiposSalas.AddAsync(TiposSalas);
             return CreatedAtAction(nameof(CreateTipoSala), new { id = TiposSalas.IdTipoSala }, TiposSalas);

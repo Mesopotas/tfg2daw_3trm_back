@@ -28,7 +28,7 @@ namespace CoWorking.Service
             return await _TiposSalasRepository.GetByIdAsync(id);
         }
 
-        public async Task AddAsync(TiposSalas tipoSala)
+        public async Task AddAsync(TiposSalasDTO tipoSala)
         {
             await _TiposSalasRepository.AddAsync(tipoSala);
         }

@@ -20,7 +20,8 @@ namespace Models
 
         public int IdTipoPuestoTrabajo { get; set; }
 
-
+        [ForeignKey("IdTipoPuestoTrabajo")]
+        public TiposPuestosTrabajo TipoPuestoTrabajo { get; set; }
 
         public TiposSalas() { }
 
