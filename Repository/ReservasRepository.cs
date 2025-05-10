@@ -35,54 +35,27 @@ public async Task<List<ReservasDTO>> GetAllAsync()
     return reservas;
 }
 
-/*
-        public async Task<ReservasDTO> GetByIdAsync(int id)
+public async Task<ReservasDTO?> GetByIdAsync(int id)
+{
+    var reserva = await _context.Reservas
+        .Include(r => r.Usuario)
+        .Where(r => r.IdReserva == id)
+        .Select(r => new ReservasDTO
         {
-            ReservasDTO reserva = null;
+            IdReserva = r.IdReserva,
+            Fecha = r.Fecha,
+            ReservaDescripcion = r.Descripcion,
+            PrecioTotal = Convert.ToDouble(r.PrecioTotal), // de decimal a double
+            UsuarioId = r.Usuario.IdUsuario,
+            UsuarioNombre = r.Usuario.Nombre,
+            UsuarioEmail = r.Usuario.Email
+        })
+        .FirstOrDefaultAsync();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-                // ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN / 
+    return reserva;
+}
 
-                string query = @"
-            SELECT  
-                reserva.IdReserva, reserva.Fecha, reserva.Descripcion, reserva.PrecioTotal,
-                usuario.IdUsuario, usuario.Nombre , usuario.Email,
-               puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
-                puesto.URL_Imagen,
-            FROM Reservas reserva
-            INNER JOIN Usuarios usuario ON reserva.IdUsuario = usuario.IdUsuario
-            INNER JOIN Lineas linea ON reserva.IdReserva = linea.IdReserva
-            WHERE reserva.IdReserva = @Id";
-
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            reserva = new ReservasDTO
-                            {
-                                IdReserva = reader.GetInt32(0),
-                                Fecha = reader.GetDateTime(1),
-                                ReservaDescripcion = reader.GetString(2),
-                                PrecioTotal = (double)reader.GetDecimal(3),
-                                UsuarioId = reader.GetInt32(4),
-                                UsuarioNombre = reader.GetString(5),
-                                UsuarioEmail = reader.GetString(6),
-                            };
-
-
-                        }
-                    }
-                }
-            }
-            return reserva;
-        }
-
+/*
         public async Task CreateReservaAsync(Reservas reserva)
         {
             using (var connection = new SqlConnection(_connectionString))

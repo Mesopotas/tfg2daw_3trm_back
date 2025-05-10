@@ -26,7 +26,7 @@ namespace CoWorking.Controllers
             return Ok(reservas);
         }
 
-/*
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservas>> GetReserva(int id)
         {
@@ -38,7 +38,7 @@ namespace CoWorking.Controllers
             return Ok(detalleReservas);
         }
 
-
+/*
         [HttpPost]
         public async Task<ActionResult<ReservasDTO>> CreateReserva(Reservas reservas)
         {

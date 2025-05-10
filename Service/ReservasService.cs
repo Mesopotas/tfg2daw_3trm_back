@@ -22,12 +22,12 @@ namespace CoWorking.Service
         {
             return await _reservasRepository.GetAllAsync();
         }
-/*
+
         public async Task<ReservasDTO> GetByIdAsync(int id)
         {
             return await _reservasRepository.GetByIdAsync(id);
         }
-
+/*
         public async Task CreateReservaAsync(Reservas reserva)
         {
             await _reservasRepository.CreateReservaAsync(reserva);
