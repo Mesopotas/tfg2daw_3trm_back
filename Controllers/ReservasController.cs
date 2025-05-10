@@ -26,7 +26,7 @@ namespace CoWorking.Controllers
             return Ok(reservas);
         }
 
-
+/*
         [HttpGet("{id}")]
         public async Task<ActionResult<Reservas>> GetReserva(int id)
         {
@@ -61,7 +61,7 @@ namespace CoWorking.Controllers
             await _serviceReservas.UpdateAsync(existingReserva);
             return NoContent();
         }
-*/
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
@@ -84,6 +84,6 @@ public async Task<ActionResult<ReservasClienteInfoDTO>> GetDetallesPedido(int id
     }
     return Ok(reservaDetalles);
 }
-
+*/
     }
 }

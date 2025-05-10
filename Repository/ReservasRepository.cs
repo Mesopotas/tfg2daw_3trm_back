@@ -1,62 +1,41 @@
 using Microsoft.Data.SqlClient;
 using Models;
 using CoWorking.DTO;
+using CoWorking.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace CoWorking.Repositories
 {
     public class ReservasRepository : IReservasRepository
     {
-        private readonly string _connectionString;
+        private readonly CoworkingDBContext _context;
 
-        public ReservasRepository(string connectionString)
+        public ReservasRepository(CoworkingDBContext context)
         {
-            _connectionString = connectionString;
+            _context = context;
         }
 
-        public async Task<List<ReservasDTO>> GetAllAsync()
+public async Task<List<ReservasDTO>> GetAllAsync()
+{
+    var reservas = await _context.Reservas
+        .Include(r => r.Usuario)
+        .Select(r => new ReservasDTO
         {
-            var reservas = new List<ReservasDTO>();
+            IdReserva = r.IdReserva,
+            Fecha = r.Fecha,
+            ReservaDescripcion = r.Descripcion,
+            PrecioTotal = Convert.ToDouble(r.PrecioTotal), // de decimal a double
+            UsuarioId = r.Usuario.IdUsuario,
+            UsuarioNombre = r.Usuario.Nombre,
+            UsuarioEmail = r.Usuario.Email
+        })
+        .ToListAsync();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
-                string query = @"
-                 SELECT  
-                reserva.IdReserva, reserva.Fecha, reserva.Descripcion, reserva.PrecioTotal,
-                usuario.IdUsuario, usuario.Nombre , usuario.Email,
-                 puesto.IdPuestoTrabajo, puesto.CodigoMesa, 
-                puesto.URL_Imagen, 
-                FROM Reservas reserva
-                INNER JOIN Usuarios usuario ON reserva.IdUsuario = usuario.IdUsuario
-                INNER JOIN Lineas linea ON reserva.IdReserva = linea.IdReserva";
+    return reservas;
+}
 
-
-                using (var command = new SqlCommand(query, connection))
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        var reserva = new ReservasDTO
-                        {
-                            IdReserva = reader.GetInt32(0),
-                            Fecha = reader.GetDateTime(1),
-                            ReservaDescripcion = reader.GetString(2),
-                            PrecioTotal = (double)reader.GetDecimal(3),
-                            UsuarioId = reader.GetInt32(4),
-                            UsuarioNombre = reader.GetString(5),
-                            UsuarioEmail = reader.GetString(6),
-                            DetallesReservas = new List<DetalleReservaDTO>()
-                        };
-
-
-                        reservas.Add(reserva);
-                    }
-                }
-            }
-            return reservas;
-        }
-
+/*
         public async Task<ReservasDTO> GetByIdAsync(int id)
         {
             ReservasDTO reserva = null;
@@ -64,7 +43,7 @@ namespace CoWorking.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
+                // ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN / 
 
                 string query = @"
             SELECT  
@@ -183,7 +162,7 @@ namespace CoWorking.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                /* ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN */ 
+                / ELIMINADO DETALLES RESERVA , REESTRUCTURAR JOIN / 
 
                 string query = @"SELECT r.PrecioTotal, u.Nombre AS UsuarioNombre, u.Apellidos AS UsuarioApellidos, 
        u.Email AS UsuarioEmail, pt.NumeroAsiento, s.Nombre AS NombreSala, 
@@ -224,6 +203,7 @@ WHERE r.IdUsuario = u.IdUsuario
 
             return reserva;
         }
-
+        */
     }
 }
+

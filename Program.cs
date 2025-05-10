@@ -55,14 +55,14 @@ builder.Services.AddScoped<ISedesRepository, SedesRepository>();
 
 builder.Services.AddScoped< ITramosHorariosRepository, TramosHorariosRepository>();
 
+builder.Services.AddScoped< IReservasRepository, ReservasRepository>();
+
+
 builder.Services.AddScoped<ITipoSalasRepository, TipoSalasRepository>(provider =>
     new TipoSalasRepository(connectionString));
 
 builder.Services.AddScoped<ISalasRepository, SalasRepository>(provider =>
     new SalasRepository(connectionString));   
-
-builder.Services.AddScoped<IReservasRepository, ReservasRepository>(provider =>
-    new ReservasRepository(connectionString));  
 
 builder.Services.AddScoped<ILineasRepository, LineasRepository>(provider =>
     new LineasRepository(connectionString));        

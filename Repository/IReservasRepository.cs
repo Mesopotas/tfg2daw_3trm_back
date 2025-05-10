@@ -6,12 +6,12 @@ namespace CoWorking.Repositories
     public interface IReservasRepository
     {
         Task<List<ReservasDTO>> GetAllAsync();
-        Task<ReservasDTO> GetByIdAsync(int id);
+    /*    Task<ReservasDTO> GetByIdAsync(int id);
         Task CreateReservaAsync(Reservas reserva);
        // Task UpdateAsync(Reservas reservas);
         Task DeleteAsync(int id);
 
     Task<ReservasClienteInfoDTO> GetDetallesPedidoAsync(int idReserva);
-
+*/
     }
 }
