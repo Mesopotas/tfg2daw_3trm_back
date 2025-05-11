@@ -18,6 +18,8 @@ namespace CoWorking.Data
         public DbSet<TiposPuestosTrabajo> TiposPuestosTrabajo { get; set; }
         public DbSet<TiposSalas> TiposSalas { get; set; }
         public DbSet<Salas> Salas{ get; set; }
+        
+        public DbSet<ZonasTrabajo> ZonasTrabajo{ get; set; }
 
     }
 }
