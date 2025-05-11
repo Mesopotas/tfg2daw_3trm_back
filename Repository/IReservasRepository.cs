@@ -13,7 +13,7 @@ namespace CoWorking.Repositories
 
         Task UpdateAsync(ReservasUpdateDTO reservas);
         
-    //    Task DeleteAsync(int id);
+       Task DeleteAsync(int id);
 
     Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario);
 

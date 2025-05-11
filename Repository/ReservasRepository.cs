@@ -80,25 +80,30 @@ public async Task UpdateAsync(ReservasUpdateDTO reservas)
 }
 
 
-/*
 
-        public async Task DeleteAsync(int id)
-        {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
 
-                string query = "DELETE FROM Reservas WHERE IdReserva = @IdReserva";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@IdReserva", id);
+public async Task DeleteAsync(int id)
+{
+    // Buscar la reserva por su ID
+    var reserva = await _context.Reservas.FirstOrDefaultAsync(r => r.IdReserva == id);
 
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
-        }
+    if (reserva != null)// si existe, procede a eliminar
+    {
+        // primero elimina las linea asociadas para evitar que no se pueda por la FK
+        var lineas = await _context.Lineas
+            .Where(l => l.IdReserva == id)
+            .ToListAsync();
 
-        */
+        _context.Lineas.RemoveRange(lineas);
+
+        _context.Reservas.Remove(reserva);
+        await _context.SaveChangesAsync();
+    }
+}
+
+
+
+        
  public async Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario)
     {
         // obtener todas las reservas

@@ -68,7 +68,7 @@ public async Task<IActionResult> UpdateReserva(int id, ReservasUpdateDTO updated
     }
 }
 
-/*
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
@@ -80,7 +80,7 @@ public async Task<IActionResult> UpdateReserva(int id, ReservasUpdateDTO updated
             await _serviceReservas.DeleteAsync(id);
             return NoContent();
         }
-        */
+        
 [HttpGet("reservasdeusuario/{idUsuario}/")]
 public async Task<ActionResult<GetReservasClienteDTO>> GetDetallesPedido(int idUsuario)
 {

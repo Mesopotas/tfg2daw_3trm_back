@@ -38,7 +38,7 @@ namespace CoWorking.Service
         {
             await _reservasRepository.UpdateAsync(reserva);
         }
-/*
+
         public async Task DeleteAsync(int id)
         {
            var reserva = await _reservasRepository.GetByIdAsync(id);
@@ -49,7 +49,7 @@ namespace CoWorking.Service
            await _reservasRepository.DeleteAsync(id);
            //return NoContent();
         }
-*/
+
 
         public async Task<List<GetReservasClienteDTO>> GetReservasUsuario(int idUsuario)
 {
