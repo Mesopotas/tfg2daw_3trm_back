@@ -19,7 +19,7 @@ namespace Models
 
         [ForeignKey("IdUsuario")]
         public Usuarios Usuario { get; set; }
-        public List<Lineas> Lineas { get; set; } = new();
+        public List<Lineas> Lineas { get; set; }
 
         public Reservas() { }
 

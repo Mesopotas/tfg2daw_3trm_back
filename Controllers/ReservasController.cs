@@ -3,6 +3,7 @@ using CoWorking.Repositories;
 using CoWorking.Service;
 using CoWorking.DTO;
 using Models;
+using Models.DTOs;
 
 namespace CoWorking.Controllers
 {
@@ -79,17 +80,17 @@ public async Task<IActionResult> UpdateReserva(int id, ReservasUpdateDTO updated
             await _serviceReservas.DeleteAsync(id);
             return NoContent();
         }
-        // este endpoint habrá q cambiarlo, ya no tomará 2 parametros, sino uno solo, el idReserva
-[HttpGet("detalles/{idReserva}/")]
-public async Task<ActionResult<ReservasClienteInfoDTO>> GetDetallesPedido(int idReserva)
+        */
+[HttpGet("reservasdeusuario/{idUsuario}/")]
+public async Task<ActionResult<GetReservasClienteDTO>> GetDetallesPedido(int idUsuario)
 {
-    var reservaDetalles = await _serviceReservas.GetDetallesPedido(idReserva);
+    var reservaDetalles = await _serviceReservas.GetReservasUsuario(idUsuario);
     if (reservaDetalles == null)
     {
         return NotFound();
     }
     return Ok(reservaDetalles);
 }
-*/
+
     }
 }
