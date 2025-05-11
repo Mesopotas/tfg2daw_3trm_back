@@ -20,6 +20,10 @@ namespace CoWorking.Data
         public DbSet<Salas> Salas{ get; set; }
         
         public DbSet<ZonasTrabajo> ZonasTrabajo{ get; set; }
+        public DbSet<Reservas> Reservas { get; set; }
+        public DbSet<Lineas> Lineas { get; set; }
+
+        public DbSet<SalaConCaracteristicas> SalaConCaracteristicas { get; set; }
 
     }
 }

@@ -32,7 +32,7 @@ namespace CoWorking.Repositories
                             {
                                 IdLinea = reader.GetInt32(0),
                                 IdReserva = reader.GetInt32(1),
-                                Precio = (double)reader.GetDecimal(2)
+                                Precio = reader.GetDecimal(2)
                             };
 
                             lineas.Add(linea);
@@ -64,7 +64,7 @@ namespace CoWorking.Repositories
                             {
                                 IdLinea = reader.GetInt32(0),
                                 IdReserva = reader.GetInt32(1),
-                                Precio = (double)reader.GetDecimal(2)
+                                Precio = reader.GetDecimal(2)
                             };
                         }
                     }
@@ -86,7 +86,7 @@ public async Task AddAsync(Lineas linea)
             object result = await commandGet.ExecuteScalarAsync();
             if (result != null && result != DBNull.Value)
             {
-                linea.Precio = Convert.ToDouble(result);
+        linea.Precio = (decimal)result;
             }
         }
 

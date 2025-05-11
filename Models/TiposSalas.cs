@@ -18,9 +18,9 @@ namespace Models
 
         public string? Descripcion { get; set; }
 
+        [ForeignKey("IdTipoPuestoTrabajo")]
         public int IdTipoPuestoTrabajo { get; set; }
 
-        [ForeignKey("IdTipoPuestoTrabajo")]
         public TiposPuestosTrabajo TipoPuestoTrabajo { get; set; }
 
         public TiposSalas() { }

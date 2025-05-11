@@ -3,6 +3,7 @@ using CoWorking.Repositories;
 using CoWorking.Service;
 using CoWorking.DTO;
 using Models;
+using Models.DTOs;
 
 namespace CoWorking.Controllers
 {
@@ -47,21 +48,27 @@ namespace CoWorking.Controllers
         }
 
 
-     /*   [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateReserva(int id, Reservas updatedReservas)
-        {
-            var existingReserva = await _serviceReservas.GetByIdAsync(id);
-            if (existingReserva == null)
-            {
-                return NotFound();
-            }
-            existingReserva.Descripcion = updatedReservas.Descripcion;
+ [HttpPut("{id}")]
+public async Task<IActionResult> UpdateReserva(int id, ReservasUpdateDTO updatedReservas)
+{
+    
+
+    try
+    {
+        await _serviceReservas.UpdateAsync(updatedReservas);
+        return NoContent();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return NotFound(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error al actualizar la reserva: {ex.Message}");
+    }
+}
 
 
-            await _serviceReservas.UpdateAsync(existingReserva);
-            return NoContent();
-        }
-*/
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
@@ -73,11 +80,11 @@ namespace CoWorking.Controllers
             await _serviceReservas.DeleteAsync(id);
             return NoContent();
         }
-        // este endpoint habrá q cambiarlo, ya no tomará 2 parametros, sino uno solo, el idReserva
-[HttpGet("detalles/{idReserva}/")]
-public async Task<ActionResult<ReservasClienteInfoDTO>> GetDetallesPedido(int idReserva)
+        
+[HttpGet("reservasdeusuario/{idUsuario}/")]
+public async Task<ActionResult<GetReservasClienteDTO>> GetDetallesPedido(int idUsuario)
 {
-    var reservaDetalles = await _serviceReservas.GetDetallesPedido(idReserva);
+    var reservaDetalles = await _serviceReservas.GetReservasUsuario(idUsuario);
     if (reservaDetalles == null)
     {
         return NotFound();

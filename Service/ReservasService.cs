@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CoWorking.Repositories;
 using CoWorking.DTO;
 using CoWorking.Service;
+using Models.DTOs;
 
 namespace CoWorking.Service
 {
@@ -33,10 +34,10 @@ namespace CoWorking.Service
             await _reservasRepository.CreateReservaAsync(reserva);
         }
 
-     /*   public async Task UpdateAsync(Reservas reserva)
+        public async Task UpdateAsync(ReservasUpdateDTO reserva)
         {
             await _reservasRepository.UpdateAsync(reserva);
-        }*/
+        }
 
         public async Task DeleteAsync(int id)
         {
@@ -48,9 +49,11 @@ namespace CoWorking.Service
            await _reservasRepository.DeleteAsync(id);
            //return NoContent();
         }
-        public async Task<ReservasClienteInfoDTO> GetDetallesPedido(int idReserva)
+
+
+        public async Task<List<GetReservasClienteDTO>> GetReservasUsuario(int idUsuario)
 {
-    return await _reservasRepository.GetDetallesPedidoAsync(idReserva);
+    return await _reservasRepository.GetReservasUsuarioAsync(idUsuario);
 }
 
 
