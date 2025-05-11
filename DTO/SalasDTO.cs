@@ -14,12 +14,6 @@ namespace Models
         // no es necesario cargar los todos los asientos ni las zonas en algunos endpoints que lo haran mas lento
     }
 
-    public class ZonasTrabajoDTO
-    {
-        public int IdZonaTrabajo { get; set; }
-        public string Descripcion { get; set; }
-    }
-
     public class PuestosTrabajoDTO
     {
         public int IdPuestoTrabajo { get; set; }
