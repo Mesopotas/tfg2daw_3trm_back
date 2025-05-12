@@ -88,7 +88,8 @@ builder.Services.AddScoped<ICaracteristicasSalaService, CaracteristicasSalaServi
 builder.Services.AddScoped<IZonasTrabajoService, ZonasTrabajoService>();
 builder.Services.AddScoped<IReservasRepository, ReservasRepository>();
 
-
+builder.Services.AddScoped<IPuestosTrabajoService, PuestosTrabajoService>(); 
+builder.Services.AddScoped<IPuestosTrabajoRepository, PuestosTrabajoRepository>(); 
 
 
 // Configuración de controladores
