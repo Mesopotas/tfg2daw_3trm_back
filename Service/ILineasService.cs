@@ -5,9 +5,9 @@ namespace CoWorking.Service
 {
     public interface ILineasService
     {
-        Task<List<Lineas>> GetAllAsync();
-        Task<Lineas?> GetByIdAsync(int id);
-        Task AddAsync(Lineas linea);
+        Task<List<LineasDTO>> GetAllAsync();
+        Task<LineasDTO?> GetByIdAsync(int id);
+        Task AddAsync(LineasDTO linea);
         Task DeleteAsync(int id);
     }
 }

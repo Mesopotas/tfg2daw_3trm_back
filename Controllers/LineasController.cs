@@ -40,7 +40,7 @@ namespace CoWorking.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<Lineas>> CreateLinea(Lineas lineas)
+        public async Task<ActionResult<LineasDTO>> CreateLinea(LineasDTO lineas)
         {
             await _serviceLineas.AddAsync(lineas);
             return CreatedAtAction(nameof(CreateLinea), new { id = lineas.IdLinea }, lineas);

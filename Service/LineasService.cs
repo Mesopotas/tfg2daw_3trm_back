@@ -18,17 +18,17 @@ namespace CoWorking.Service
             _lineasRepository = lineasRepository;
         }
 
-        public async Task<List<Lineas>> GetAllAsync()
+        public async Task<List<LineasDTO>> GetAllAsync()
         {
             return await _lineasRepository.GetAllAsync();
         }
 
-        public async Task<Lineas?> GetByIdAsync(int id)
+        public async Task<LineasDTO?> GetByIdAsync(int id)
         {
             return await _lineasRepository.GetByIdAsync(id);
         }
 
-        public async Task AddAsync(Lineas linea)
+        public async Task AddAsync(LineasDTO linea)
         {
             await _lineasRepository.AddAsync(linea);
         }

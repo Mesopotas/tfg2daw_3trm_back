@@ -59,6 +59,8 @@ builder.Services.AddScoped<ITramosHorariosRepository, TramosHorariosRepository>(
 
 
 builder.Services.AddScoped<ITramosHorariosRepository, TramosHorariosRepository>();
+builder.Services.AddScoped<ILineasRepository, LineasRepository>();
+
 
 builder.Services.AddScoped<ITiposSalasRepository, TiposSalasRepository>();
 
@@ -66,9 +68,7 @@ builder.Services.AddScoped<ISalasRepository, SalasRepository>();
 
 builder.Services.AddScoped<IZonasTrabajoRepository, ZonasTrabajoRepository>();   
 
-
-builder.Services.AddScoped<ILineasRepository, LineasRepository>(provider =>
-    new LineasRepository(connectionString));        
+    
 
 builder.Services.AddScoped<IDisponibilidadesRepository, DisponibilidadesRepository>();
 builder.Services.AddScoped<DisponibilidadesService>();
