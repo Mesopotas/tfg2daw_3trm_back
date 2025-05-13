@@ -13,10 +13,13 @@ public class Sedes{
     public string  Direccion {get; set;}
     public string  CodigoPostal {get; set;}
     public string  Planta  {get; set;}
-    public string  Observaciones  {get; set;}
+   public string URL_Imagen { get; set; } 
+    public string Latitud { get; set; } 
+    public string Longitud { get; set; }
+    public string Observaciones { get; set; }
     public Sedes(){} // CONTRUCTOR VACIO INYECCION DE DEPENDENCIAS
 
-    public Sedes(int idSede, string pais, string ciudad, string direccion, string codigoPostal, string planta, string observaciones){
+    public Sedes(int idSede, string pais, string ciudad, string direccion, string codigoPostal, string planta, string url_Imagen, string latitud, string longitud, string observaciones){
 
         IdSede = idSede;
         Pais = pais;
@@ -24,6 +27,9 @@ public class Sedes{
         Direccion = direccion;
         CodigoPostal = codigoPostal;
         Planta = planta;
+        URL_Imagen = url_Imagen;
+        Latitud = latitud;
+        Longitud = longitud;
         Observaciones = observaciones;
     }
 
