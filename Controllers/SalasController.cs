@@ -83,10 +83,20 @@ namespace CoWorking.Controllers
             return NoContent();
         }
 
+    
+        //  EJEMPLO https://localhost:7179/api/Salas/search?idsede=4
+       [HttpGet("search")]
+        public async Task<ActionResult<List<Salas>>> GetSalasBySede([FromQuery] int idsede)
+        {
+            var salas = await _serviceSalas.GetByIdSedeAsync(idsede);
+            if (salas == null)
+            {
+                return NotFound("No se encontraron salas para la sede con ese ID");
+            }
+            return Ok(salas);
+        }
+
     }
-
-
-
 /*
     public class SalasController : ControllerBase
     {

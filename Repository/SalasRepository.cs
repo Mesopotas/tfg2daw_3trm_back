@@ -19,84 +19,103 @@ namespace CoWorking.Repositories
         }
 
 
-        public async Task<List<Salas>> GetAllAsync()
-        {
-            var salas = await _context.Salas
-
-                .Select(u => new Salas
-                {
-                    IdSala = u.IdSala,
-                    Nombre = u.Nombre,
-                    URL_Imagen = u.URL_Imagen,
-                    Capacidad = u.Capacidad,
-                    IdTipoSala = u.IdTipoSala,
-                    IdSede = u.IdSede,
-                    Bloqueado = u.Bloqueado,
-                })
-                .ToListAsync();
-
-            return salas;
-        }
-
-        public async Task<Salas?> GetByIdAsync(int id)
-        {
-            var salas = await _context.Salas
-                .Where(u => u.IdSala == id)
-                .Select(u => new Salas
-                {
-                    IdSala = u.IdSala,
-                    Nombre = u.Nombre,
-                    URL_Imagen = u.URL_Imagen,
-                    Capacidad = u.Capacidad,
-                    IdTipoSala = u.IdTipoSala,
-                    IdSede = u.IdSede,
-                    Bloqueado = u.Bloqueado,
-                })
-                .FirstOrDefaultAsync();
-
-            return salas;
-        }
-
-
-        public async Task AddAsync(SalasDTO SalaDTO)
-        {
-            var salasEntidad = new Salas
+    public async Task<List<SalasDTO>> GetAllAsync()
+    {
+        return await _context.Salas
+            .Select(u => new SalasDTO
             {
-                    IdSala = SalaDTO.IdSala,
-                    Nombre = SalaDTO.Nombre,
-                    URL_Imagen = SalaDTO.URL_Imagen,
-                    Capacidad = SalaDTO.Capacidad,
-                    IdTipoSala = SalaDTO.IdTipoSala,
-                    IdSede = SalaDTO.IdSede,
-                    Bloqueado = SalaDTO.Bloqueado,
-            };
+                IdSala = u.IdSala,
+                Nombre = u.Nombre,
+                URL_Imagen = u.URL_Imagen,
+                Capacidad = u.Capacidad,
+                IdTipoSala = u.IdTipoSala,
+                IdSede = u.IdSede,
+                Bloqueado = u.Bloqueado,
+            })
+            .ToListAsync();
+    }
 
-            await _context.Salas.AddAsync(salasEntidad);
+    public async Task<SalasDTO?> GetByIdAsync(int id)
+    {
+        return await _context.Salas
+            .Where(u => u.IdSala == id)
+            .Select(u => new SalasDTO
+            {
+                IdSala = u.IdSala,
+                Nombre = u.Nombre,
+                URL_Imagen = u.URL_Imagen,
+                Capacidad = u.Capacidad,
+                IdTipoSala = u.IdTipoSala,
+                IdSede = u.IdSede,
+                Bloqueado = u.Bloqueado,
+            })
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task AddAsync(SalasDTO sala)
+    {
+        var entidad = new Salas
+        {
+            IdSala = sala.IdSala,
+            Nombre = sala.Nombre,
+            URL_Imagen = sala.URL_Imagen,
+            Capacidad = sala.Capacidad,
+            IdTipoSala = sala.IdTipoSala,
+            IdSede = sala.IdSede,
+            Bloqueado = sala.Bloqueado,
+        };
+
+        await _context.Salas.AddAsync(entidad);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
+    {
+        return await _context.Salas
+            .Where(s => s.IdSede == idSede)
+            .Select(s => new SalasDTO
+            {
+                IdSala = s.IdSala,
+                Nombre = s.Nombre,
+                URL_Imagen = s.URL_Imagen,
+                Capacidad = s.Capacidad,
+                IdTipoSala = s.IdTipoSala,
+                IdSede = s.IdSede,
+                Bloqueado = s.Bloqueado
+            })
+            .ToListAsync();
+    }
+
+
+    public async Task UpdateAsync(SalasDTO sala)
+    {
+        var entidad = await _context.Salas.FindAsync(sala.IdSala);
+        if (entidad != null)
+        {
+            entidad.Nombre = sala.Nombre;
+            entidad.URL_Imagen = sala.URL_Imagen;
+            entidad.Capacidad = sala.Capacidad;
+            entidad.IdTipoSala = sala.IdTipoSala;
+            entidad.IdSede = sala.IdSede;
+            entidad.Bloqueado = sala.Bloqueado;
+
+            _context.Salas.Update(entidad);
             await _context.SaveChangesAsync();
         }
+    }
 
-
-
-        public async Task UpdateAsync(Salas sala)
+    public async Task DeleteAsync(int id)
+    {
+        var entidad = await _context.Salas.FindAsync(id);
+        if (entidad != null)
         {
-            _context.Salas.Update(sala); // igual que el add pero haciendo un update
+            _context.Salas.Remove(entidad);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var sala = await GetByIdAsync(id); // primero busca el id del usuario
-            if (sala != null)
-            {// si existe, pasa a ejecutar
-
-                _context.Salas.Remove(sala); // metodo de EF para eliminar registros (los prepara para eliminacion)
-                await _context.SaveChangesAsync();
-            }
         }
     }
 }
 
-
+}
 
 
 /*

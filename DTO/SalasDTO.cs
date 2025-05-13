@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-
-namespace Models
-{
     public class SalasDTO
     {
         public int IdSala { get; set; }
@@ -11,8 +7,4 @@ namespace Models
         public int IdTipoSala { get; set; }
         public int IdSede { get; set; }
         public bool Bloqueado { get; set; }
-        // no es necesario cargar los todos los asientos ni las zonas en algunos endpoints que lo haran mas lento
     }
-
-
-}
