@@ -28,7 +28,7 @@ namespace CoWorking.Repositories
                     Nombre = u.Nombre,
                     Imagen_URL = u.Imagen_URL,
                     Descripcion = u.Descripcion,
-                    Precio = Convert.ToDouble(u.Precio), // le llega un decimal pero la api maneja un double
+                    Precio = u.Precio, // le llega un decimal pero la api maneja un double
                 })
                 .ToListAsync();
 
@@ -46,7 +46,7 @@ namespace CoWorking.Repositories
                     Nombre = u.Nombre,
                     Imagen_URL = u.Imagen_URL,
                     Descripcion = u.Descripcion,
-                    Precio = Convert.ToDouble(u.Precio), // le llega un decimal pero la api maneja un double
+                    Precio = u.Precio, // le llega un decimal pero la api maneja un double
                 })
                 .FirstOrDefaultAsync();
 

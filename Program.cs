@@ -92,9 +92,15 @@ builder.Services.AddScoped<IPuestosTrabajoService, PuestosTrabajoService>();
 builder.Services.AddScoped<IPuestosTrabajoRepository, PuestosTrabajoRepository>(); 
 
 
-// Configuración de controladores
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    { 
+        /*sin añadir esto dará System.Text.Json.JsonException : System.Text.Json.ThrowHelper.ThrowJsonException_SerializerCycleDetected(Int32 maxDepth) */
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 
+    
 // Configuración de CORS para permitir cualquier origen
 builder.Services.AddCors(options =>
 {

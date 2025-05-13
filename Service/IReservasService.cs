@@ -13,6 +13,7 @@ namespace CoWorking.Service
         Task DeleteAsync(int id);
         Task<List<GetReservasClienteDTO>> GetReservasUsuario(int idUsuario);
 
+        Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO);
 
     }
 }

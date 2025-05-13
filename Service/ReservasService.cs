@@ -56,6 +56,10 @@ namespace CoWorking.Service
     return await _reservasRepository.GetReservasUsuarioAsync(idUsuario);
 }
 
+public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
+{
+    return await _reservasRepository.CreateReservaConLineasAsync(reservaDTO);
+}
 
 
                 }

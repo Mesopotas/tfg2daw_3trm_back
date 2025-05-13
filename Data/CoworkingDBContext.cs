@@ -25,5 +25,20 @@ namespace CoWorking.Data
 
         public DbSet<SalaConCaracteristicas> SalaConCaracteristicas { get; set; }
 
-    }
+    
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+
+    // si esto no se define pondrá Invalid column name 'TipoPuestoTrabajoIdTipoPuestoTrabajo'
+    modelBuilder.Entity<TiposSalas>()
+        .HasOne(tipospuesto => tipospuesto.TipoPuestoTrabajo) // HasOne hace 1:-
+        .WithMany()  // WithMany seria -:N , es decir , la relacion 1:N
+        .HasForeignKey(tipospuesto => tipospuesto.IdTipoPuestoTrabajo); // FK presente tipossalas a tipospuestotrabajo
+}
+
+}
+
+
 }

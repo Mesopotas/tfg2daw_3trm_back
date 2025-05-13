@@ -27,7 +27,7 @@ namespace CoWorking.Repositories
                     IdCaracteristica = u.IdCaracteristica,
                     Nombre = u.Nombre,
                     Descripcion = u.Descripcion,
-                    PrecioAniadido = Convert.ToDouble(u.PrecioAniadido), // le llega un decimal pero la api maneja un double
+                    PrecioAniadido = u.PrecioAniadido, // manejo en decimal ahora
                 })
                 .ToListAsync();
 
@@ -44,7 +44,7 @@ namespace CoWorking.Repositories
                     IdCaracteristica = u.IdCaracteristica,
                     Nombre = u.Nombre,
                     Descripcion = u.Descripcion,
-                    PrecioAniadido = Convert.ToDouble(u.PrecioAniadido), // le llega un decimal pero la api maneja un double
+                    PrecioAniadido = u.PrecioAniadido, // manejo en decimal ahora
                 })
                 .FirstOrDefaultAsync();
 

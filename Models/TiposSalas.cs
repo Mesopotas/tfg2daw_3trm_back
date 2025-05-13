@@ -18,7 +18,7 @@ namespace Models
 
         public string? Descripcion { get; set; }
 
-        [ForeignKey("IdTipoPuestoTrabajo")]
+        [ForeignKey("IdTipoPuestoTrabajo")] // no sirve solo con esto, habrá que ponerlo en el ContextDB definida la relacion
         public int IdTipoPuestoTrabajo { get; set; }
 
         public TiposPuestosTrabajo TipoPuestoTrabajo { get; set; }

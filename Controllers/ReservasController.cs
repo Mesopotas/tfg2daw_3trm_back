@@ -92,5 +92,49 @@ public async Task<ActionResult<GetReservasClienteDTO>> GetDetallesPedido(int idU
     return Ok(reservaDetalles);
 }
 
+/*
+EJEMPLO BODY PARA EL ENDPOINT (todos los IDs deben existir en la base de datos)
+{
+  "idUsuario": 1,
+  "descripcion": "Reserva",
+  "fechaReserva": "2025-05-14T11:30:00",
+  "lineas": [
+    {
+      "idPuestoTrabajo": 1,
+      "idTramoHorario": 2
+    },
+    {
+      "idPuestoTrabajo": 2,
+      "idTramoHorario": 2
+    },
+  {
+      "idPuestoTrabajo": 3,
+      "idTramoHorario": 2
+    }
+  ]
+}*/
+[HttpPost("reservacompleta")]
+public async Task<ActionResult<Reservas>> CrearReservaConLineas([FromBody] ReservaPostDTO reservaDTO) // [FromBody] hace que se explique que debe haber un contenido en el BODY de la peticion y no ir todo por path
+{
+    try
+    {
+        var reservaCreada = await _serviceReservas.CreateReservaConLineasAsync(reservaDTO);
+        return CreatedAtAction(nameof(GetReserva), new { id = reservaCreada.IdReserva }, reservaCreada);
+    }
+    catch (ArgumentException ex)
+    {
+        return BadRequest(ex.Message);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Conflict(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500,  {ex.Message});
+    }
+}
+
+
     }
 }
