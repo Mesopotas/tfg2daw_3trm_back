@@ -33,6 +33,8 @@ CREATE TABLE Sedes ( -- ubicacion fisica de la oficina
     CodigoPostal VARCHAR(5),
     Planta VARCHAR(100),
     URL_Imagen VARCHAR(250), -- imagen de la localizacion
+    Latitud  VARCHAR(100),
+    Longitud  VARCHAR(100),
     Observaciones VARCHAR(100)
 );
 
