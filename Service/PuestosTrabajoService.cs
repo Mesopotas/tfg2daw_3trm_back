@@ -45,5 +45,12 @@ namespace CoWorking.Service
             }
             await _puestosTrabajoRepository.DeleteAsync(id);
         }
+
+
+          public async Task<List<PuestosTrabajoDTO>> GetDisponiblesEnSedeAsync(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+    {
+        return await _puestosTrabajoRepository.GetDisponiblesEnSedeAsync(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
+    }
+    
     }
 }
