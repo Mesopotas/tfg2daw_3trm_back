@@ -11,5 +11,8 @@ namespace CoWorking.Repositories
 
        Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad);
        Task AddDisponibilidadesAsync(int anio);
+
+        Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId);
+
     }
 }

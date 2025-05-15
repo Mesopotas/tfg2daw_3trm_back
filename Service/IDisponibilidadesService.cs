@@ -10,5 +10,7 @@ namespace CoWorking.Service
         Task<List<DisponibilidadDTO>> GetByIdPuestoTrabajoAsync(int id);
        Task UpdateDisponibilidadAsync(DisponibilidadDTO disponibilidad);
        Task AddDisponibilidadesAsync(int anio);
+
+       Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId);
     }
 }

@@ -150,7 +150,48 @@ namespace CoWorking.Repositories
         await _context.SaveChangesAsync();
     }
 }
+
+public async Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId)
+{
+    // Consultamos primero las fechas únicas
+    var fechasUnicas = await _context.Disponibilidades
+        .Where(d => d.Estado &&
+                d.PuestoTrabajo.Disponible &&
+                !d.PuestoTrabajo.Bloqueado &&
+                d.PuestoTrabajo.Sala.IdSala == salaId)
+        .Select(d => d.Fecha.Date) // se elige la fecha obtenida de disponibilidad
+        .Distinct() // igual que en sql, evita duplicados, ya que cada fecha puede tener varios puestos de trabajo de esa misma sala
+        .OrderBy(fecha => fecha) // primero cargará las fechas mas recientes en orden ascendente
+        .ToListAsync();
+    
+    // para cada fecha única, se elige su primera disponibilidad, sino cada fecha aparecería varias veces
+    var output = new List<FechasDisponiblesDTO>();
+    
+    foreach (var fecha in fechasUnicas)
+    {
+        // select de esa fecha para tener el id del puesto de trabajo al que corresponde y su id de disponibilidad
+        var disponibilidad = await _context.Disponibilidades
+            .Where(d => d.Estado &&
+                    d.PuestoTrabajo.Disponible &&
+                    !d.PuestoTrabajo.Bloqueado &&
+                    d.PuestoTrabajo.Sala.IdSala == salaId &&
+                    d.Fecha.Date == fecha)
+            .FirstOrDefaultAsync();
+        
+        if (disponibilidad != null) // si existe la disponibilidad
+        {
+            output.Add(new FechasDisponiblesDTO // añade esa info al dato de salida con las propiedades del DTO
+            {
+                IdDisponibilidad = disponibilidad.IdDisponibilidad,
+                Fecha = disponibilidad.Fecha,
+                IdPuestoTrabajo = disponibilidad.IdPuestoTrabajo
+            });
+        }
     }
+    
+    return output;
+}
 
 
+}
 }

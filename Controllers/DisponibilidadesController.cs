@@ -92,7 +92,17 @@ namespace CoWorking.Controllers
                 return StatusCode(500, new { message = "Hubo un error al agregar las disponibilidades.", error = ex.Message });
             }
         }
-
+        
+        [HttpGet("dias/{salaId}")]
+        public async Task<ActionResult<List<Disponibilidad>>> GetDiasBySala(int salaId)
+        {
+            var dias = await _serviceDisponibilidad.GetDiasBySalaAsync(salaId);
+            if (dias == null || !dias.Any())
+            {
+                return NotFound("No se encontraron disponibilidades para la sala especificada.");
+            }
+            return Ok(dias);
+        }
 
     }
 }
