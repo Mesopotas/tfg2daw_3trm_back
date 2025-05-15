@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
 
 // dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 
@@ -94,10 +96,10 @@ builder.Services.AddScoped<IPuestosTrabajoRepository, PuestosTrabajoRepository>(
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-    { 
-        /*sin añadir esto dará System.Text.Json.JsonException : System.Text.Json.ThrowHelper.ThrowJsonException_SerializerCycleDetected(Int32 maxDepth) */
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull; // para que no salga el   "$id": "1",  "$values": [
+
     });
 
     
