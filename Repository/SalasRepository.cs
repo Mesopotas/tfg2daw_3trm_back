@@ -19,155 +19,157 @@ namespace CoWorking.Repositories
         }
 
 
-    public async Task<List<SalasDTO>> GetAllAsync()
-    {
-        return await _context.Salas
-            .Select(u => new SalasDTO
-            {
-                IdSala = u.IdSala,
-                Nombre = u.Nombre,
-                URL_Imagen = u.URL_Imagen,
-                Capacidad = u.Capacidad,
-                IdTipoSala = u.IdTipoSala,
-                IdSede = u.IdSede,
-                Bloqueado = u.Bloqueado,
-            })
-            .ToListAsync();
-    }
-
-    public async Task<SalasDTO?> GetByIdAsync(int id)
-    {
-        return await _context.Salas
-            .Where(u => u.IdSala == id)
-            .Select(u => new SalasDTO
-            {
-                IdSala = u.IdSala,
-                Nombre = u.Nombre,
-                URL_Imagen = u.URL_Imagen,
-                Capacidad = u.Capacidad,
-                IdTipoSala = u.IdTipoSala,
-                IdSede = u.IdSede,
-                Bloqueado = u.Bloqueado,
-            })
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task AddAsync(SalasDTO sala)
-    {
-        var entidad = new Salas
+        public async Task<List<SalasDTO>> GetAllAsync()
         {
-            IdSala = sala.IdSala,
-            Nombre = sala.Nombre,
-            URL_Imagen = sala.URL_Imagen,
-            Capacidad = sala.Capacidad,
-            IdTipoSala = sala.IdTipoSala,
-            IdSede = sala.IdSede,
-            Bloqueado = sala.Bloqueado,
-        };
+            return await _context.Salas
+                .Select(u => new SalasDTO
+                {
+                    IdSala = u.IdSala,
+                    Nombre = u.Nombre,
+                    URL_Imagen = u.URL_Imagen,
+                    Capacidad = u.Capacidad,
+                    IdTipoSala = u.IdTipoSala,
+                    IdSede = u.IdSede,
+                    Bloqueado = u.Bloqueado,
+                })
+                .ToListAsync();
+        }
 
-        await _context.Salas.AddAsync(entidad);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
-    {
-        return await _context.Salas
-            .Where(s => s.IdSede == idSede)
-            .Select(s => new SalasDTO
-            {
-                IdSala = s.IdSala,
-                Nombre = s.Nombre,
-                URL_Imagen = s.URL_Imagen,
-                Capacidad = s.Capacidad,
-                IdTipoSala = s.IdTipoSala,
-                IdSede = s.IdSede,
-                Bloqueado = s.Bloqueado
-            })
-            .ToListAsync();
-    }
-
-
-    public async Task UpdateAsync(SalasDTO sala)
-    {
-        var entidad = await _context.Salas.FindAsync(sala.IdSala);
-        if (entidad != null)
+        public async Task<SalasDTO?> GetByIdAsync(int id)
         {
-            entidad.Nombre = sala.Nombre;
-            entidad.URL_Imagen = sala.URL_Imagen;
-            entidad.Capacidad = sala.Capacidad;
-            entidad.IdTipoSala = sala.IdTipoSala;
-            entidad.IdSede = sala.IdSede;
-            entidad.Bloqueado = sala.Bloqueado;
+            return await _context.Salas
+                .Where(u => u.IdSala == id)
+                .Select(u => new SalasDTO
+                {
+                    IdSala = u.IdSala,
+                    Nombre = u.Nombre,
+                    URL_Imagen = u.URL_Imagen,
+                    Capacidad = u.Capacidad,
+                    IdTipoSala = u.IdTipoSala,
+                    IdSede = u.IdSede,
+                    Bloqueado = u.Bloqueado,
+                })
+                .FirstOrDefaultAsync();
+        }
 
-            _context.Salas.Update(entidad);
+        public async Task AddAsync(SalasDTO sala)
+        {
+            var entidad = new Salas
+            {
+                IdSala = sala.IdSala,
+                Nombre = sala.Nombre,
+                URL_Imagen = sala.URL_Imagen,
+                Capacidad = sala.Capacidad,
+                IdTipoSala = sala.IdTipoSala,
+                IdSede = sala.IdSede,
+                Bloqueado = sala.Bloqueado,
+            };
+
+            await _context.Salas.AddAsync(entidad);
             await _context.SaveChangesAsync();
         }
-    }
 
-    public async Task DeleteAsync(int id)
-    {
-        var entidad = await _context.Salas.FindAsync(id);
-        if (entidad != null)
+        public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
         {
-            _context.Salas.Remove(entidad);
-            await _context.SaveChangesAsync();
+            return await _context.Salas
+                .Where(s => s.IdSede == idSede)
+                .Select(s => new SalasDTO
+                {
+                    IdSala = s.IdSala,
+                    Nombre = s.Nombre,
+                    URL_Imagen = s.URL_Imagen,
+                    Capacidad = s.Capacidad,
+                    IdTipoSala = s.IdTipoSala,
+                    IdSede = s.IdSede,
+                    Bloqueado = s.Bloqueado
+                })
+                .ToListAsync();
         }
-    }
 
 
-    public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
-{
-    var salasFiltradas = _context.Salas // todas las salas de base
-        .Join(_context.Sedes, // join con sedes
-            sala => sala.IdSede,
-            sede => sede.IdSede,
-            (sala, sede) => new { sala, sede })
-        .Where(s => s.sede.IdSede == idSede) // filtrar solo las de ese id de sede, las otras no
-        .Join(_context.PuestosTrabajo, // join con puestos de trabajo
-            salaSede => salaSede.sala.IdSala,
-            puesto => puesto.IdSala,
-            (salaSede, puesto) => new { salaSede.sala, salaSede.sede, puesto })
-        .Join(_context.Disponibilidades, // join con disponibilidades
-            salaPuesto => salaPuesto.puesto.IdPuestoTrabajo,
-            disponibilidad => disponibilidad.IdPuestoTrabajo,
-            (salaPuesto, disponibilidad) => new { salaPuesto.sala, salaPuesto.sede, salaPuesto.puesto, disponibilidad })
-        .Join(_context.TramosHorarios, // join con tramos horarios
-            salaDisp => salaDisp.disponibilidad.IdTramoHorario,
-            tramoHorario => tramoHorario.IdTramoHorario,
-            (salaDisp, tramoHorario) => new
-            {
-                SalaEntidad = salaDisp.sala,
-                SedeEntidad = salaDisp.sede,
-                PuestoEntidad = salaDisp.puesto,
-                DisponibilidadEntidad = salaDisp.disponibilidad,
-                TramoHorarioEntidad = tramoHorario
-            })
-        .Where(item => 
-            item.DisponibilidadEntidad.Estado == true && // disponibilidad este como true
-            item.PuestoEntidad.Disponible == true && // Puesto disponible
-            !item.PuestoEntidad.Bloqueado && // puesto no bloqueado por admin
-            item.DisponibilidadEntidad.Fecha >= fechaInicio && 
-            item.DisponibilidadEntidad.Fecha <= fechaFin && // mayor o igual a la fecha de inicio y menor o igual a la fecha de fin (dias)
-            item.TramoHorarioEntidad.HoraInicio >= horaInicio && 
-            item.TramoHorarioEntidad.HoraFin <= horaFin) // mayor o igual a la hora de inicio y menor o igual a la hora de fin
-        .Select(item => new SalasFiltradoDTO
+        public async Task UpdateAsync(SalasDTO sala)
         {
-            IdSala = item.SalaEntidad.IdSala,
-            Nombre = item.SalaEntidad.Nombre,
-            URL_Imagen = item.SalaEntidad.URL_Imagen,
-            Capacidad = item.SalaEntidad.Capacidad,
-            IdTipoSala = item.SalaEntidad.IdTipoSala,
-            IdSede = item.SalaEntidad.IdSede,
-        })
-        .Distinct(); // Para evitar duplicados de salas
+            var entidad = await _context.Salas.FindAsync(sala.IdSala);
+            if (entidad != null)
+            {
+                entidad.Nombre = sala.Nombre;
+                entidad.URL_Imagen = sala.URL_Imagen;
+                entidad.Capacidad = sala.Capacidad;
+                entidad.IdTipoSala = sala.IdTipoSala;
+                entidad.IdSede = sala.IdSede;
+                entidad.Bloqueado = sala.Bloqueado;
 
-    return await salasFiltradas.ToListAsync();
-}
-}
+                _context.Salas.Update(entidad);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var entidad = await _context.Salas.FindAsync(id);
+            if (entidad != null)
+            {
+                _context.Salas.Remove(entidad);
+                await _context.SaveChangesAsync();
+            }
+        }
 
 
+        public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+        {
+            var salasFiltradas = _context.Salas // todas las salas de base
+                .Join(_context.Sedes, // join con sedes
+                    sala => sala.IdSede,
+                    sede => sede.IdSede,
+                    (sala, sede) => new { sala, sede })
+                .Where(s => s.sede.IdSede == idSede) // filtrar solo las de ese id de sede, las otras no
+                .Join(_context.PuestosTrabajo, // join con puestos de trabajo
+                    salaSede => salaSede.sala.IdSala,
+                    puesto => puesto.IdSala,
+                    (salaSede, puesto) => new { salaSede.sala, salaSede.sede, puesto })
+                .Join(_context.Disponibilidades, // join con disponibilidades
+                    salaPuesto => salaPuesto.puesto.IdPuestoTrabajo,
+                    disponibilidad => disponibilidad.IdPuestoTrabajo,
+                    (salaPuesto, disponibilidad) => new { salaPuesto.sala, salaPuesto.sede, salaPuesto.puesto, disponibilidad })
+                .Join(_context.TramosHorarios, // join con tramos horarios
+                    salaDisp => salaDisp.disponibilidad.IdTramoHorario,
+                    tramoHorario => tramoHorario.IdTramoHorario,
+                    (salaDisp, tramoHorario) => new
+                    {
+                        SalaEntidad = salaDisp.sala,
+                        SedeEntidad = salaDisp.sede,
+                        PuestoEntidad = salaDisp.puesto,
+                        DisponibilidadEntidad = salaDisp.disponibilidad,
+                        TramoHorarioEntidad = tramoHorario
+                    })
+                .Where(item =>
+                    item.DisponibilidadEntidad.Estado == true && // disponibilidad este como true
+                    item.PuestoEntidad.Disponible == true && // Puesto disponible
+                    !item.PuestoEntidad.Bloqueado && // puesto no bloqueado por admin
+                    item.DisponibilidadEntidad.Fecha >= fechaInicio &&
+                    item.DisponibilidadEntidad.Fecha <= fechaFin && // mayor o igual a la fecha de inicio y menor o igual a la fecha de fin (dias)
+                    item.TramoHorarioEntidad.HoraInicio >= horaInicio &&
+                    item.TramoHorarioEntidad.HoraFin <= horaFin) // mayor o igual a la hora de inicio y menor o igual a la hora de fin
+                .Select(item => new SalasFiltradoDTO
+                {
+                    IdSala = item.SalaEntidad.IdSala,
+                    Nombre = item.SalaEntidad.Nombre,
+                    URL_Imagen = item.SalaEntidad.URL_Imagen,
+                    Capacidad = item.SalaEntidad.Capacidad,
+                    IdTipoSala = item.SalaEntidad.IdTipoSala,
+                    IdSede = item.SalaEntidad.IdSede,
+                    SedeObservaciones = item.SedeEntidad.Observaciones,
+                    SedePlanta = item.SedeEntidad.Planta,
+                    SedeDireccion = item.SedeEntidad.Direccion,
+                    SedeCiudad = item.SedeEntidad.Ciudad
+                })
+                .Distinct(); // Para evitar duplicados de salas
+
+            return await salasFiltradas.ToListAsync();
+        }
 
 
+    }
 }
 
 
