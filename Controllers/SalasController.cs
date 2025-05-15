@@ -96,6 +96,26 @@ namespace CoWorking.Controllers
             return Ok(salas);
         }
 
+        // https://localhost:7179/api/salas/getsalasdisponibles?idSede=1%20&fechaInicio=2024-05-20&fechaFin=2025-05-22&horaInicio=08:00:00&horaFin=18:00:00 ejemplo 
+        [HttpGet("getsalasdisponibles")]
+         public async Task<ActionResult<List<SalasFiltradoDTO>>> GetDisponiblesEnSede(
+        // [FromQuery] son parametros que irán en URL
+        /*si se usa el swagger para probar este get, el campo horaInicio y horaFin deben escribirse "08:00:00" (comillas incluidas), formato HH:mm:ss */
+        [FromQuery] int idSede, 
+        [FromQuery] DateTime fechaInicio, 
+        [FromQuery] DateTime fechaFin, 
+        [FromQuery] TimeSpan horaInicio, 
+        [FromQuery] TimeSpan horaFin)
+    {
+        var salas = await _serviceSalas.GetSalasBySede(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
+        if (salas == null)
+        {
+            return NotFound("No se encontraron salas disponibles en la sede especificada para la fecha dada");
+        }
+
+        return Ok(salas);
+    }
+
     }
 /*
     public class SalasController : ControllerBase

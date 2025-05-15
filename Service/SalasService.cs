@@ -53,6 +53,10 @@ namespace CoWorking.Service
         {
             return await _salasRepository.GetByIdSedeAsync(idSede);
         }
-
+        
+    public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+        {
+            return await _salasRepository.GetSalasBySede(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
+        }
     }
 }

@@ -14,6 +14,9 @@ namespace CoWorking.Repositories
         Task DeleteAsync(int id);
         Task<List<SalasDTO>> GetByIdSedeAsync(int idSede);
 
+        Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
+
+
     }
 
   /*
