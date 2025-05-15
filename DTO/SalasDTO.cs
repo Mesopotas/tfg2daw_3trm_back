@@ -23,5 +23,8 @@ public class SalasFiltradoDTO
     public string SedeDireccion { get; set; }
     public string SedeCiudad { get; set; }   
 
+    public int PuestosDisponibles { get; set; }
+    public int PuestosOcupados { get; set; }
+
  }
 
