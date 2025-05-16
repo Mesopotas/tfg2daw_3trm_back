@@ -15,7 +15,7 @@ namespace CoWorking.Repositories
         Task UpdateAsync(PuestosTrabajoDTO puestoTrabajo);
         Task DeleteAsync(int id);
 
-        Task<List<PuestosTrabajoDTO>> GetDisponiblesEnSedeAsync(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
-
+        Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(int idSala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
+        
     }
 }

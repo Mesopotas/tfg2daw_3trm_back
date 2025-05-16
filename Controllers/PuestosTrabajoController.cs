@@ -67,16 +67,18 @@ namespace CoWorking.Controllers
     // ejemplo: https://localhost:7179/api/puestosTrabajo/disponibles?idSede=1&fechaInicio=2025-06-01&fechaFin=2025-06-10&horaInicio=08:00:00&horaFin=17:00:00
 
          [HttpGet("disponibles")]
-    public async Task<ActionResult<List<PuestosTrabajoDTO>>> GetDisponiblesEnSede(
+    public async Task<ActionResult<List<PuestoTrabajoFiltroFechasDTO>>> GetDisponiblesEnSede(
         // [FromQuery] son parametros que irán en URL
         /*si se usa el swagger para probar este get, el campo horaInicio y horaFin deben escribirse "08:00:00" (comillas incluidas), formato HH:mm:ss */
-        [FromQuery] int idSede, 
+        [FromQuery] int idSala, // ahora irá con el id de la sala en vez de id de la sede
         [FromQuery] DateTime fechaInicio, 
         [FromQuery] DateTime fechaFin, 
         [FromQuery] TimeSpan horaInicio, 
         [FromQuery] TimeSpan horaFin)
     {
-        var puestosDisponibles = await _servicePuestosTrabajo.GetDisponiblesEnSedeAsync(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
+
+
+        var puestosDisponibles = await _servicePuestosTrabajo.GetPuestosWithAvailabilityBySalaAsync(idSala, fechaInicio, fechaFin, horaInicio, horaFin);
         if (puestosDisponibles == null)
         {
             return NotFound("No se encontraron puestos disponibles en la sede especificada para la fecha dada");

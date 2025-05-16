@@ -109,53 +109,54 @@ namespace CoWorking.Repositories
             _context.PuestosTrabajo.Remove(puesto); // elimina el puesto de trabajo
             await _context.SaveChangesAsync();
         }
-        public async Task<List<PuestosTrabajoDTO>> GetDisponiblesEnSedeAsync(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+       public async Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(
+            int idSala,
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            TimeSpan horaInicio,
+            TimeSpan horaFin)
         {
-  
-                        
-            var filtro = _context.PuestosTrabajo // todos los puestos de trabajo como base
-                .Join(_context.Salas, // iner join a salas
-                    puesto => puesto.IdSala, // une cada puesto de trabajo con la sala que le corresponde
-                    sala => sala.IdSala,
-                    (puesto, sala) => new { puesto, sala }) // union de puesto y sala
-                .Join(_context.Sedes,
-                    puestoysala => puestoysala.sala.IdSede, // une lo del join de arriba (puestos y salas) con sedes
-                    sede => sede.IdSede,
-                    (puestoysala, sede) => new { puestoysala.puesto, puestoysala.sala, sede })
-                .Join(_context.Disponibilidades,
-                    pdisponibilidad => pdisponibilidad.puesto.IdPuestoTrabajo, // union de lo de arriba (puesto, sala, sede) con su disponibilidad 
-                    disponibilidad => disponibilidad.IdPuestoTrabajo,
-                    (pdisponibilidad, disponibilidad) => new { pdisponibilidad.puesto, pdisponibilidad.sala, pdisponibilidad.sede, disponibilidad })
-                .Join(_context.TramosHorarios,
-                    ptramohorario => ptramohorario.disponibilidad.IdTramoHorario, // une lo de arriba (puesto, sala, sede, disponibilidad) con su tramo horario
-                    tramoHorario => tramoHorario.IdTramoHorario,
-                    (ptramohorario, tramoHorario) => new
-                    { // objeto final para el output con todas las uniones
-                        PuestoEntidad = ptramohorario.puesto,
-                        SalaEntidad = ptramohorario.sala,
-                        SedeEntidad = ptramohorario.sede,
-                        DisponibilidadEntidad = ptramohorario.disponibilidad,
-                        TramoHorarioEntidad = tramoHorario
-                    })
-                .Where(puesto => puesto.SedeEntidad.IdSede == idSede // solo las q pertenezcan a la sede elegida
-                             && puesto.PuestoEntidad.Disponible == true // si el puesto esta disponible (tal vez quitar)
-                             && puesto.DisponibilidadEntidad.Estado == true // si no esta disponible no la saca (tal vez quitar este filtro)
-                             && puesto.DisponibilidadEntidad.Fecha >= fechaInicio && puesto.DisponibilidadEntidad.Fecha <= fechaFin // sea mayor o igual que la fecha de comienzo y menor o igual que la fecha de fin
-                             && puesto.TramoHorarioEntidad.HoraInicio >= horaInicio && puesto.TramoHorarioEntidad.HoraFin <= horaFin) // sea mayor o igual que la hora de comienzo y menor o igual que la hora de fin, si el tramo horario es 08:00-09:00, horafin deberá ser al menos 09:00
-                .Select(puesto => new PuestosTrabajoDTO // dar los valores al dto q será el output
+            var query = _context.PuestosTrabajo
+                .Where(puesto => puesto.IdSala == idSala && !puesto.Bloqueado) // Filtra por la sala especificada y que no haya bloqueados (el admin es quien los bloquea)
+                .Select(puesto => new // select del puesto ya filtrado con sus tramos y disponibilidades
                 {
-                    IdPuestoTrabajo = puesto.PuestoEntidad.IdPuestoTrabajo,
-                    NumeroAsiento = puesto.PuestoEntidad.NumeroAsiento,
-                    CodigoMesa = puesto.PuestoEntidad.CodigoMesa,
-                    URL_Imagen = puesto.PuestoEntidad.URL_Imagen,
-                    Disponible = puesto.PuestoEntidad.Disponible,
-                    Bloqueado = puesto.PuestoEntidad.Bloqueado,
-                    IdZonaTrabajo = puesto.PuestoEntidad.IdZonaTrabajo,
-                    IdSala = puesto.PuestoEntidad.IdSala
+                    PuestoEntidad = puesto,
+                    DisponibilidadesEnRango = _context.Disponibilidades
+                        .Where(disp => disp.IdPuestoTrabajo == puesto.IdPuestoTrabajo)
+                        .Join(_context.TramosHorarios,
+                            disp => disp.IdTramoHorario,
+                            tramo => tramo.IdTramoHorario,
+                            (disp, tramo) => new { disp, tramo })
+                        .Where(pd =>
+                            pd.disp.Fecha >= fechaInicio && pd.disp.Fecha <= fechaFin &&
+                            pd.tramo.HoraInicio >= horaInicio && pd.tramo.HoraFin <= horaFin) // filtro horario
+                        .Select(pd => new DisponibilidadFiltroFechasDTO // array de disponibilidades que cumplen los filtros
+                        {
+                            IdDisponibilidad = pd.disp.IdDisponibilidad,
+                            Fecha = pd.disp.Fecha,
+                            Estado = pd.disp.Estado,
+                            IdTramoHorario = pd.tramo.IdTramoHorario,
+                            HoraInicio = pd.tramo.HoraInicio,
+                            HoraFin = pd.tramo.HoraFin
+                        })
+                        .ToList() // se ejecuta y almacena en el array los resultados obtenidos
+                })
+
+                .Where(item => item.DisponibilidadesEnRango.Any()) // filtro, solo sacará los resultados que tengan al menos 1 disponibilidad en el rango de fecha-hora, si no, no saldrá
+                .Select(item => new PuestoTrabajoFiltroFechasDTO // resultado final del array list con la data del dto
+                {
+                    IdPuestoTrabajo = item.PuestoEntidad.IdPuestoTrabajo,
+                    NumeroAsiento = item.PuestoEntidad.NumeroAsiento,
+                    CodigoMesa = item.PuestoEntidad.CodigoMesa,
+                    URL_Imagen = item.PuestoEntidad.URL_Imagen,
+                    DisponibleGeneral = item.PuestoEntidad.Disponible, // es el campo del puesto de trabajo, no significa que tenga disponibilidad en la tabla disponibilidades, solo que esta marcado como disponible
+                    BloqueadoGeneral = item.PuestoEntidad.Bloqueado, // // lo mismo q arriba, serian las que bloquease el admin, no tiene que ver con la disponibilidad
+                    IdZonaTrabajo = item.PuestoEntidad.IdZonaTrabajo,
+                    IdSala = item.PuestoEntidad.IdSala,
+                    DisponibilidadesEnRango = item.DisponibilidadesEnRango // array de disponibilidades que cumplen los filtros
                 });
 
-
-            return await filtro.ToListAsync();
+            return await query.ToListAsync(); // devuelve el listado de asientos, cada asiento con sus disponibilidades acorde al filtro
         }
     }
 }

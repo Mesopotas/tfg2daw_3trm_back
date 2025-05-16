@@ -47,10 +47,10 @@ namespace CoWorking.Service
         }
 
 
-          public async Task<List<PuestosTrabajoDTO>> GetDisponiblesEnSedeAsync(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
-    {
-        return await _puestosTrabajoRepository.GetDisponiblesEnSedeAsync(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
-    }
+        public async Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(int idSala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+        {
+            return await _puestosTrabajoRepository.GetPuestosWithAvailabilityBySalaAsync(idSala, fechaInicio, fechaFin, horaInicio, horaFin);
+        }
     
     }
 }
