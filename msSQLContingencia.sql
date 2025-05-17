@@ -217,6 +217,196 @@ INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('18:00', '19:00');
 
 
+
+-- inserts de prueba
+
+
+-- 5 Inserts para la tabla Sedes
+INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
+VALUES ('España', 'Madrid', 'Calle Gran Vía 32', '28013', 'Planta 4', 'https://ejemplo.com/imagenes/sede_madrid.jpg', '40.4200', '-3.7050', 'Edificio céntrico con vistas al centro');
+
+INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
+VALUES ('España', 'Barcelona', 'Passeig de Gràcia 77', '08008', 'Planta 2', 'https://ejemplo.com/imagenes/sede_barcelona.jpg', '41.3950', '2.1609', 'Zona comercial Premium');
+
+INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
+VALUES ('España', 'Valencia', 'Calle Colón 15', '46004', 'Planta 1', 'https://ejemplo.com/imagenes/sede_valencia.jpg', '39.4699', '-0.3773', 'Cerca del centro histórico');
+
+INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
+VALUES ('España', 'Sevilla', 'Avenida de la Constitución 10', '41004', 'Planta 3', 'https://ejemplo.com/imagenes/sede_sevilla.jpg', '37.3886', '-5.9953', 'Al lado de la Catedral');
+
+INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
+VALUES ('España', 'Bilbao', 'Gran Vía Don Diego López de Haro 12', '48001', 'Planta 5', 'https://ejemplo.com/imagenes/sede_bilbao.jpg', '43.2630', '-2.9350', 'Vistas al Guggenheim');
+
+-- 5 Inserts para la tabla TiposPuestosTrabajo (2 ya existen en su script original)
+INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
+VALUES ('Mesa individual', 'https://ejemplo.com/imagenes/mesa_individual.png', 'Mesa individual para una persona', 20.00);
+
+INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
+VALUES ('Mesa compartida', 'https://ejemplo.com/imagenes/mesa_compartida.png', 'Mesa para cuatro personas', 12.00);
+
+INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
+VALUES ('Espacio premium', 'https://ejemplo.com/imagenes/espacio_premium.png', 'Espacio con monitor adicional y mejores vistas', 25.00);
+
+-- 5 Inserts para la tabla TiposSalas
+INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
+VALUES ('Sala común general', 10, 4, 0, 'Espacio abierto compartido', 1);
+
+INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
+VALUES ('Sala privada pequeña', 2, 4, 1, 'Sala privada para reuniones pequeñas', 2);
+
+INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
+VALUES ('Sala privada mediana', 4, 4, 1, 'Sala privada para equipos medianos', 2);
+
+INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
+VALUES ('Sala premium', 5, 2, 1, 'Sala con servicios exclusivos', 5);
+
+INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
+VALUES ('Sala de conferencias', 1, 10, 1, 'Sala para presentaciones', 2);
+
+-- 5 Inserts para la tabla Salas
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Coworking Madrid Central', 'https://ejemplo.com/imagenes/sala_madrid1.jpg', 40, 1, 1, 0);
+
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Sala Reuniones Barcelona', 'https://ejemplo.com/imagenes/sala_barcelona1.jpg', 8, 2, 2, 0);
+
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Espacio Valencia Creativo', 'https://ejemplo.com/imagenes/sala_valencia1.jpg', 16, 3, 3, 0);
+
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Sala Premium Sevilla', 'https://ejemplo.com/imagenes/sala_sevilla1.jpg', 10, 4, 4, 0);
+
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Auditorio Bilbao', 'https://ejemplo.com/imagenes/sala_bilbao1.jpg', 10, 5, 5, 0);
+
+-- 5 Inserts para la tabla CaracteristicasSala
+INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
+VALUES ('WiFi Alta Velocidad', 'Conexión fibra 1Gbps', 0.10);
+
+INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
+VALUES ('Proyector 4K', 'Proyector de alta definición con HDMI', 0.15);
+
+INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
+VALUES ('Pizarra Digital', 'Pizarra interactiva con conexión a dispositivos', 0.12);
+
+INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
+VALUES ('Sistema de Videoconferencia', 'Equipo completo para reuniones virtuales', 0.20);
+
+INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
+VALUES ('Café Premium', 'Servicio de café de especialidad incluido', 0.05);
+
+-- 5 Inserts para la tabla SalaConCaracteristicas
+INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
+VALUES (1, 1);
+
+INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
+VALUES (2, 2);
+
+INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
+VALUES (3, 3);
+
+INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
+VALUES (4, 4);
+
+INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
+VALUES (5, 5);
+
+-- 5 Inserts para la tabla ZonasTrabajo
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
+VALUES ('Zona General Madrid', 1);
+
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
+VALUES ('Zona Reuniones Barcelona', 2);
+
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
+VALUES ('Zona Creativa Valencia', 3);
+
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
+VALUES ('Zona Premium Sevilla', 4);
+
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
+VALUES ('Zona Conferencias Bilbao', 5);
+
+-- 5 Inserts para la tabla PuestosTrabajo
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+-- 5 Inserts para la tabla Disponibilidades (con fechas a partir de hoy)
+INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
+VALUES ('2025-05-16', 1, 1, 1);
+
+INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
+VALUES ('2025-05-16', 1, 2, 2);
+
+INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
+VALUES ('2025-05-16', 1, 3, 3);
+
+INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
+VALUES ('2025-05-16', 1, 4, 4);
+
+INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
+VALUES ('2025-05-16', 1, 5, 5);
+
+-- 5 Inserts para la tabla Usuarios
+INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
+VALUES ('Admin', 'Principal', 'admin@coworking.com', 'Pass123$Admin', GETDATE(), 1);
+
+INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
+VALUES ('Juan', 'García Pérez', 'juan.garcia@email.com', 'Pass123$Juan', GETDATE(), 2);
+
+INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
+VALUES ('María', 'López Martínez', 'maria.lopez@email.com', 'Pass123$Maria', GETDATE(), 2);
+
+INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
+VALUES ('Carlos', 'Rodríguez Sánchez', 'carlos.rodriguez@email.com', 'Pass123$Carlos', GETDATE(), 2);
+
+INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
+VALUES ('Laura', 'Fernández Díaz', 'laura.fernandez@email.com', 'Pass123$Laura', GETDATE(), 2);
+
+-- 5 Inserts para la tabla Reservas
+INSERT INTO Reservas (IdUsuario, Fecha, Descripcion, PrecioTotal)
+VALUES (2, '2025-05-16 09:00:00', 'Reunión de proyecto', 15.00);
+
+INSERT INTO Reservas (IdUsuario, Fecha, Descripcion, PrecioTotal)
+VALUES (3, '2025-05-16 10:00:00', 'Trabajo individual', 10.00);
+
+INSERT INTO Reservas (IdUsuario, Fecha, Descripcion, PrecioTotal)
+VALUES (4, '2025-05-16 14:00:00', 'Entrevista con cliente', 20.00);
+
+INSERT INTO Reservas (IdUsuario, Fecha, Descripcion, PrecioTotal)
+VALUES (5, '2025-05-16 16:00:00', 'Sesión de trabajo en equipo', 25.00);
+
+INSERT INTO Reservas (IdUsuario, Fecha, Descripcion, PrecioTotal)
+VALUES (2, '2025-05-17 11:00:00', 'Presentación de proyecto', 30.00);
+
+-- 5 Inserts para la tabla Lineas
+INSERT INTO Lineas (IdReserva, IdPuestoTrabajo, Precio)
+VALUES (1, 1, 15.00);
+
+INSERT INTO Lineas (IdReserva, IdPuestoTrabajo, Precio)
+VALUES (2, 2, 10.00);
+
+INSERT INTO Lineas (IdReserva, IdPuestoTrabajo, Precio)
+VALUES (3, 3, 20.00);
+
+INSERT INTO Lineas (IdReserva, IdPuestoTrabajo, Precio)
+VALUES (4, 4, 25.00);
+
+INSERT INTO Lineas (IdReserva, IdPuestoTrabajo, Precio)
+VALUES (5, 5, 30.00);
+
 /* AÑADIR PROXIMAMENTE CONFORME TODO ESTE HECHO 
 CREATE TABLE Descuentos ( 
     IdDescuento INT IDENTITY(1,1) PRIMARY KEY,
