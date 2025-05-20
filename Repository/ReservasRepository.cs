@@ -70,7 +70,7 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
         {
             IdUsuario = reservaDTO.IdUsuario,
             Descripcion = reservaDTO.Descripcion,
-            Fecha = DateTime.Now,
+            Fecha = reservaDTO.FechaReserva,
             PrecioTotal = 0 // inicializado a 0, pero se actualizará conforme se añadan las lineas
         };
         
@@ -96,6 +96,7 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
             var disponibilidad = await _context.Disponibilidades
                 .FirstOrDefaultAsync(d => d.IdPuestoTrabajo == lineaDTO.IdPuestoTrabajo && 
                                           d.IdTramoHorario == lineaDTO.IdTramoHorario &&
+                                          d.Fecha.Date == reservaDTO.FechaReserva.Date && // sino no se podrán elegir fechas de disponibilidad futuras
                                           d.Estado == true);
                                           
             if (disponibilidad == null)

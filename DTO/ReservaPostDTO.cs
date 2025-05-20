@@ -9,6 +9,7 @@ public class ReservaPostDTO
 {
     public int IdUsuario { get; set; }
     public string Descripcion { get; set; }
+    public DateTime FechaReserva { get; set; }
     public List<LineasPostReservaDTO> Lineas { get; set; }
 }
 
