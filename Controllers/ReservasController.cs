@@ -4,6 +4,8 @@ using CoWorking.Service;
 using CoWorking.DTO;
 using Models;
 using Models.DTOs;
+using System.Text.Json;
+using QRCoder;
 
 namespace CoWorking.Controllers
 {
@@ -135,6 +137,30 @@ public async Task<ActionResult<Reservas>> CrearReservaConLineas([FromBody] Reser
     }
 }
 
+        [HttpGet("generarqr/{id}")] // GET https://localhost:7179/api/Reservas/generarqr/1 
+        [Produces("image/png")] // el endpoint respondera un png
+        public async Task<IActionResult> GenerarQr(int id)
+        {
+ 
+            var reservaDTO = await _serviceReservas.GetByIdAsync(id);
 
+            if (reservaDTO == null)
+            {
+                return NotFound("Reserva no encontrada."); // devolver status 404 si no hay
+            }
+
+            string jsonString = JsonSerializer.Serialize(reservaDTO); // respuesta json del getbyid
+
+            byte[] qrCodeBytes;
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(jsonString, QRCodeGenerator.ECCLevel.Q)) // genera la libreria el qr de un json
+            {
+                 using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+                 {
+                     qrCodeBytes = qrCode.GetGraphic(5); // tamaño del qr autoajustado
+                 }
+            }
+            return File(qrCodeBytes, "image/png"); // devolver la imagen en png por http, para que la respuesta del swagge en lugar de un json sea la foto del qr
+        }
     }
 }
