@@ -9,13 +9,13 @@ public class ReservaPostDTO
 {
     public int IdUsuario { get; set; }
     public string Descripcion { get; set; }
+    public DateTime FechaReserva { get; set; }
     public List<LineasPostReservaDTO> Lineas { get; set; }
 }
 
 public class LineasPostReservaDTO
 {
     public int IdPuestoTrabajo { get; set; }
-    public int IdTramoHorario { get; set; }
-}
+ public int IdDisponibilidad { get; set; }}
 
 }
