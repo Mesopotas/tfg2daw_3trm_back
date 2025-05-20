@@ -268,6 +268,9 @@ INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
 VALUES ('Coworking Madrid Central', 'https://ejemplo.com/imagenes/sala_madrid1.jpg', 40, 1, 1, 0);
 
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
+VALUES ('Auditorio Bilbao', 'https://ejemplo.com/imagenes/sala_bilbao1.jpg', 10, 5, 1, 0);
+
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
 VALUES ('Sala Reuniones Barcelona', 'https://ejemplo.com/imagenes/sala_barcelona1.jpg', 8, 2, 2, 0);
 
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
@@ -406,6 +409,24 @@ VALUES (4, 2, 'https://ejemplo.com/imagenes/puesto_bilbao4.jpg', 1, 5, 5, 0);
 
 INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES (5, 3, 'https://ejemplo.com/imagenes/puesto_bilbao5.jpg', 1, 5, 5, 0);
+
+
+
+-- 5 Puestos para la Sala 5 (Bilbao)
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 6, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (2, 1, 'https://ejemplo.com/imagenes/puesto_bilbao2.jpg', 1, 5, 6, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (3, 2, 'https://ejemplo.com/imagenes/puesto_bilbao3.jpg', 1, 5, 6, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (4, 2, 'https://ejemplo.com/imagenes/puesto_bilbao4.jpg', 1, 5, 6, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (5, 3, 'https://ejemplo.com/imagenes/puesto_bilbao5.jpg', 1, 5, 6, 0);
 
 -- 5 Inserts para la tabla Disponibilidades (con fechas a partir de hoy)
 INSERT INTO Disponibilidades (Fecha, Estado, IdTramoHorario, IdPuestoTrabajo)
