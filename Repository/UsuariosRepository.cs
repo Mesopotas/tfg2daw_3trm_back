@@ -37,11 +37,33 @@ namespace CoWorking.Repositories
         }
 
 
-        public async Task UpdateAsync(Usuarios usuario)
-        {
-            _context.Usuarios.Update(usuario); // igual que el add pero haciendo un update
-            await _context.SaveChangesAsync();
-        }
+public async Task UpdateAsync(UsuarioUpdateDTO usuario)
+{
+    var existingUsuario = await _context.Usuarios.FindAsync(usuario.IdUsuario);
+    if (existingUsuario == null)
+    {
+        throw new InvalidOperationException("El usuario no existe.");
+    }
+
+    // validar que no exista ya
+    var emailEnUso = await _context.Usuarios
+        .AnyAsync(u => u.Email == usuario.Email && u.IdUsuario != usuario.IdUsuario);
+
+    if (emailEnUso)
+    {
+        throw new InvalidOperationException("El email ya está en uso por otro usuario");
+    }
+
+    // actualizar los campos del endpoint
+    existingUsuario.Nombre = usuario.Nombre;
+    existingUsuario.Apellidos = usuario.Apellidos;
+    existingUsuario.Email = usuario.Email;
+
+    // guardar 
+    _context.Usuarios.Update(existingUsuario);
+    await _context.SaveChangesAsync();
+}
+
 
         public async Task DeleteAsync(int id)
         {

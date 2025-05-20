@@ -9,7 +9,7 @@ namespace CoWorking.Service
         Task<List<Usuarios>> GetAllAsync();
         Task<Usuarios?> GetByIdAsync(int id);
         Task AddAsync(Usuarios usuario);
-        Task UpdateAsync(Usuarios usuario);
+        Task UpdateAsync(UsuarioUpdateDTO usuario);
         Task DeleteAsync(int id);
        
         Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email);

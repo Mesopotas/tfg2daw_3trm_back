@@ -50,23 +50,22 @@ namespace CoWorking.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUsuario(int id, Usuarios updatedUsuarios)
+        public async Task<IActionResult> UpdateUsuario(int id, UsuarioUpdateDTO updatedUsuario)
         {
-            var existingUsuario = await _serviceUsuarios.GetByIdAsync(id);
-            if (existingUsuario == null)
+            try
             {
-                return NotFound();
+                updatedUsuario.IdUsuario = id;
+
+                await _serviceUsuarios.UpdateAsync(updatedUsuario);
+                return NoContent(); // 204 OK sin contenido
             }
-            existingUsuario.Nombre = updatedUsuarios.Nombre;
-            existingUsuario.Apellidos = updatedUsuarios.Apellidos;
-            existingUsuario.Email = updatedUsuarios.Email;
-            existingUsuario.Contrasenia = updatedUsuarios.Contrasenia;
-            existingUsuario.IdRol = updatedUsuarios.IdRol;
-
-
-            await _serviceUsuarios.UpdateAsync(existingUsuario);
-            return NoContent();
+            catch (InvalidOperationException ex)
+            {
+                // Email duplicado
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
@@ -107,10 +106,10 @@ namespace CoWorking.Controllers
             return Ok(usuario);
         }
 
-       
+
         [Authorize(Roles = "Admin")]
-            [HttpPost("cambiar-rol")]
-        public async Task<IActionResult> ChangeUserRole( string email)
+        [HttpPost("cambiar-rol")]
+        public async Task<IActionResult> ChangeUserRole(string email)
         {
             var result = await _serviceUsuarios.ChangeUserRoleAsync(email);
 
@@ -121,10 +120,10 @@ namespace CoWorking.Controllers
 
             return Ok("Rol del usuario cambiado correctamente.");
         }
-      [Authorize(Roles = "Admin")]
-            [HttpPost("quitar-admin")]
-            
-        public async Task<IActionResult> QuitarAdminAsync( string email)
+        [Authorize(Roles = "Admin")]
+        [HttpPost("quitar-admin")]
+
+        public async Task<IActionResult> QuitarAdminAsync(string email)
         {
             var result = await _serviceUsuarios.QuitarAdminAsync(email);
             if (!result)
@@ -134,6 +133,6 @@ namespace CoWorking.Controllers
 
             return Ok("Rol del usuario cambiado correctamente.");
         }
-        
+
     }
 }

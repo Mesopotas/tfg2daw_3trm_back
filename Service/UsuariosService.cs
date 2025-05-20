@@ -34,7 +34,7 @@ namespace CoWorking.Service
             await _usuariosRepository.AddAsync(usuario);
         }
 
-        public async Task UpdateAsync(Usuarios usuario)
+        public async Task UpdateAsync(UsuarioUpdateDTO usuario)
         {
             await _usuariosRepository.UpdateAsync(usuario);
         }
