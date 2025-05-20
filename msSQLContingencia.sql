@@ -332,13 +332,93 @@ INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, I
 VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
 
 INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
+
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
+
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
 
 INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
 
 INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
+
+INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
 
 INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
