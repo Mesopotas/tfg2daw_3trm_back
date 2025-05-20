@@ -62,88 +62,106 @@ public async Task<Reservas> CreateReservaAsync(Reservas reserva)
     return reserva;
 }
 
-public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
-{
-  
-        // crear reserva
+  public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
+    {
+        // Crear reserva
         var reserva = new Reservas
         {
             IdUsuario = reservaDTO.IdUsuario,
             Descripcion = reservaDTO.Descripcion,
             Fecha = reservaDTO.FechaReserva,
-            PrecioTotal = 0 // inicializado a 0, pero se actualizará conforme se añadan las lineas
+            PrecioTotal = 0 // Inicializado a 0, se actualizará conforme se añadan las líneas
         };
-        
+
         _context.Reservas.Add(reserva);
         await _context.SaveChangesAsync();
-        
-        // Crear las lineas de esa reserva
-        decimal precioTotal = 0; // variable inicializada a 0
-        
+
+        // Crear las líneas de esa reserva
+        decimal precioTotal = 0; // Variable inicializada a 0
+
         foreach (var lineaDTO in reservaDTO.Lineas)
         {
-            // obtener puesto de trabajo
-            var puestoTrabajo = await _context.PuestosTrabajo
-                .Include(p => p.Sala) 
-                .ThenInclude(s => s.TipoSala)
-                .ThenInclude(ts => ts.TipoPuestoTrabajo)
-                .FirstOrDefaultAsync(p => p.IdPuestoTrabajo == lineaDTO.IdPuestoTrabajo); // en base al id del puesto
-                
-            if (puestoTrabajo == null)
-                throw new ArgumentException($"No existe el puesto de trabajo con Id: {lineaDTO.IdPuestoTrabajo}");
-                
-            // comprobar si esta disponible (el campo Estado de la tabla Disponibilidad esta marcado como true)
+            // Obtener la disponibilidad directamente por su IdDisponibilidad
+            // Incluimos PuestoTrabajo y sus relaciones necesarias para el cálculo del precio
             var disponibilidad = await _context.Disponibilidades
-                .FirstOrDefaultAsync(d => d.IdPuestoTrabajo == lineaDTO.IdPuestoTrabajo && 
-                                          d.IdTramoHorario == lineaDTO.IdTramoHorario &&
-                                          d.Fecha.Date == reservaDTO.FechaReserva.Date && // sino no se podrán elegir fechas de disponibilidad futuras
-                                          d.Estado == true);
-                                          
+                .Include(d => d.PuestoTrabajo)
+                    .ThenInclude(p => p.Sala)
+                        .ThenInclude(s => s.TipoSala)
+                            .ThenInclude(ts => ts.TipoPuestoTrabajo)
+                .FirstOrDefaultAsync(d => d.IdDisponibilidad == lineaDTO.IdDisponibilidad);
+
             if (disponibilidad == null)
-                throw new InvalidOperationException($"El puesto de trabajo {lineaDTO.IdPuestoTrabajo} no está disponible en el horario seleccionado");
-            
-            // obtener el precio base (todavia no esta aplicado el extra de la caracteristica) de esa linea por su tipo de puesto
-            decimal precioLinea = (decimal)puestoTrabajo.Sala.TipoSala.TipoPuestoTrabajo.Precio; // usa los includes de arriba del TipoPuestoTrabajo para obtener el precio de esa tabla
-            
-            // acceder a las caracteristicas de la sala ligadas a esa sala con su ID
+            {
+                throw new ArgumentException($"No existe la disponibilidad con Id: {lineaDTO.IdDisponibilidad}");
+            }
+
+            // Comprobar si está disponible (el campo Estado de la tabla Disponibilidad está marcado como true)
+            if (!disponibilidad.Estado)
+            {
+                throw new InvalidOperationException($"El puesto de trabajo asociado a la disponibilidad {lineaDTO.IdDisponibilidad} no está disponible.");
+            }
+
+            // Obtener el puesto de trabajo de la disponibilidad
+            var puestoTrabajo = disponibilidad.PuestoTrabajo;
+
+            if (puestoTrabajo == null)
+            {
+                // Esto no debería ocurrir si la FK está bien, pero es una buena práctica de seguridad
+                throw new ArgumentException($"La disponibilidad con Id: {lineaDTO.IdDisponibilidad} no tiene un puesto de trabajo asociado válido.");
+            }
+
+            // Obtener el precio base (todavía no está aplicado el extra de la característica) de esa línea por su tipo de puesto
+            // Asegurarse de que todas las propiedades anidadas no sean nulas antes de acceder a ellas
+            decimal precioLinea = 0;
+            if (puestoTrabajo.Sala?.TipoSala?.TipoPuestoTrabajo != null)
+            {
+                precioLinea = puestoTrabajo.Sala.TipoSala.TipoPuestoTrabajo.Precio;
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se pudo determinar el precio base para el puesto de trabajo {puestoTrabajo.IdPuestoTrabajo}. Faltan datos de Sala/TipoSala/TipoPuestoTrabajo.");
+            }
+
+            // Acceder a las características de la sala ligadas a esa sala con su ID
             var caracteristicasSala = await _context.SalaConCaracteristicas
                 .Include(sc => sc.Caracteristica)
                 .Where(sc => sc.IdSala == puestoTrabajo.IdSala)
                 .ToListAsync();
-                 
-            foreach (var caracteristica in caracteristicasSala) // un bucle, si tiene varias caracteristicas, las recorre y va aplicando el precio añadido
+
+            foreach (var caracteristica in caracteristicasSala) // Un bucle, si tiene varias características, las recorre y va aplicando el precio añadido
             {
-                // aplicar el precio añadido por caracteristica 
-                precioLinea += precioLinea * ((decimal)caracteristica.Caracteristica.PrecioAniadido / 100m); // si el % de precio añadido es 0, simplemente no sumará nada, si es 10€ seguirá siendo 10€
-                /*el precio de la linea sería el precio de esa linea + su respectivo % de añadido, ejemplo: si vale 50€ y el precio añadido es 10%, será 50 + 5 = 55€, 
-                la m del 100 hace q lo trate de decimal para el tipo de dato que estamos usando*/
+                // Aplicar el precio añadido por característica
+                // El precio añadido se asume como un porcentaje (ej. 10 para 10%)
+                precioLinea += precioLinea * (caracteristica.Caracteristica.PrecioAniadido / 100m);
+                /*
+                El precio de la línea sería el precio de esa línea + su respectivo % de añadido, ejemplo: si vale 50€ y el precio añadido es 10%, será 50 + 5 = 55€.
+                La 'm' del 100 hace que lo trate como decimal para el tipo de dato que estamos usando.
+                */
             }
-            
-            // creacion de la linea, todo esto dentro del foreach de lineas
+
+            // Creación de la línea, todo esto dentro del foreach de líneas
             var linea = new Lineas
             {
                 IdReserva = reserva.IdReserva,
-                IdPuestoTrabajo = lineaDTO.IdPuestoTrabajo,
+                IdPuestoTrabajo = puestoTrabajo.IdPuestoTrabajo, // Usamos el IdPuestoTrabajo de la disponibilidad
                 Precio = precioLinea
             };
-            
+
             _context.Lineas.Add(linea);
-            
-            // se pone la disponibilidad como no disponible (false) una vez ya se ha hecho el INSERT de la linea
+
+            // Se pone la disponibilidad como no disponible (false) una vez ya se ha hecho el INSERT de la línea
             disponibilidad.Estado = false;
-            
+
             // Sumar al precio total
             precioTotal += precioLinea;
         }
-        
-        // Actualizar el precio total de la reserva una vez recorridas todas las lineas
+
+        // Actualizar el precio total de la reserva una vez recorridas todas las líneas
         reserva.PrecioTotal = precioTotal;
-        await _context.SaveChangesAsync(); // ahora q ya esta el preciototal final, habiendo pasado todas las lineas, se guarda la informacion
-        
+        await _context.SaveChangesAsync(); // Ahora que ya está el precio total final, habiendo pasado todas las líneas, se guarda la información
+
         return reserva;
-    
-  
-}
+    }
 
 
 public async Task UpdateAsync(ReservasUpdateDTO reservas)

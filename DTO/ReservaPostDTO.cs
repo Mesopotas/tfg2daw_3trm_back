@@ -16,7 +16,6 @@ public class ReservaPostDTO
 public class LineasPostReservaDTO
 {
     public int IdPuestoTrabajo { get; set; }
-    public int IdTramoHorario { get; set; }
-}
+ public int IdDisponibilidad { get; set; }}
 
 }
