@@ -78,7 +78,7 @@ CREATE TABLE CaracteristicasSala ( -- complementos de la sala
     IdCaracteristica INT IDENTITY(1,1) PRIMARY KEY,
     Nombre VARCHAR(100), -- Ejemplo: "Internet", "Proyector"
     Descripcion VARCHAR(250),
-    PrecioAniadido DECIMAL(3,2), -- será un %, eg. si es 1,5: el precio total de las sillas + su 1,5%, 
+    PrecioAniadido DECIMAL(3,2),
 
 )
 
@@ -217,491 +217,152 @@ INSERT INTO TramosHorarios (HoraInicio, HoraFin)
 VALUES ('18:00', '19:00');
 
 
-
--- inserts de prueba
-
-
--- 5 Inserts para la tabla Sedes
+-- INSERTS PARA SEDES (5 en España con información completa)
 INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
-VALUES ('España', 'Madrid', 'Calle Gran Vía 32', '28013', 'Planta 4', 'https://ejemplo.com/imagenes/sede_madrid.jpg', '40.4200', '-3.7050', 'Edificio céntrico con vistas al centro');
+VALUES 
+('España', 'Madrid', 'Calle Gran Vía 28', '28013', 'Planta 4', 'https://example.com/images/madrid.jpg', '40.4200', '-3.7025', 'Edificio histórico con vistas a Gran Vía'),
+('España', 'Barcelona', 'Passeig de Gràcia 92', '08008', 'Planta 2', 'https://example.com/images/barcelona.jpg', '41.3950', '2.1534', 'Junto a Casa Milà'),
+('España', 'Valencia', 'Calle Colón 60', '46004', 'Planta 3', 'https://example.com/images/valencia.jpg', '39.4697', '-0.3774', 'Zona comercial principal'),
+('España', 'Sevilla', 'Avenida de la Constitución 12', '41004', 'Planta 1', 'https://example.com/images/sevilla.jpg', '37.3886', '-5.9953', 'Cerca de la Catedral'),
+('España', 'Bilbao', 'Gran Vía Don Diego López de Haro 38', '48009', 'Planta 5', 'https://example.com/images/bilbao.jpg', '43.2630', '-2.9350', 'Vista al río Nervión');
 
-INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
-VALUES ('España', 'Barcelona', 'Passeig de Gràcia 77', '08008', 'Planta 2', 'https://ejemplo.com/imagenes/sede_barcelona.jpg', '41.3950', '2.1609', 'Zona comercial Premium');
+-- ACTUALIZAR TIPOS DE PUESTOS DE TRABAJO (ajustar precios según requerimientos)
+UPDATE TiposPuestosTrabajo SET Precio = 2.00 WHERE IdTipoPuestoTrabajo = 1; -- Publica 2€/hora
+UPDATE TiposPuestosTrabajo SET Precio = 5.00 WHERE IdTipoPuestoTrabajo = 2; -- Privada 5€/hora
 
-INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
-VALUES ('España', 'Valencia', 'Calle Colón 15', '46004', 'Planta 1', 'https://ejemplo.com/imagenes/sede_valencia.jpg', '39.4699', '-0.3773', 'Cerca del centro histórico');
-
-INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
-VALUES ('España', 'Sevilla', 'Avenida de la Constitución 10', '41004', 'Planta 3', 'https://ejemplo.com/imagenes/sede_sevilla.jpg', '37.3886', '-5.9953', 'Al lado de la Catedral');
-
-INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, Latitud, Longitud, Observaciones)
-VALUES ('España', 'Bilbao', 'Gran Vía Don Diego López de Haro 12', '48001', 'Planta 5', 'https://ejemplo.com/imagenes/sede_bilbao.jpg', '43.2630', '-2.9350', 'Vistas al Guggenheim');
-
--- 5 Inserts para la tabla TiposPuestosTrabajo (2 ya existen en su script original)
-INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
-VALUES ('Mesa individual', 'https://ejemplo.com/imagenes/mesa_individual.png', 'Mesa individual para una persona', 20.00);
-
-INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
-VALUES ('Mesa compartida', 'https://ejemplo.com/imagenes/mesa_compartida.png', 'Mesa para cuatro personas', 12.00);
-
-INSERT INTO TiposPuestosTrabajo (Nombre, Imagen_URL, Descripcion, Precio)
-VALUES ('Espacio premium', 'https://ejemplo.com/imagenes/espacio_premium.png', 'Espacio con monitor adicional y mejores vistas', 25.00);
-
--- 5 Inserts para la tabla TiposSalas
+-- INSERTAR TIPOS DE SALAS (4 tipos según requerimientos)
 INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
-VALUES ('Sala común general', 10, 4, 0, 'Espacio abierto compartido', 1);
+VALUES 
+('Sala Grande Pública', 10, 40, 0, 'Sala grande de trabajo colaborativo', 1),
+('Sala Mediana Pública', 8, 32, 0, 'Sala mediana de trabajo colaborativo', 1),
+('Sala Pequeña Pública', 3, 12, 0, 'Sala pequeña de trabajo colaborativo', 1),
+('Sala Privada', 5, 20, 1, 'Sala privada para equipos', 2);
 
-INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
-VALUES ('Sala privada pequeña', 2, 4, 1, 'Sala privada para reuniones pequeñas', 2);
-
-INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
-VALUES ('Sala privada mediana', 4, 4, 1, 'Sala privada para equipos medianos', 2);
-
-INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
-VALUES ('Sala premium', 5, 2, 1, 'Sala con servicios exclusivos', 5);
-
-INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
-VALUES ('Sala de conferencias', 1, 10, 1, 'Sala para presentaciones', 2);
-
--- 5 Inserts para la tabla Salas
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Coworking Madrid Central', 'https://ejemplo.com/imagenes/sala_madrid1.jpg', 40, 1, 1, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Reuniones Barcelona', 'https://ejemplo.com/imagenes/sala_barcelona1.jpg', 8, 2, 2, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Espacio Valencia Creativo', 'https://ejemplo.com/imagenes/sala_valencia1.jpg', 16, 3, 3, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Premium Sevilla', 'https://ejemplo.com/imagenes/sala_sevilla1.jpg', 10, 4, 4, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Auditorio Bilbao', 'https://ejemplo.com/imagenes/sala_bilbao1.jpg', 10, 5, 5, 0);
-
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Madrid Premium', 'https://ejemplo.com/imagenes/sala_madrid2.jpg', 8, 2, 1, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Madrid Reuniones', 'https://ejemplo.com/imagenes/sala_madrid3.jpg', 12, 3, 1, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Madrid Conferencias', 'https://ejemplo.com/imagenes/sala_madrid4.jpg', 4, 5, 1, 0);
-
--- Para la sede 2 (Barcelona) - Ya existe 1 sala, añadimos 3 más
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Barcelona Coworking', 'https://ejemplo.com/imagenes/sala_barcelona2.jpg', 12, 1, 2, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Barcelona Premium', 'https://ejemplo.com/imagenes/sala_barcelona3.jpg', 4, 4, 2, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Barcelona Conferencias', 'https://ejemplo.com/imagenes/sala_barcelona4.jpg', 8, 5, 2, 0);
-
--- Para la sede 3 (Valencia) - Ya existe 1 sala, añadimos 3 más
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Valencia Coworking', 'https://ejemplo.com/imagenes/sala_valencia2.jpg', 8, 1, 3, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Valencia Premium', 'https://ejemplo.com/imagenes/sala_valencia3.jpg', 4, 4, 3, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Valencia Conferencias', 'https://ejemplo.com/imagenes/sala_valencia4.jpg', 12, 5, 3, 0);
-
--- Para la sede 4 (Sevilla) - Ya existe 1 sala, añadimos 3 más
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Sevilla Coworking', 'https://ejemplo.com/imagenes/sala_sevilla2.jpg', 12, 1, 4, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Sevilla Reuniones', 'https://ejemplo.com/imagenes/sala_sevilla3.jpg', 8, 3, 4, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Sevilla Conferencias', 'https://ejemplo.com/imagenes/sala_sevilla4.jpg', 4, 5, 4, 0);
-
--- Para la sede 5 (Bilbao) - Ya existe 1 sala, añadimos 3 más
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Bilbao Coworking', 'https://ejemplo.com/imagenes/sala_bilbao2.jpg', 8, 1, 5, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Bilbao Reuniones', 'https://ejemplo.com/imagenes/sala_bilbao3.jpg', 4, 2, 5, 0);
-
-INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede, Bloqueado)
-VALUES ('Sala Bilbao Premium', 'https://ejemplo.com/imagenes/sala_bilbao4.jpg', 12, 4, 5, 0);
-
--- 5 Inserts para la tabla CaracteristicasSala
+-- CARACTERÍSTICAS DE SALAS (5 características)
 INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
-VALUES ('WiFi Alta Velocidad', 'Conexión fibra 1Gbps', 0.10);
+VALUES 
+('Ordenadores incorporados', 'Puestos con ordenadores de alta gama instalados', 0.50),
+('Asientos libres', 'Solo sillas y mesas, necesario traer portátil', 0.00),
+('Habitaciones individuales para llamadas', 'Cabinas insonorizadas para videoconferencias', 0.25),
+('Lockers para usuarios', 'Taquillas seguras para pertenencias personales', 0.15),
+('Puerta por llave magnética', 'Acceso seguro mediante tarjeta magnética', 0.20);
 
-INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
-VALUES ('Proyector 4K', 'Proyector de alta definición con HDMI', 0.15);
+-- INSERTAR SALAS (4 salas por sede, cada una de un tipo)
+-- Para la sede de Madrid (IdSede = 1)
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
+VALUES 
+('Madrid Grande', 'https://example.com/images/madrid_grande.jpg', 40, 1, 1),
+('Madrid Mediana', 'https://example.com/images/madrid_mediana.jpg', 32, 2, 1),
+('Madrid Pequeña', 'https://example.com/images/madrid_pequena.jpg', 12, 3, 1),
+('Madrid Privada', 'https://example.com/images/madrid_privada.jpg', 20, 4, 1);
 
-INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
-VALUES ('Pizarra Digital', 'Pizarra interactiva con conexión a dispositivos', 0.12);
+-- Para la sede de Barcelona (IdSede = 2)
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
+VALUES 
+('Barcelona Grande', 'https://example.com/images/barcelona_grande.jpg', 40, 1, 2),
+('Barcelona Mediana', 'https://example.com/images/barcelona_mediana.jpg', 32, 2, 2),
+('Barcelona Pequeña', 'https://example.com/images/barcelona_pequena.jpg', 12, 3, 2),
+('Barcelona Privada', 'https://example.com/images/barcelona_privada.jpg', 20, 4, 2);
 
-INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
-VALUES ('Sistema de Videoconferencia', 'Equipo completo para reuniones virtuales', 0.20);
+-- Para la sede de Valencia (IdSede = 3)
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
+VALUES 
+('Valencia Grande', 'https://example.com/images/valencia_grande.jpg', 40, 1, 3),
+('Valencia Mediana', 'https://example.com/images/valencia_mediana.jpg', 32, 2, 3),
+('Valencia Pequeña', 'https://example.com/images/valencia_pequena.jpg', 12, 3, 3),
+('Valencia Privada', 'https://example.com/images/valencia_privada.jpg', 20, 4, 3);
 
-INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
-VALUES ('Café Premium', 'Servicio de café de especialidad incluido', 0.05);
+-- Para la sede de Sevilla (IdSede = 4)
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
+VALUES 
+('Sevilla Grande', 'https://example.com/images/sevilla_grande.jpg', 40, 1, 4),
+('Sevilla Mediana', 'https://example.com/images/sevilla_mediana.jpg', 32, 2, 4),
+('Sevilla Pequeña', 'https://example.com/images/sevilla_pequena.jpg', 12, 3, 4),
+('Sevilla Privada', 'https://example.com/images/sevilla_privada.jpg', 20, 4, 4);
 
--- 5 Inserts para la tabla SalaConCaracteristicas
+-- Para la sede de Bilbao (IdSede = 5)
+INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
+VALUES 
+('Bilbao Grande', 'https://example.com/images/bilbao_grande.jpg', 40, 1, 5),
+('Bilbao Mediana', 'https://example.com/images/bilbao_mediana.jpg', 32, 2, 5),
+('Bilbao Pequeña', 'https://example.com/images/bilbao_pequena.jpg', 12, 3, 5),
+('Bilbao Privada', 'https://example.com/images/bilbao_privada.jpg', 20, 4, 5);
+
+-- INSERTAR RELACIÓN SALA CON CARACTERÍSTICAS (al menos una característica por sala)
+-- Para Madrid
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
-VALUES (1, 1);
+VALUES 
+(1, 1), -- Madrid Grande: Ordenadores incorporados
+(1, 4), -- Madrid Grande: Lockers para usuarios
+(2, 2), -- Madrid Mediana: Asientos libres
+(3, 2), -- Madrid Pequeña: Asientos libres
+(3, 3), -- Madrid Pequeña: Habitaciones individuales para llamadas
+(4, 5); -- Madrid Privada: Puerta por llave magnética
 
+-- Para Barcelona
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
-VALUES (2, 2);
+VALUES 
+(5, 1), -- Barcelona Grande: Ordenadores incorporados
+(6, 2), -- Barcelona Mediana: Asientos libres
+(6, 3), -- Barcelona Mediana: Habitaciones individuales para llamadas
+(7, 2), -- Barcelona Pequeña: Asientos libres
+(8, 5); -- Barcelona Privada: Puerta por llave magnética
 
+-- Para Valencia
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
-VALUES (3, 3);
+VALUES 
+(9, 1),  -- Valencia Grande: Ordenadores incorporados
+(10, 2), -- Valencia Mediana: Asientos libres
+(11, 3), -- Valencia Pequeña: Habitaciones individuales para llamadas
+(12, 4), -- Valencia Privada: Lockers para usuarios
+(12, 5); -- Valencia Privada: Puerta por llave magnética
 
+-- Para Sevilla
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
-VALUES (4, 4);
+VALUES 
+(13, 1), -- Sevilla Grande: Ordenadores incorporados
+(14, 2), -- Sevilla Mediana: Asientos libres
+(15, 3), -- Sevilla Pequeña: Habitaciones individuales para llamadas
+(16, 5); -- Sevilla Privada: Puerta por llave magnética
 
+-- Para Bilbao
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
-VALUES (5, 5);
-
--- 5 Inserts para la tabla ZonasTrabajo
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona General Madrid', 1);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Reuniones Barcelona', 2);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Creativa Valencia', 3);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Premium Sevilla', 4);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Conferencias Bilbao', 5);
-
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Premium Madrid', 6);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Reuniones Madrid', 7);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Conferencias Madrid', 8);
-
--- Para las nuevas salas de Barcelona
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Coworking Barcelona', 9);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Premium Barcelona', 10);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Conferencias Barcelona', 11);
-
--- Para las nuevas salas de Valencia
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Coworking Valencia', 12);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Premium Valencia', 13);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Conferencias Valencia', 14);
-
--- Para las nuevas salas de Sevilla
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Coworking Sevilla', 15);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Reuniones Sevilla', 16);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Conferencias Sevilla', 17);
-
--- Para las nuevas salas de Bilbao
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Coworking Bilbao', 18);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Reuniones Bilbao', 19);
-
-INSERT INTO ZonasTrabajo (Descripcion, IdSala)
-VALUES ('Zona Premium Bilbao', 20);
-
--- 5 Inserts para la tabla PuestosTrabajo
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_madrid1.jpg', 1, 1, 1, 0);
-
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona1.jpg', 1, 2, 2, 0);
-
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_valencia1.jpg', 1, 3, 3, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla1.jpg', 1, 4, 4, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES (1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao1.jpg', 1, 5, 5, 0);
-
-
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
 VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_madrid_premium.jpg', 1, 6, 6, 0);
+(17, 1), -- Bilbao Grande: Ordenadores incorporados
+(18, 2), -- Bilbao Mediana: Asientos libres
+(19, 3), -- Bilbao Pequeña: Habitaciones individuales para llamadas
+(20, 4), -- Bilbao Privada: Lockers para usuarios
+(20, 5); -- Bilbao Privada: Puerta por llave magnética
 
--- Para la sala 7 (Madrid Reuniones) - 12 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
+-- INSERTAR ZONAS DE TRABAJO (una por sala)
+INSERT INTO ZonasTrabajo (Descripcion, IdSala)
 VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(1, 3, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(2, 3, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(3, 3, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0),
-(4, 3, 'https://ejemplo.com/imagenes/puesto_madrid_reuniones.jpg', 1, 7, 7, 0);
+-- Madrid
+('Zona amplia con mesas espaciosas', 1),
+('Zona bien iluminada con mesas medianas', 2),
+('Zona tranquila con pocas mesas', 3),
+('Zona privada con mesas para equipos', 4),
+-- Barcelona
+('Zona amplia con vistas a la ciudad', 5),
+('Zona céntrica con mesas medianas', 6),
+('Zona tranquila y acogedora', 7),
+('Zona privada para reuniones de equipo', 8),
+-- Valencia
+('Zona amplia con luz natural', 9),
+('Zona mediterránea con mesas medianas', 10),
+('Zona compacta y funcional', 11),
+('Zona privada con decoración moderna', 12),
+-- Sevilla
+('Zona amplia con estilo andaluz', 13),
+('Zona acogedora con mesas medianas', 14),
+('Zona íntima con pocas mesas', 15),
+('Zona privada con aire acondicionado', 16),
+-- Bilbao
+('Zona amplia con estilo industrial', 17),
+('Zona moderna con mesas medianas', 18),
+('Zona pequeña pero bien equipada', 19),
+('Zona privada con vistas a la ciudad', 20);
 
--- Para la sala 8 (Madrid Conferencias) - 4 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_madrid_conf.jpg', 1, 8, 8, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_madrid_conf.jpg', 1, 8, 8, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_madrid_conf.jpg', 1, 8, 8, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_madrid_conf.jpg', 1, 8, 8, 0);
-
--- Para la sala 9 (Barcelona Coworking) - 12 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(1, 3, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(2, 3, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(3, 3, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0),
-(4, 3, 'https://ejemplo.com/imagenes/puesto_barcelona_cowork.jpg', 1, 9, 9, 0);
-
--- Para la sala 10 (Barcelona Premium) - 4 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_premium.jpg', 1, 10, 10, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_premium.jpg', 1, 10, 10, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_premium.jpg', 1, 10, 10, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_premium.jpg', 1, 10, 10, 0);
-
--- Para la sala 11 (Barcelona Conferencias) - 8 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_barcelona_conf.jpg', 1, 11, 11, 0);
-
--- Para la sala 12 (Valencia Coworking) - 8 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_valencia_cowork.jpg', 1, 12, 12, 0);
-
--- Para la sala 13 (Valencia Premium) - 4 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_valencia_premium.jpg', 1, 13, 13, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_valencia_premium.jpg', 1, 13, 13, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_valencia_premium.jpg', 1, 13, 13, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_valencia_premium.jpg', 1, 13, 13, 0);
-
--- Para la sala 14 (Valencia Conferencias) - 12 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(1, 3, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(2, 3, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(3, 3, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0),
-(4, 3, 'https://ejemplo.com/imagenes/puesto_valencia_conf.jpg', 1, 14, 14, 0);
-
--- Para la sala 15 (Sevilla Coworking) - 12 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(1, 3, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(2, 3, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(3, 3, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0),
-(4, 3, 'https://ejemplo.com/imagenes/puesto_sevilla_cowork.jpg', 1, 15, 15, 0);
-
--- Para la sala 16 (Sevilla Reuniones) - 8 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_sevilla_reuniones.jpg', 1, 16, 16, 0);
-
--- Para la sala 17 (Sevilla Conferencias) - 4 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_conf.jpg', 1, 17, 17, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_conf.jpg', 1, 17, 17, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_conf.jpg', 1, 17, 17, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_sevilla_conf.jpg', 1, 17, 17, 0);
-
--- Para la sala 18 (Bilbao Coworking) - 8 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_cowork.jpg', 1, 18, 18, 0);
-
--- Para la sala 19 (Bilbao Reuniones) - 4 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_reuniones.jpg', 1, 19, 19, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_reuniones.jpg', 1, 19, 19, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_reuniones.jpg', 1, 19, 19, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_reuniones.jpg', 1, 19, 19, 0);
-
--- Para la sala 20 (Bilbao Premium) - 12 asientos
-INSERT INTO PuestosTrabajo (NumeroAsiento, CodigoMesa, URL_Imagen, Disponible, IdZonaTrabajo, IdSala, Bloqueado)
-VALUES 
-(1, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(2, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(3, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(4, 1, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(1, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(2, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(3, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(4, 2, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(1, 3, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(2, 3, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(3, 3, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0),
-(4, 3, 'https://ejemplo.com/imagenes/puesto_bilbao_premium.jpg', 1, 20, 20, 0);
 
 
 
@@ -721,7 +382,19 @@ VALUES ('Carlos', 'Rodríguez Sánchez', 'carlos.rodriguez@email.com', 'Pass123$
 INSERT INTO Usuarios (Nombre, Apellidos, Email, Contrasenia, FechaRegistro, IdRol)
 VALUES ('Laura', 'Fernández Díaz', 'laura.fernandez@email.com', 'Pass123$Laura', GETDATE(), 2);
 
+/* PARA LOS ASIENTOS Y TRAMOS HORARIOS 
 
+EN CMD ESCRIBIR ESTE COMANDO
+curl -k -X POST https://localhost:7179/api/PuestosTrabajo/generarAsientosDeSalas
+
+Y LUEGO ESTE ( TARDA 2-3 MINS YA QUE HAY 520 ASIENTOS EN TOTAL Y CARGA LAS DISPONIBILIDADES DE CADA UNO TODO EL AÑO)
+
+curl -k -X POST https://localhost:7179/api/Disponibilidades/add/2025
+
+
+
+
+*/
 
 /* AÑADIR PROXIMAMENTE CONFORME TODO ESTE HECHO 
 CREATE TABLE Descuentos ( 

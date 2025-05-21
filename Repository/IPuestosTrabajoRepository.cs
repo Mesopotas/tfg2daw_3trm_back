@@ -16,6 +16,7 @@ namespace CoWorking.Repositories
         Task DeleteAsync(int id);
 
         Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(int idSala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
-        
+        Task GenerarAsientosDeSalas();
+
     }
 }
