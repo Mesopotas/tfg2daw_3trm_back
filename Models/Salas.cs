@@ -27,6 +27,10 @@ namespace Models
         [ForeignKey("IdTipoSala")]
         public TiposSalas TipoSala { get; set; }
 
+
+        public ICollection<ZonasTrabajo> ZonasTrabajo { get; set; }
+
+
         public Salas() { }
 
         public Salas(int idSala, string nombre, string urlImagen, int capacidad, int idTipoSala, int idSede, bool bloqueado = false)
@@ -38,6 +42,7 @@ namespace Models
             IdTipoSala = idTipoSala;
             IdSede = idSede;
             Bloqueado = bloqueado;
+            ZonasTrabajo = new HashSet<ZonasTrabajo>();
         }
     }
 }

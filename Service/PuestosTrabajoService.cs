@@ -52,5 +52,10 @@ namespace CoWorking.Service
             return await _puestosTrabajoRepository.GetPuestosWithAvailabilityBySalaAsync(idSala, fechaInicio, fechaFin, horaInicio, horaFin);
         }
     
+
+     public async Task GenerarAsientosDeSalas()
+        {
+            await _puestosTrabajoRepository.GenerarAsientosDeSalas();
+        }
     }
 }

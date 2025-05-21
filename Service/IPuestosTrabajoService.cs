@@ -14,5 +14,8 @@ namespace CoWorking.Service
 
         Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(int idsala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
 
+         Task GenerarAsientosDeSalas();
+
+
     }
 }
