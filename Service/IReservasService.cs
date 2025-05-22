@@ -15,5 +15,8 @@ namespace CoWorking.Service
 
         Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO);
 
+        Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha);
+
+
     }
 }

@@ -303,6 +303,17 @@ namespace CoWorking.Repositories
 
             return resultado;
         }
+
+          public async Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha)
+    {
+        var existe = await _context.Reservas
+        // si cumple esos 3 requisitos, existe, si el usuario no es el mismo o la fecha esta mal, devolverá false
+            .AnyAsync(r => r.IdReserva == idReserva &&
+                           r.IdUsuario == idUsuario &&
+                           r.Fecha.Date == fecha.Date);
+
+        return existe;
+    }
     }
 
 }

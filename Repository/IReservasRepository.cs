@@ -12,12 +12,15 @@ namespace CoWorking.Repositories
 
 
         Task UpdateAsync(ReservasUpdateDTO reservas);
-        
-       Task DeleteAsync(int id);
 
-    Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario);
+        Task DeleteAsync(int id);
 
-    Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO);
+        Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario);
+
+        Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO);
+
+        Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha);
+
 
     }
 }

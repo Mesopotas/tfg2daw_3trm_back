@@ -41,26 +41,30 @@ namespace CoWorking.Service
 
         public async Task DeleteAsync(int id)
         {
-           var reserva = await _reservasRepository.GetByIdAsync(id);
-           if (reserva == null)
-           {
-               //return NotFound();
-           }
-           await _reservasRepository.DeleteAsync(id);
-           //return NoContent();
+            var reserva = await _reservasRepository.GetByIdAsync(id);
+            if (reserva == null)
+            {
+                //return NotFound();
+            }
+            await _reservasRepository.DeleteAsync(id);
+            //return NoContent();
         }
 
 
         public async Task<List<GetReservasClienteDTO>> GetReservasUsuario(int idUsuario)
-{
-    return await _reservasRepository.GetReservasUsuarioAsync(idUsuario);
-}
+        {
+            return await _reservasRepository.GetReservasUsuarioAsync(idUsuario);
+        }
 
-public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
-{
-    return await _reservasRepository.CreateReservaConLineasAsync(reservaDTO);
-}
+        public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
+        {
+            return await _reservasRepository.CreateReservaConLineasAsync(reservaDTO);
+        }
 
-
+        public async Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha)
+                {
+                    return await _reservasRepository.ValidarReservaExisteQR(idReserva, idUsuario, fecha);
                 }
+
+    }
 }
