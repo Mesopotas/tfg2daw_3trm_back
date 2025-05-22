@@ -141,27 +141,32 @@ namespace CoWorking.Controllers
         [Produces("image/png")] // el endpoint respondera un png
         public async Task<IActionResult> GenerarQr(int id)
         {
-
+            // obtener la info de la reserva
             var reservaDTO = await _serviceReservas.GetByIdAsync(id);
 
             if (reservaDTO == null)
             {
-                return NotFound("Reserva no encontrada."); // devolver status 404 si no hay
+                return NotFound("Reserva no encontrada para generar el QR.");
             }
 
-            string jsonString = JsonSerializer.Serialize(reservaDTO); // respuesta json del getbyid
+            // construir el enlace al que deberá apuntar el QR, con los campos a validar siendo variables obtenidad del getbyid
+            string urlEndpointValidador = $"https://localhost:7179/api/Reservas/validarReservaQR" +
+                                   $"?idReserva={reservaDTO.IdReserva}" +
+                                   $"&idUsuario={reservaDTO.UsuarioId}" +
+                                   $"&fecha={reservaDTO.Fecha.ToString("yyyy-MM-dd")}"; // formato que el endpoint acepta
 
             byte[] qrCodeBytes;
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(jsonString, QRCodeGenerator.ECCLevel.Q)) // genera la libreria el qr de un json
+            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlEndpointValidador, QRCodeGenerator.ECCLevel.Q)) // genera el qr de la url con los campos variables
             {
                 using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
                 {
                     qrCodeBytes = qrCode.GetGraphic(5); // tamaño del qr autoajustado
                 }
             }
-            return File(qrCodeBytes, "image/png"); // devolver la imagen en png por http, para que la respuesta del swagge en lugar de un json sea la foto del qr
+            return File(qrCodeBytes, "image/png"); // respuesta png
         }
+
         
 
         // ejemplo: https://localhost:7179/api/Reservas/validarReservaQR?idReserva=2&idUsuario=2&fecha=2025-05-23
