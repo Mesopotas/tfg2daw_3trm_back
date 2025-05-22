@@ -183,21 +183,41 @@ namespace CoWorking.Repositories
 
 
 
-        public async Task DeleteAsync(int id)
+          public async Task DeleteAsync(int id)
         {
-            // Buscar la reserva por su ID
             var reserva = await _context.Reservas.FirstOrDefaultAsync(r => r.IdReserva == id);
 
-            if (reserva != null)// si existe, procede a eliminar
+            if (reserva != null) // si la reserva existe, sino no se hace nada
             {
-                // primero elimina las linea asociadas para evitar que no se pueda por la FK
+                // obtener todas las lineas asociadas a la reserva
                 var lineas = await _context.Lineas
                     .Where(l => l.IdReserva == id)
                     .ToListAsync();
 
-                _context.Lineas.RemoveRange(lineas);
+                // ids de los puestos de trabajo asociados a las lineas de la reserva
+                var puestoTrabajoIds = lineas.Select(l => l.IdPuestoTrabajo).Distinct().ToList();
 
+    
+                var disponibilidadesLiberar = await _context.Disponibilidades // las disponibilidades que tenia la reserva, se ponen libres (Estado = true)
+                    .Where(d => puestoTrabajoIds.Contains(d.IdPuestoTrabajo) &&
+                                d.Fecha.Date == reserva.Fecha.Date &&
+                                d.Estado == false)
+                                        //    disponibilidades que estaban asociadas a los puestos de trabajo de la reserva, en su fecha y que estaban ocupadas
+
+                    .ToListAsync();
+
+                foreach (var disponibles in disponibilidadesLiberar)
+                {
+                    disponibles.Estado = true;
+                    _context.Disponibilidades.Update(disponibles); // guardr todos como disponibles
+                }
+
+                _context.Lineas.RemoveRange(lineas); // borrar tosdas las lineas asociadas a la reserva
+
+                // eliminar la reserva
                 _context.Reservas.Remove(reserva);
+
+                // guardar todo
                 await _context.SaveChangesAsync();
             }
         }
