@@ -8,12 +8,29 @@ namespace Models.DTOs
         public int IdReserva { get; set; }
         public decimal PrecioTotal { get; set; }
 
-        public string? NombreSalaPrincipal { get; set; } 
+        public string? NombreSalaPrincipal { get; set; }
         public string? CiudadSedePrincipal { get; set; }
         public string? DireccionSedePrincipal { get; set; }
         public string? ImagenSalaPrincipal { get; set; }
 
         public string? RangoHorarioReserva { get; set; } // string ya que se devolverá formateado
         public int CantidadHorasReservadas { get; set; } // conteo de disponibilidades de la reserva
+    }
+
+    public class GetDetallesReservaDTO
+    {
+        public int IdReserva { get; set; }
+        public decimal PrecioTotal { get; set; }
+
+        public string? NombreSalaPrincipal { get; set; }
+        public string? CiudadSedePrincipal { get; set; }
+        public string? DireccionSedePrincipal { get; set; }
+        public string? ImagenSalaPrincipal { get; set; }
+
+        public string? RangoHorarioReserva { get; set; } // string ya que se devolverá formateado
+        public int CantidadHorasReservadas { get; set; } // conteo de disponibilidades de la reserva
+        
+        public string? AsientosReservados { get; set; } // asientos separados por comas
+
     }
 }

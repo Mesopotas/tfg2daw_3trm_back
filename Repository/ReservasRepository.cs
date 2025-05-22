@@ -324,16 +324,133 @@ namespace CoWorking.Repositories
             return resultado;
         }
 
-          public async Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha)
-    {
-        var existe = await _context.Reservas
-        // si cumple esos 3 requisitos, existe, si el usuario no es el mismo o la fecha esta mal, devolverá false
-            .AnyAsync(r => r.IdReserva == idReserva &&
-                           r.IdUsuario == idUsuario &&
-                           r.Fecha.Date == fecha.Date);
 
-        return existe;
+public async Task<GetDetallesReservaDTO?> GetResumenReservaAsync(int idReserva)
+{
+    // obtener la reserva y sus líneas asociadas
+    var reservaConLineasYDetalles = await _context.Reservas
+        .Where(r => r.IdReserva == idReserva) // filtro por ID
+        .Select(r => new
+        {
+            Reserva = r,
+            LineasDetalladas = r.Lineas
+                                    .Select(l => new
+                                    {
+                                        l.IdPuestoTrabajo,
+                                        Sala = l.PuestoTrabajo.Sala, // obtener salas
+                                        Sede = l.PuestoTrabajo.Sala.Sede  // obtener sedes en base a sala
+                                    })
+                                    .ToList() // añadir respuesta
+        })
+        .FirstOrDefaultAsync(); // primera reserva que coincida con todo
+
+    // no no se encuentra la reserva, devolver nulo
+    if (reservaConLineasYDetalles == null)
+    {
+        return null;
     }
+
+    var reserva = reservaConLineasYDetalles.Reserva;
+    var lineasDetalladas = reservaConLineasYDetalles.LineasDetalladas;
+
+    // obtener los ids de los puestos de la linea sin que se repitan
+    var puestoTrabajoIds = lineasDetalladas.Select(ld => ld.IdPuestoTrabajo).Distinct().ToList();
+
+    // obtener info de los puestos
+    var puestosTrabajo = await _context.PuestosTrabajo
+        .Where(pt => puestoTrabajoIds.Contains(pt.IdPuestoTrabajo))
+        .Select(pt => new { pt.IdPuestoTrabajo, pt.NumeroAsiento, pt.CodigoMesa })
+        .ToListAsync();
+
+    // formatear el output del string de asientos, separandolos por comas y dandoles formato legible
+    var asientosReservados = string.Join(", ", 
+        puestosTrabajo
+            .OrderBy(pt => pt.CodigoMesa)
+            .ThenBy(pt => pt.NumeroAsiento)
+            .Select(pt => $"Mesa {pt.CodigoMesa} - Asiento {pt.NumeroAsiento}"));
+
+    // si no hay asientos que encuentre, solo cantidad, aunque no deberia suceder nunca
+    if (string.IsNullOrEmpty(asientosReservados))
+    {
+        asientosReservados = $"{puestoTrabajoIds.Count} puesto(s) de trabajo";
+    }
+
+    // misma logica que GetReservasUsuarioAsync
+    var disponibilidadesAsociadas = await _context.Disponibilidades
+        .Where(d => puestoTrabajoIds.Contains(d.IdPuestoTrabajo) &&
+                    d.Estado == false &&
+                    d.Fecha.Date >= reserva.Fecha.Date)
+        .Include(d => d.TramoHorario)
+        .OrderBy(d => d.Fecha) // primero se ordena por fechas
+        .ThenBy(d => d.TramoHorario.HoraInicio) // luego por horas
+        .ToListAsync();
+
+    // horas reservas el conteo de disponibilidades que haya
+    int cantidadHorasReservadas = disponibilidadesAsociadas.Count;
+
+    // igual que GetReservasUsuarioAsync para dar con la fecha y hora de inicio y fin
+    string rangoHorario = "Horario no disponible";
+    if (disponibilidadesAsociadas.Any())
+    {
+        // fecha de inicio y fin (mas grande y mas pequeña)
+        DateTime minFecha = disponibilidadesAsociadas.Min(d => d.Fecha);
+        DateTime maxFecha = disponibilidadesAsociadas.Max(d => d.Fecha);
+
+        // hora de inicio
+        TimeSpan minHoraInicio = disponibilidadesAsociadas
+                                    .Where(d => d.Fecha == minFecha)
+                                    .Min(d => d.TramoHorario.HoraInicio);
+
+        //  hora de fin
+        TimeSpan maxHoraFin = disponibilidadesAsociadas
+                                    .Where(d => d.Fecha == maxFecha)
+                                    .Max(d => d.TramoHorario.HoraFin);
+
+        if (minFecha.Date == maxFecha.Date)
+        {
+            // formato legible para 1 dia solo
+            rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxHoraFin:hh\\:mm}";
+        }
+        else
+        {
+            // formato legible para varios dias
+            rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxFecha:dd/MM/yyyy} {maxHoraFin:hh\\:mm}";
+        }
+    }
+    else if (lineasDetalladas.Any())
+    {
+        // si no hay disponibilidades, pero si lineas, se pone el rango de la reserva, aunque no deberia suceder en ningun caso
+        rangoHorario = $"{reserva.Fecha:dd/MM/yyyy} (Horario no especificado)";
+    }
+
+    // informacion de sala y sede en base a la primera linea, ya que es todo de la misma sala y sede
+    var primeraLineaValida = lineasDetalladas.FirstOrDefault(ld => ld.Sala != null && ld.Sede != null);
+
+    // output final con toda la data
+    return new GetDetallesReservaDTO
+    {
+        IdReserva = reserva.IdReserva,
+        PrecioTotal = reserva.PrecioTotal,
+        CantidadHorasReservadas = cantidadHorasReservadas,
+        
+        NombreSalaPrincipal = primeraLineaValida?.Sala?.Nombre,
+        ImagenSalaPrincipal = primeraLineaValida?.Sala?.URL_Imagen,
+        CiudadSedePrincipal = primeraLineaValida?.Sede?.Ciudad,
+        DireccionSedePrincipal = primeraLineaValida?.Sede?.Direccion,
+        RangoHorarioReserva = rangoHorario,
+        AsientosReservados = asientosReservados
+    };
+}
+        public async Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha)
+        {
+            var existe = await _context.Reservas
+                // si cumple esos 3 requisitos, existe, si el usuario no es el mismo o la fecha esta mal, devolverá false
+                .AnyAsync(r => r.IdReserva == idReserva &&
+                               r.IdUsuario == idUsuario &&
+                               r.Fecha.Date == fecha.Date);
+
+            return existe;
+        }
     }
 
 }

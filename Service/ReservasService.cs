@@ -51,6 +51,12 @@ namespace CoWorking.Service
         }
 
 
+      public async Task<GetDetallesReservaDTO> GetResumenReservaAsync(int id)
+        {
+            return await _reservasRepository.GetResumenReservaAsync(id);
+        }
+
+
         public async Task<List<GetReservasClienteDTO>> GetReservasUsuario(int idUsuario)
         {
             return await _reservasRepository.GetReservasUsuarioAsync(idUsuario);

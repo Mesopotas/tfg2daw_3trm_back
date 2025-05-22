@@ -94,6 +94,25 @@ namespace CoWorking.Controllers
             return Ok(reservaDetalles);
         }
 
+[HttpGet("resumencompra/{id}")]
+public async Task<ActionResult<GetDetallesReservaDTO>> GetResumenReserva(int id)
+{
+    try
+    {
+        var resumenReserva = await _serviceReservas.GetResumenReservaAsync(id);
+        
+        if (resumenReserva == null)
+        {
+            return NotFound($"No se encontró la reserva con ID {id}");
+        }
+        
+        return Ok(resumenReserva);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error al obtener el resumen de la reserva: {ex.Message}");
+    }
+}
         /*
         EJEMPLO BODY PARA EL ENDPOINT (todos los IDs deben existir en la base de datos)
         {

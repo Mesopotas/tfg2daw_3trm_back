@@ -17,6 +17,7 @@ namespace CoWorking.Repositories
 
         Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario);
 
+        Task<GetDetallesReservaDTO> GetResumenReservaAsync(int id);
         Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO);
 
         Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha);
