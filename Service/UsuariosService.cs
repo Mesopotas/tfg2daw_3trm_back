@@ -50,6 +50,10 @@ namespace CoWorking.Service
             //return NoContent();
         }
 
+    public async Task<bool> DeleteByEmailAsync(string email)
+    {
+        return await _usuariosRepository.DeleteByEmailAsync(email);
+    }
         public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email)
         {
             return await _usuariosRepository.GetClientesByEmailAsync(email);

@@ -76,8 +76,44 @@ public async Task UpdateAsync(UsuarioUpdateDTO usuario)
             }
         }
 
+    public async Task<bool> DeleteByEmailAsync(string email)
+    {
+        // buscar el email
+        var userToDelete = await _context.Usuarios
+                                     .FirstOrDefaultAsync(u => u.Email == email);
 
+        if (userToDelete == null)
+        {
+            // no existe ese email
+            return false;
+        }
 
+        // seleccionar lineas y reservas que tenga ese usuario, para evitar conflictos de FK
+        var userReservas = await _context.Reservas
+                                        .Where(r => r.IdUsuario == userToDelete.IdUsuario)
+                                        .Include(r => r.Lineas) // para poder borrarlas tb
+                                        .ToListAsync();
+
+        if (userReservas.Any()) // si hay alguna reserva
+        {
+            foreach (var reserva in userReservas)
+            {
+                //  borrar lineas de cada reserva
+                if (reserva.Lineas != null && reserva.Lineas.Any())
+                {
+                    _context.Lineas.RemoveRange(reserva.Lineas);
+                }
+            }
+            // borrar reservas
+            _context.Reservas.RemoveRange(userReservas);
+        }
+
+        // borrar usuario y guardar
+        _context.Usuarios.Remove(userToDelete);
+        await _context.SaveChangesAsync();
+
+        return true; // devolver true
+    }
 
 
         public async Task<List<UsuarioClienteDTO>> GetClientesByEmailAsync(string email)
