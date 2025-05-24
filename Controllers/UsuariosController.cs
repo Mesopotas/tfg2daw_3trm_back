@@ -48,6 +48,24 @@ namespace CoWorking.Controllers
             return CreatedAtAction(nameof(CreateUsuario), new { id = usuarios.IdUsuario }, usuarios);
         }
 
+        [HttpDelete("delete-admin-email/{email}")] // DELETE api/usuarios/delete-admin-email/{email}
+                public async Task<IActionResult> DeleteUserByEmail(string email)
+                {
+                    if (string.IsNullOrWhiteSpace(email))
+                    {
+                        return BadRequest("El email no puede estar vacío.");
+                    }
+
+                    var borrarUsuario = await _serviceUsuarios.DeleteByEmailAsync(email); // llamar al service que llamara al repository
+
+                    if (!borrarUsuario)
+                    {
+                        return NotFound($"Usuario con email '{email}' no encontrado o no se pudo eliminar.");
+                    }
+
+                    return NoContent(); // 204, Ok
+                }
+      
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUsuario(int id, UsuarioUpdateDTO updatedUsuario)
