@@ -106,10 +106,52 @@ namespace CoWorking.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var entidad = await _context.Salas.FindAsync(id);
-            if (entidad != null)
+            var sala = await _context.Salas.FindAsync(id);
+            if (sala != null)
             {
-                _context.Salas.Remove(entidad);
+
+                //  Características de la sala
+                var caracteristicas = _context.SalaConCaracteristicas.Where(c => c.IdSala == id);
+                _context.SalaConCaracteristicas.RemoveRange(caracteristicas);
+
+                //  Zonas de trabajo
+                var zonas = _context.ZonasTrabajo.Where(z => z.IdSala == id).ToList();
+
+                // Eliminar puestos de trabajo de cada zona
+                foreach (var zona in zonas)
+                {
+                    var puestos = _context.PuestosTrabajo.Where(p => p.IdZonaTrabajo == zona.IdZonaTrabajo).ToList();
+
+                    //  Eliminar disponibilidades asociadas a los puestos
+                    foreach (var puesto in puestos)
+                    {
+                        var disponibilidades = _context.Disponibilidades.Where(d => d.IdPuestoTrabajo == puesto.IdPuestoTrabajo);
+                        _context.Disponibilidades.RemoveRange(disponibilidades);
+
+                        var lineas = _context.Lineas.Where(l => l.IdPuestoTrabajo == puesto.IdPuestoTrabajo);
+                        _context.Lineas.RemoveRange(lineas);
+                    }
+
+                    _context.PuestosTrabajo.RemoveRange(puestos);
+                }
+
+                // Eliminar zonas
+                _context.ZonasTrabajo.RemoveRange(zonas);
+
+                //  Eliminar puestos de trabajo que no tengan zona (si los hay)
+                var puestosSinZona = _context.PuestosTrabajo.Where(p => p.IdSala == id && p.IdZonaTrabajo == null);
+                foreach (var puesto in puestosSinZona)
+                {
+                    var disponibilidades = _context.Disponibilidades.Where(d => d.IdPuestoTrabajo == puesto.IdPuestoTrabajo);
+                    _context.Disponibilidades.RemoveRange(disponibilidades);
+
+                    var lineas = _context.Lineas.Where(l => l.IdPuestoTrabajo == puesto.IdPuestoTrabajo);
+                    _context.Lineas.RemoveRange(lineas);
+                }
+                _context.PuestosTrabajo.RemoveRange(puestosSinZona);
+
+                // Finalmente, eliminar la sala
+                _context.Salas.Remove(sala);
                 await _context.SaveChangesAsync();
             }
         }
@@ -152,7 +194,7 @@ namespace CoWorking.Repositories
                       TotalPuestos = _context.PuestosTrabajo // selecciona puestos
                           .Count(puestos => puestos.IdSala == item.sala.IdSala) // cuenta todos los puestos de la sala
                   })
-          // filtro final: solo incluye salas que tienen al menos un puesto disponible calculado
+                  // filtro final: solo incluye salas que tienen al menos un puesto disponible calculado
                   .Where(item => item.PuestosDisponibles > 0) // solo salas con puestos disponibles > 0
                                                               // proyeccion final al dto de resultado
                   .Select(item => new SalasFiltradoDTO // proyeccion final al dto

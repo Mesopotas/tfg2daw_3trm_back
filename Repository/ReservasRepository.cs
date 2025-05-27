@@ -434,7 +434,6 @@ public async Task<GetDetallesReservaDTO?> GetResumenReservaAsync(int idReserva)
         CantidadHorasReservadas = cantidadHorasReservadas,
         
         NombreSalaPrincipal = primeraLineaValida?.Sala?.Nombre,
-        ImagenSalaPrincipal = primeraLineaValida?.Sala?.URL_Imagen,
         CiudadSedePrincipal = primeraLineaValida?.Sede?.Ciudad,
         DireccionSedePrincipal = primeraLineaValida?.Sede?.Direccion,
         RangoHorarioReserva = rangoHorario,
