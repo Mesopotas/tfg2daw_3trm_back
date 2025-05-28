@@ -20,19 +20,22 @@ namespace CoWorking.Repositories
     Task RemoveCaracteristicaFromSalaAsync(int idSala, int idCaracteristica);
     Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int idSala);
 
+
+    Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo);
+
   }
 
   /*
-    public interface ISalasRepository
-    {
-        Task<List<SalasDetallesDTO>> GetAllAsync();
-        Task<SalasDetallesDTO> GetByIdAsync(int id);
-        Task<List<SalasDTO>> GetByIdSedeAsync(int id);
-        Task AddAsync(Salas salas);
-      //  Task UpdateAsync(Salas salas);
-        Task DeleteAsync(int id);
+        public interface ISalasRepository
+        {
+            Task<List<SalasDetallesDTO>> GetAllAsync();
+            Task<SalasDetallesDTO> GetByIdAsync(int id);
+            Task<List<SalasDTO>> GetByIdSedeAsync(int id);
+            Task AddAsync(Salas salas);
+          //  Task UpdateAsync(Salas salas);
+            Task DeleteAsync(int id);
 
-    }
+        }
 
-  */
-}
+      */
+  }

@@ -322,7 +322,26 @@ public async Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int
             })
         .ToListAsync();
 }
+public async Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo)
+{
+    // Find the PuestoTrabajo first
+    var puesto = await _context.PuestosTrabajo
+        .Where(p => p.IdPuestoTrabajo == idPuestoTrabajo)
+        .FirstOrDefaultAsync();
 
+    if (puesto == null)
+    {
+        return null; // no existe el puesto, devuelve nulo
+    }
+
+    // buscar sala por IdSala del puesto
+    var sala = await _context.Salas
+        .Where(s => s.IdSala == puesto.IdSala)
+        .Select(s => s.Nombre) // solo el nombre
+        .FirstOrDefaultAsync();
+
+    return sala;
+}
     }
 }
 

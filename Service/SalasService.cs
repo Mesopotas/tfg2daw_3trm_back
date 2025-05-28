@@ -80,6 +80,13 @@ namespace CoWorking.Service
         {
             return await _salasRepository.GetCaracteristicasBySalaAsync(idSala);
         }
+
+
+        public async Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo)
+        {
+            return await _salasRepository.GetSalaNameByPuestoTrabajoIdAsync(idPuestoTrabajo);
+        }
+
     }
 }
 

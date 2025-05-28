@@ -115,74 +115,95 @@ namespace CoWorking.Controllers
 
             return Ok(salas);
         }
+
+        [HttpGet("con-caracteristicas")]
+        public async Task<ActionResult<List<SalasConCaracteristicasDTO>>> GetAllWithCaracteristicas()
+        {
+            try
+            {
+                var salas = await _serviceSalas.GetAllWithCaracteristicasAsync();
+                return Ok(salas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+        [HttpPost("{idSala}/caracteristicas/{idCaracteristica}")]
+        public async Task<ActionResult> AddCaracteristicaToSala(int idSala, int idCaracteristica)
+        {
+            try
+            {
+                await _serviceSalas.AddCaracteristicaToSalaAsync(idSala, idCaracteristica);
+                return Ok(new { message = $"Característica {idCaracteristica} agregada a la sala {idSala} exitosamente" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{idSala}/caracteristicas/{idCaracteristica}")]
+        public async Task<ActionResult> RemoveCaracteristicaFromSala(int idSala, int idCaracteristica)
+        {
+            try
+            {
+                await _serviceSalas.RemoveCaracteristicaFromSalaAsync(idSala, idCaracteristica);
+                return Ok(new { message = $"Característica {idCaracteristica} eliminada de la sala {idSala} exitosamente" });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{idSala}/caracteristicas")]
+        public async Task<ActionResult<List<CaracteristicaSalaDTO>>> GetCaracteristicasBySala(int idSala)
+        {
+            try
+            {
+                var caracteristicas = await _serviceSalas.GetCaracteristicasBySalaAsync(idSala);
+                return Ok(caracteristicas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
+        }
+
+    [HttpGet("puesto/{idPuestoTrabajo}/sala-nombre")] // EJ: /api/Salas/puesto/123/sala-nombre
+            public async Task<ActionResult<string>> GetSalaNameByPuestoTrabajo(int idPuestoTrabajo)
+            {
+                try
+                {
+                    var salaName = await _serviceSalas.GetSalaNameByPuestoTrabajoIdAsync(idPuestoTrabajo);
+
+                    if (salaName == null)
+                    {
+                        return NotFound($"No se encontró el nombre de la sala para el puesto de trabajo con ID {idPuestoTrabajo}.");
+                    }
+
+                    return Ok(salaName);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Error del servidor: {ex.Message}");
+                }
+            }
     
-    [HttpGet("con-caracteristicas")]
-public async Task<ActionResult<List<SalasConCaracteristicasDTO>>> GetAllWithCaracteristicas()
-{
-    try
-    {
-        var salas = await _serviceSalas.GetAllWithCaracteristicasAsync();
-        return Ok(salas);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-    }
-}
-
-[HttpPost("{idSala}/caracteristicas/{idCaracteristica}")]
-public async Task<ActionResult> AddCaracteristicaToSala(int idSala, int idCaracteristica)
-{
-    try
-    {
-        await _serviceSalas.AddCaracteristicaToSalaAsync(idSala, idCaracteristica);
-        return Ok(new { message = $"Característica {idCaracteristica} agregada a la sala {idSala} exitosamente" });
-    }
-    catch (ArgumentException ex)
-    {
-        return BadRequest(ex.Message);
-    }
-    catch (InvalidOperationException ex)
-    {
-        return Conflict(ex.Message);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-    }
-}
-
-[HttpDelete("{idSala}/caracteristicas/{idCaracteristica}")]
-public async Task<ActionResult> RemoveCaracteristicaFromSala(int idSala, int idCaracteristica)
-{
-    try
-    {
-        await _serviceSalas.RemoveCaracteristicaFromSalaAsync(idSala, idCaracteristica);
-        return Ok(new { message = $"Característica {idCaracteristica} eliminada de la sala {idSala} exitosamente" });
-    }
-    catch (ArgumentException ex)
-    {
-        return NotFound(ex.Message);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-    }
-}
-
-[HttpGet("{idSala}/caracteristicas")]
-public async Task<ActionResult<List<CaracteristicaSalaDTO>>> GetCaracteristicasBySala(int idSala)
-{
-    try
-    {
-        var caracteristicas = await _serviceSalas.GetCaracteristicasBySalaAsync(idSala);
-        return Ok(caracteristicas);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-    }
-}
 
     }
 
