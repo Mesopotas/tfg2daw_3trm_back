@@ -23,19 +23,8 @@ namespace CoWorking.Repositories
 
     Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo);
 
+
+     Task<decimal?> GetPrecioPuestoTrabajoAsync(int idPuestoTrabajo);
+
   }
-
-  /*
-        public interface ISalasRepository
-        {
-            Task<List<SalasDetallesDTO>> GetAllAsync();
-            Task<SalasDetallesDTO> GetByIdAsync(int id);
-            Task<List<SalasDTO>> GetByIdSedeAsync(int id);
-            Task AddAsync(Salas salas);
-          //  Task UpdateAsync(Salas salas);
-            Task DeleteAsync(int id);
-
-        }
-
-      */
-  }
+}

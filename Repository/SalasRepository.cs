@@ -221,19 +221,95 @@ namespace CoWorking.Repositories
 
 
         public async Task<List<SalasConCaracteristicasDTO>> GetAllWithCaracteristicasAsync()
-{
-    var salasConCaracteristicas = await _context.Salas
-        .Select(s => new SalasConCaracteristicasDTO
         {
-            IdSala = s.IdSala,
-            Nombre = s.Nombre,
-            URL_Imagen = s.URL_Imagen,
-            Capacidad = s.Capacidad,
-            IdTipoSala = s.IdTipoSala,
-            IdSede = s.IdSede,
-            Bloqueado = s.Bloqueado,
-            Caracteristicas = _context.SalaConCaracteristicas
-                .Where(sc => sc.IdSala == s.IdSala)
+            var salasConCaracteristicas = await _context.Salas
+                .Select(s => new SalasConCaracteristicasDTO
+                {
+                    IdSala = s.IdSala,
+                    Nombre = s.Nombre,
+                    URL_Imagen = s.URL_Imagen,
+                    Capacidad = s.Capacidad,
+                    IdTipoSala = s.IdTipoSala,
+                    IdSede = s.IdSede,
+                    Bloqueado = s.Bloqueado,
+                    Caracteristicas = _context.SalaConCaracteristicas
+                        .Where(sc => sc.IdSala == s.IdSala)
+                        .Join(_context.CaracteristicasSala,
+                            sc => sc.IdCaracteristica,
+                            c => c.IdCaracteristica,
+                            (sc, c) => new CaracteristicaSalaDTO
+                            {
+                                IdCaracteristica = c.IdCaracteristica,
+                                Nombre = c.Nombre,
+                                Descripcion = c.Descripcion,
+                                PrecioAniadido = c.PrecioAniadido
+                            })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return salasConCaracteristicas;
+        }
+
+        //  agregar una característica a una sala
+        public async Task AddCaracteristicaToSalaAsync(int idSala, int idCaracteristica)
+        {
+            // verificar que la sala existe
+            var salaExiste = await _context.Salas.AnyAsync(s => s.IdSala == idSala);
+            if (!salaExiste)
+            {
+                throw new ArgumentException($"No existe una sala con ID {idSala}");
+            }
+
+            // verificar que la característica existe
+            var caracteristicaExiste = await _context.CaracteristicasSala.AnyAsync(c => c.IdCaracteristica == idCaracteristica);
+            if (!caracteristicaExiste)
+            {
+                throw new ArgumentException($"No existe una característica con ID {idCaracteristica}");
+            }
+
+            // vrificar que la relación no existe ya
+            var relacionExiste = await _context.SalaConCaracteristicas
+                .AnyAsync(sc => sc.IdSala == idSala && sc.IdCaracteristica == idCaracteristica);
+
+            if (relacionExiste)
+            {
+                throw new InvalidOperationException($"La sala {idSala} ya tiene asignada la característica {idCaracteristica}");
+            }
+
+            // crear la relación
+            var salaConCaracteristica = new SalaConCaracteristicas
+            {
+                IdSala = idSala,
+                IdCaracteristica = idCaracteristica
+            };
+
+            await _context.SalaConCaracteristicas.AddAsync(salaConCaracteristica);
+            await _context.SaveChangesAsync();
+        }
+
+        // metodo para eliminar una característica de una sala
+        public async Task RemoveCaracteristicaFromSalaAsync(int idSala, int idCaracteristica)
+        {
+            // buscar la relación existente
+            var salaConCaracteristica = await _context.SalaConCaracteristicas
+                .FirstOrDefaultAsync(sc => sc.IdSala == idSala && sc.IdCaracteristica == idCaracteristica);
+
+            if (salaConCaracteristica == null)
+            {
+                throw new ArgumentException($"No existe una relación entre la sala {idSala} y la característica {idCaracteristica}");
+            }
+
+            // eliminar la relación
+            _context.SalaConCaracteristicas.Remove(salaConCaracteristica);
+            await _context.SaveChangesAsync();
+        }
+
+        // metodo para obtener las características de una sala específica
+        public async Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int idSala)
+        {
+            return await _context.SalaConCaracteristicas
+                .Where(sc => sc.IdSala == idSala)
                 .Join(_context.CaracteristicasSala,
                     sc => sc.IdCaracteristica,
                     c => c.IdCaracteristica,
@@ -244,104 +320,73 @@ namespace CoWorking.Repositories
                         Descripcion = c.Descripcion,
                         PrecioAniadido = c.PrecioAniadido
                     })
-                .ToList()
-        })
-        .ToListAsync();
+                .ToListAsync();
+        }
+        public async Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo)
+        {
+            // Find the PuestoTrabajo first
+            var puesto = await _context.PuestosTrabajo
+                .Where(p => p.IdPuestoTrabajo == idPuestoTrabajo)
+                .FirstOrDefaultAsync();
 
-    return salasConCaracteristicas;
-}
-
-//  agregar una característica a una sala
-public async Task AddCaracteristicaToSalaAsync(int idSala, int idCaracteristica)
-{
-    // verificar que la sala existe
-    var salaExiste = await _context.Salas.AnyAsync(s => s.IdSala == idSala);
-    if (!salaExiste)
-    {
-        throw new ArgumentException($"No existe una sala con ID {idSala}");
-    }
-
-    // verificar que la característica existe
-    var caracteristicaExiste = await _context.CaracteristicasSala.AnyAsync(c => c.IdCaracteristica == idCaracteristica);
-    if (!caracteristicaExiste)
-    {
-        throw new ArgumentException($"No existe una característica con ID {idCaracteristica}");
-    }
-
-    // vrificar que la relación no existe ya
-    var relacionExiste = await _context.SalaConCaracteristicas
-        .AnyAsync(sc => sc.IdSala == idSala && sc.IdCaracteristica == idCaracteristica);
-    
-    if (relacionExiste)
-    {
-        throw new InvalidOperationException($"La sala {idSala} ya tiene asignada la característica {idCaracteristica}");
-    }
-
-    // crear la relación
-    var salaConCaracteristica = new SalaConCaracteristicas
-    {
-        IdSala = idSala,
-        IdCaracteristica = idCaracteristica
-    };
-
-    await _context.SalaConCaracteristicas.AddAsync(salaConCaracteristica);
-    await _context.SaveChangesAsync();
-}
-
-// metodo para eliminar una característica de una sala
-public async Task RemoveCaracteristicaFromSalaAsync(int idSala, int idCaracteristica)
-{
-    // buscar la relación existente
-    var salaConCaracteristica = await _context.SalaConCaracteristicas
-        .FirstOrDefaultAsync(sc => sc.IdSala == idSala && sc.IdCaracteristica == idCaracteristica);
-
-    if (salaConCaracteristica == null)
-    {
-        throw new ArgumentException($"No existe una relación entre la sala {idSala} y la característica {idCaracteristica}");
-    }
-
-    // eliminar la relación
-    _context.SalaConCaracteristicas.Remove(salaConCaracteristica);
-    await _context.SaveChangesAsync();
-}
-
-// metodo para obtener las características de una sala específica
-public async Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int idSala)
-{
-    return await _context.SalaConCaracteristicas
-        .Where(sc => sc.IdSala == idSala)
-        .Join(_context.CaracteristicasSala,
-            sc => sc.IdCaracteristica,
-            c => c.IdCaracteristica,
-            (sc, c) => new CaracteristicaSalaDTO
+            if (puesto == null)
             {
-                IdCaracteristica = c.IdCaracteristica,
-                Nombre = c.Nombre,
-                Descripcion = c.Descripcion,
-                PrecioAniadido = c.PrecioAniadido
-            })
-        .ToListAsync();
-}
-public async Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo)
-{
-    // Find the PuestoTrabajo first
-    var puesto = await _context.PuestosTrabajo
-        .Where(p => p.IdPuestoTrabajo == idPuestoTrabajo)
-        .FirstOrDefaultAsync();
+                return null; // no existe el puesto, devuelve nulo
+            }
 
-    if (puesto == null)
-    {
-        return null; // no existe el puesto, devuelve nulo
-    }
+            // buscar sala por IdSala del puesto
+            var sala = await _context.Salas
+                .Where(s => s.IdSala == puesto.IdSala)
+                .Select(s => s.Nombre) // solo el nombre
+                .FirstOrDefaultAsync();
 
-    // buscar sala por IdSala del puesto
-    var sala = await _context.Salas
-        .Where(s => s.IdSala == puesto.IdSala)
-        .Select(s => s.Nombre) // solo el nombre
-        .FirstOrDefaultAsync();
+            return sala;
+        }
 
-    return sala;
-}
+
+    public async Task<decimal?> GetPrecioPuestoTrabajoAsync(int idPuestoTrabajo)
+        {
+            // primero se hacen los joins necesarios, ya que el puesto de trabajo tiene una sala, y la sala tiene un tipo de sala, y el tipo de sala tiene un tipo de puesto de trabajo
+            var puestoTrabajo = await _context.PuestosTrabajo
+                .Include(p => p.Sala)
+                    .ThenInclude(s => s.TipoSala)
+                        .ThenInclude(ts => ts.TipoPuestoTrabajo)
+                .FirstOrDefaultAsync(p => p.IdPuestoTrabajo == idPuestoTrabajo);
+
+            if (puestoTrabajo == null)
+            {
+                return null; // el puesto de trabajo no existe
+            }
+
+            // obtener el precio base del tipo de puesto de trabajo
+            decimal precioBase = 0;
+            if (puestoTrabajo.Sala?.TipoSala?.TipoPuestoTrabajo != null)
+            {
+                precioBase = puestoTrabajo.Sala.TipoSala.TipoPuestoTrabajo.Precio;
+            }
+            else
+            {
+                throw new InvalidOperationException($"No se pudo determinar el precio base para el puesto de trabajo {idPuestoTrabajo}. Faltan datos de Sala/TipoSala/TipoPuestoTrabajo.");
+            }
+
+            // obtener caracteristicas de la sala en la que esta ese puesto de trabajo
+            var caracteristicasSala = await _context.SalaConCaracteristicas
+                .Include(sc => sc.Caracteristica)
+                .Where(sc => sc.IdSala == puestoTrabajo.IdSala)
+                .ToListAsync();
+
+            decimal precioFinal = precioBase;
+
+            // aplicar el precio añadido por cada característica de la sala
+            foreach (var caracteristica in caracteristicasSala)
+            {
+                // el precio añadido se aplica como porcentaje sobre el precio actual
+                precioFinal += precioFinal * (caracteristica.Caracteristica.PrecioAniadido / 100m);
+            }
+
+            return precioFinal;
+        }
+
     }
 }
 

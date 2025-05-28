@@ -87,6 +87,10 @@ namespace CoWorking.Service
             return await _salasRepository.GetSalaNameByPuestoTrabajoIdAsync(idPuestoTrabajo);
         }
 
+     public async Task<decimal?> GetPrecioPuestoTrabajoAsync(int idPuestoTrabajo)
+        {
+            return await _salasRepository.GetPrecioPuestoTrabajoAsync(idPuestoTrabajo);
+        }
     }
 }
 

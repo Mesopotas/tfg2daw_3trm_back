@@ -184,16 +184,36 @@ namespace CoWorking.Controllers
             }
         }
 
-    [HttpGet("puesto/{idPuestoTrabajo}/sala-nombre")] // EJ: /api/Salas/puesto/123/sala-nombre
-            public async Task<ActionResult<string>> GetSalaNameByPuestoTrabajo(int idPuestoTrabajo)
+        [HttpGet("puesto/{idPuestoTrabajo}/sala-nombre")] // EJ: https://localhost:7179/api/Salas/puesto/15/sala-nombre
+        public async Task<ActionResult<string>> GetSalaNameByPuestoTrabajo(int idPuestoTrabajo)
+        {
+            try
+            {
+                var salaName = await _serviceSalas.GetSalaNameByPuestoTrabajoIdAsync(idPuestoTrabajo);
+
+                if (salaName == null)
+                {
+                    return NotFound($"No se encontró el nombre de la sala para el puesto de trabajo con ID {idPuestoTrabajo}.");
+                }
+
+                return Ok(salaName);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error del servidor: {ex.Message}");
+            }
+        }
+
+    [HttpGet("puesto/{idPuestoTrabajo}/asiento-precio")] // EJ: https://localhost:7179/api/Salas/puesto/15/asiento-precio
+            public async Task<ActionResult<decimal>> GetPrecioPuestoTrabajoAsync(int idPuestoTrabajo)
             {
                 try
                 {
-                    var salaName = await _serviceSalas.GetSalaNameByPuestoTrabajoIdAsync(idPuestoTrabajo);
+                    var salaName = await _serviceSalas.GetPrecioPuestoTrabajoAsync(idPuestoTrabajo);
 
                     if (salaName == null)
                     {
-                        return NotFound($"No se encontró el nombre de la sala para el puesto de trabajo con ID {idPuestoTrabajo}.");
+                        return NotFound($"No se encontró el precio final del asiento con id {idPuestoTrabajo}.");
                     }
 
                     return Ok(salaName);
@@ -203,7 +223,7 @@ namespace CoWorking.Controllers
                     return StatusCode(500, $"Error del servidor: {ex.Message}");
                 }
             }
-    
+
 
     }
 

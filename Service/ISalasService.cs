@@ -22,6 +22,8 @@ namespace CoWorking.Service
     Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int idSala);
 
     Task<string?> GetSalaNameByPuestoTrabajoIdAsync(int idPuestoTrabajo);
+    Task<decimal?> GetPrecioPuestoTrabajoAsync(int idPuestoTrabajo);
+
 
   }
 
