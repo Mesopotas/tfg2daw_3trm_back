@@ -52,22 +52,31 @@ namespace CoWorking.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task AddAsync(SalasDTO sala)
-        {
-            var entidad = new Salas
-            {
-                IdSala = sala.IdSala,
-                Nombre = sala.Nombre,
-                URL_Imagen = sala.URL_Imagen,
-                Capacidad = sala.Capacidad,
-                IdTipoSala = sala.IdTipoSala,
-                IdSede = sala.IdSede,
-                Bloqueado = sala.Bloqueado,
-            };
+public async Task AddAsync(SalasDTO sala)
+{
+    // Buscar el TipoSala para obtener su CapacidadAsientos
+    var tipoSala = await _context.TiposSalas
+        .FirstOrDefaultAsync(ts => ts.IdTipoSala == sala.IdTipoSala);
 
-            await _context.Salas.AddAsync(entidad);
-            await _context.SaveChangesAsync();
-        }
+    if (tipoSala == null)
+    {
+        throw new ArgumentException($"No existe un tipo de sala con ID {sala.IdTipoSala}");
+    }
+
+    var entidad = new Salas
+    {
+        IdSala = sala.IdSala,
+        Nombre = sala.Nombre,
+        URL_Imagen = sala.URL_Imagen,
+        Capacidad = tipoSala.CapacidadAsientos, // asignar la capacidad total en base a la capacidad del tipo de sala
+        IdTipoSala = sala.IdTipoSala,
+        IdSede = sala.IdSede,
+        Bloqueado = sala.Bloqueado,
+    };
+
+    await _context.Salas.AddAsync(entidad);
+    await _context.SaveChangesAsync();
+}
 
         public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
         {
