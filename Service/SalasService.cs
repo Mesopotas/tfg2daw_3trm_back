@@ -48,15 +48,38 @@ namespace CoWorking.Service
             await _salasRepository.DeleteAsync(id);
             //return NoContent();
         }
-        
-     public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
+
+        public async Task<List<SalasDTO>> GetByIdSedeAsync(int idSede)
         {
             return await _salasRepository.GetByIdSedeAsync(idSede);
         }
-        
-    public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+
+        public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
         {
             return await _salasRepository.GetSalasBySede(idSede, fechaInicio, fechaFin, horaInicio, horaFin);
         }
+
+
+        // Métodos para características de sala
+        public async Task<List<SalasConCaracteristicasDTO>> GetAllWithCaracteristicasAsync()
+        {
+            return await _salasRepository.GetAllWithCaracteristicasAsync();
+        }
+
+        public async Task AddCaracteristicaToSalaAsync(int idSala, int idCaracteristica)
+        {
+            await _salasRepository.AddCaracteristicaToSalaAsync(idSala, idCaracteristica);
+        }
+
+        public async Task RemoveCaracteristicaFromSalaAsync(int idSala, int idCaracteristica)
+        {
+            await _salasRepository.RemoveCaracteristicaFromSalaAsync(idSala, idCaracteristica);
+        }
+
+        public async Task<List<CaracteristicaSalaDTO>> GetCaracteristicasBySalaAsync(int idSala)
+        {
+            return await _salasRepository.GetCaracteristicasBySalaAsync(idSala);
+        }
     }
 }
+
