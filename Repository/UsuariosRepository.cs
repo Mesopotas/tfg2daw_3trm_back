@@ -45,19 +45,13 @@ public async Task UpdateAsync(UsuarioUpdateDTO usuario)
         throw new InvalidOperationException("El usuario no existe.");
     }
 
-    // validar que no exista ya
-    var emailEnUso = await _context.Usuarios
-        .AnyAsync(u => u.Email == usuario.Email && u.IdUsuario != usuario.IdUsuario);
+ 
 
-    if (emailEnUso)
-    {
-        throw new InvalidOperationException("El email ya está en uso por otro usuario");
-    }
 
     // actualizar los campos del endpoint
     existingUsuario.Nombre = usuario.Nombre;
     existingUsuario.Apellidos = usuario.Apellidos;
-    existingUsuario.Email = usuario.Email;
+    existingUsuario.IdRol = usuario.IdRol;
 
     // guardar 
     _context.Usuarios.Update(existingUsuario);
