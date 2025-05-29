@@ -97,6 +97,9 @@ builder.Services.AddScoped<IReservasRepository, ReservasRepository>();
 builder.Services.AddScoped<IPuestosTrabajoService, PuestosTrabajoService>(); 
 builder.Services.AddScoped<IPuestosTrabajoRepository, PuestosTrabajoRepository>(); 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEstadisticasRepository, EstadisticasRepository>();
+builder.Services.AddScoped<IEstadisticasService, EstadisticasService>();
+
 
 
 builder.Services.AddControllers()
