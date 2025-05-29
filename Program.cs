@@ -16,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<IEmailService, EmailService>(); // necesario para que pueda mandar los emails
+builder.Services.AddHttpClient(); // necesario para obtener y adjuntar el codigo qr al email
+
 // Configuración de autenticación y validación de JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>

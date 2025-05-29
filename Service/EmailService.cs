@@ -10,18 +10,20 @@ namespace CoWorking.Service
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory; // necesario para obtener y adjuntar el qr code
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, IHttpClientFactory httpClientFactory)
         {
             _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task SendReservationConfirmationAsync(string toEmail, string userName, ReservationEmailData reservationData)
         {
-         
+            using var httpClient = _httpClientFactory.CreateClient();
+
                 var message = new MimeMessage();
 
-                // toda la data saldrá del appsettings.json
                 message.From.Add(new MailboxAddress(
                     _configuration["EmailSettings:SenderName"],
                     _configuration["EmailSettings:SenderEmail"])
@@ -29,15 +31,35 @@ namespace CoWorking.Service
                 message.To.Add(new MailboxAddress(userName, toEmail));
                 message.Subject = $"Confirmación de Reserva #{reservationData.IdReserva}";
 
-                // cuerpo del email
                 var cuerpoEmail = new BodyBuilder();
                 cuerpoEmail.HtmlBody = CreateEmailTemplate(userName, reservationData);
+
+                string qrCodeApiUrl = $"https://localhost:7179/api/Reservas/generarqr/{reservationData.IdReserva}"; // endpoint que genera los qr
+                byte[] qrCodeBytes = null;
+
+               
+                    HttpResponseMessage response = await httpClient.GetAsync(qrCodeApiUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    qrCodeBytes = await response.Content.ReadAsByteArrayAsync();
+
+                    if (qrCodeBytes != null && qrCodeBytes.Length > 0)
+                    {
+                        var attachment = new MimePart("image", "png")
+                        {
+                            Content = new MimeContent(new MemoryStream(qrCodeBytes)),
+                            ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            FileName = $"qr_reserva_{reservationData.IdReserva}.png" // nombre con id de reserva incluido
+                        };
+                        cuerpoEmail.Attachments.Add(attachment);
+                    }
+            
+
                 message.Body = cuerpoEmail.ToMessageBody();
 
-                // configurar y mandar email
                 using var client = new SmtpClient();
 
-                // configs autenticacion y conexion al server SMTP (gmail), tb se saca del appsettings.json
                 string smtpHost = _configuration["EmailSettings:SmtpHost"];
                 string smtpPortString = _configuration["EmailSettings:SmtpPort"];
                 string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
