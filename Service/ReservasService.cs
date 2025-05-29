@@ -5,18 +5,24 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoWorking.Repositories;
 using CoWorking.DTO;
+using CoWorking.Data;
 using CoWorking.Service;
 using Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoWorking.Service
 {
     public class ReservasService : IReservasService
     {
         private readonly IReservasRepository _reservasRepository;
+        private readonly IEmailService _emailService;
+        private readonly CoworkingDBContext _context;
 
-        public ReservasService(IReservasRepository reservasRepository)
+        public ReservasService(IReservasRepository reservasRepository, IEmailService emailService, CoworkingDBContext context, ILogger<ReservasService> logger)
         {
             _reservasRepository = reservasRepository;
+            _emailService = emailService;
+            _context = context;
         }
 
         public async Task<List<ReservasDTO>> GetAllAsync()
@@ -64,7 +70,45 @@ namespace CoWorking.Service
 
         public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
         {
-            return await _reservasRepository.CreateReservaConLineasAsync(reservaDTO);
+            // crear la reserva
+            var reserva = await _reservasRepository.CreateReservaConLineasAsync(reservaDTO);
+
+            // mandar el email de confirmación
+            try
+            {
+                // obtener el usuario por IdUsuario
+                var usuario = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.IdUsuario == reservaDTO.IdUsuario);
+
+                if (usuario != null) // siempre habra un id usuario asociado a la reserva
+                {
+                    var detallesReserva = await _reservasRepository.GetResumenReservaAsync(reserva.IdReserva); // obtener la info de la reserva para rellenar el email
+
+                    var emailData = new Models.DTO.ReservationEmailData
+                    {
+                        IdReserva = reserva.IdReserva,
+                        Fecha = reserva.Fecha,
+                        PrecioTotal = reserva.PrecioTotal,
+                        NombreSala = detallesReserva?.NombreSalaPrincipal,
+                        CiudadSede = detallesReserva?.CiudadSedePrincipal,
+                        DireccionSede = detallesReserva?.DireccionSedePrincipal,
+                        RangoHorario = detallesReserva?.RangoHorarioReserva,
+                        AsientosReservados = detallesReserva?.AsientosReservados
+                    };
+
+                    await _emailService.SendReservationConfirmationAsync(
+                        usuario.Email,
+                        usuario.Nombre,
+                        emailData
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;  
+            }
+
+            return reserva;
         }
 
         public async Task<bool> ValidarReservaExisteQR(int idReserva, int idUsuario, DateTime fecha)

@@ -2,18 +2,20 @@ using CoWorking.Controllers;
 using CoWorking.Repositories;
 using CoWorking.Service;
 using CoWorking.Data;
+using Coworking.Configs;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
-
 // dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>(); // necesario para que pueda mandar los emails
 // Configuración de autenticación y validación de JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
@@ -92,6 +94,7 @@ builder.Services.AddScoped<IReservasRepository, ReservasRepository>();
 
 builder.Services.AddScoped<IPuestosTrabajoService, PuestosTrabajoService>(); 
 builder.Services.AddScoped<IPuestosTrabajoRepository, PuestosTrabajoRepository>(); 
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 builder.Services.AddControllers()
