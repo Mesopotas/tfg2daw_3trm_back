@@ -8,6 +8,7 @@ public class PuestoTrabajoFiltroFechasDTO
     public bool DisponibleGeneral { get; set; }
     public bool BloqueadoGeneral { get; set; }
     public int? IdZonaTrabajo { get; set; }
+    public int IdTipoPuestoTrabajo { get; set; }
     public int IdSala { get; set; }
 
 

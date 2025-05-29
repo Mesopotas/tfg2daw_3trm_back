@@ -109,54 +109,64 @@ namespace CoWorking.Repositories
             _context.PuestosTrabajo.Remove(puesto); // elimina el puesto de trabajo
             await _context.SaveChangesAsync();
         }
-        public async Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(
-          int idSala,
-          DateTime fechaInicio,
-          DateTime fechaFin,
-          TimeSpan horaInicio,
-          TimeSpan horaFin)
+public async Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(
+    int idSala,
+    DateTime fechaInicio,
+    DateTime fechaFin,
+    TimeSpan horaInicio,
+    TimeSpan horaFin)
+{
+    var query = _context.PuestosTrabajo
+        .Where(puesto => puesto.IdSala == idSala && !puesto.Bloqueado) // Filtra por la sala especificada y que no haya bloqueados (el admin es quien los bloquea)
+        .Join(_context.Salas, // JOIN con Salas para obtener IdTipoSala
+            puesto => puesto.IdSala,
+            sala => sala.IdSala,
+            (puesto, sala) => new { puesto, sala })
+        .Join(_context.TiposSalas, // JOIN con TiposSalas para obtener IdTipoPuestoTrabajo
+            ps => ps.sala.IdTipoSala,
+            tipoSala => tipoSala.IdTipoSala,
+            (ps, tipoSala) => new { ps.puesto, ps.sala, tipoSala })
+        .Select(pst => new // select del puesto ya filtrado con sus tramos y disponibilidades
         {
-            var query = _context.PuestosTrabajo
-                .Where(puesto => puesto.IdSala == idSala && !puesto.Bloqueado) // Filtra por la sala especificada y que no haya bloqueados (el admin es quien los bloquea)
-                .Select(puesto => new // select del puesto ya filtrado con sus tramos y disponibilidades
+            PuestoEntidad = pst.puesto,
+            IdTipoPuestoTrabajo = pst.tipoSala.IdTipoPuestoTrabajo, // obtener IdTipoPuestoTrabajo
+            DisponibilidadesEnRango = _context.Disponibilidades
+                .Where(disp => disp.IdPuestoTrabajo == pst.puesto.IdPuestoTrabajo)
+                .Join(_context.TramosHorarios,
+                    disp => disp.IdTramoHorario,
+                    tramo => tramo.IdTramoHorario,
+                    (disp, tramo) => new { disp, tramo })
+                .Where(pd =>
+                    pd.disp.Fecha >= fechaInicio && pd.disp.Fecha <= fechaFin &&
+                    pd.tramo.HoraInicio >= horaInicio && pd.tramo.HoraFin <= horaFin) // filtro horario
+                .Select(pd => new DisponibilidadFiltroFechasDTO // array de disponibilidades que cumplen los filtros
                 {
-                    PuestoEntidad = puesto,
-                    DisponibilidadesEnRango = _context.Disponibilidades
-                        .Where(disp => disp.IdPuestoTrabajo == puesto.IdPuestoTrabajo)
-                        .Join(_context.TramosHorarios,
-                            disp => disp.IdTramoHorario,
-                            tramo => tramo.IdTramoHorario,
-                            (disp, tramo) => new { disp, tramo })
-                        .Where(pd =>
-                            pd.disp.Fecha >= fechaInicio && pd.disp.Fecha <= fechaFin &&
-                            pd.tramo.HoraInicio >= horaInicio && pd.tramo.HoraFin <= horaFin) // filtro horario
-                        .Select(pd => new DisponibilidadFiltroFechasDTO // array de disponibilidades que cumplen los filtros
-                        {
-                            IdDisponibilidad = pd.disp.IdDisponibilidad,
-                            Fecha = pd.disp.Fecha,
-                            Estado = pd.disp.Estado,
-                            IdTramoHorario = pd.tramo.IdTramoHorario,
-                            HoraInicio = pd.tramo.HoraInicio,
-                            HoraFin = pd.tramo.HoraFin
-                        })
-                        .ToList() // se ejecuta y almacena en el array los resultados obtenidos
+                    IdDisponibilidad = pd.disp.IdDisponibilidad,
+                    Fecha = pd.disp.Fecha,
+                    Estado = pd.disp.Estado,
+                    IdTramoHorario = pd.tramo.IdTramoHorario,
+                    HoraInicio = pd.tramo.HoraInicio,
+                    HoraFin = pd.tramo.HoraFin
                 })
-                .Where(item => item.DisponibilidadesEnRango.Any()) // filtro, solo sacará los resultados que tengan al menos 1 disponibilidad en el rango de fecha-hora, si no, no saldrá
-                .Select(item => new PuestoTrabajoFiltroFechasDTO // resultado final del array list con la data del dto
-                {
-                    IdPuestoTrabajo = item.PuestoEntidad.IdPuestoTrabajo,
-                    NumeroAsiento = item.PuestoEntidad.NumeroAsiento,
-                    CodigoMesa = item.PuestoEntidad.CodigoMesa,
-                    URL_Imagen = item.PuestoEntidad.URL_Imagen,
-                    DisponibleGeneral = item.DisponibilidadesEnRango.Any(d => d.Estado), // ARREGLADO: Ahora es true solo si al menos una disponibilidad tiene estado=true
-                    BloqueadoGeneral = item.PuestoEntidad.Bloqueado, // lo mismo q arriba, serian las que bloquease el admin, no tiene que ver con la disponibilidad
-                    IdZonaTrabajo = item.PuestoEntidad.IdZonaTrabajo,
-                    IdSala = item.PuestoEntidad.IdSala,
-                    DisponibilidadesEnRango = item.DisponibilidadesEnRango // array de disponibilidades que cumplen los filtros
-                });
+                .ToList() // se ejecuta y almacena en el array los resultados obtenidos
+        })
+        .Where(item => item.DisponibilidadesEnRango.Any()) // filtro, solo sacará los resultados que tengan al menos 1 disponibilidad en el rango de fecha-hora, si no, no saldrá
+        .Select(item => new PuestoTrabajoFiltroFechasDTO // resultado final del array list con la data del dto
+        {
+            IdPuestoTrabajo = item.PuestoEntidad.IdPuestoTrabajo,
+            NumeroAsiento = item.PuestoEntidad.NumeroAsiento,
+            CodigoMesa = item.PuestoEntidad.CodigoMesa,
+            URL_Imagen = item.PuestoEntidad.URL_Imagen,
+            DisponibleGeneral = item.DisponibilidadesEnRango.All(d => d.Estado), // true solo si TODAS las disponibilidades tienen estado=true (100% disponible)
+            BloqueadoGeneral = item.PuestoEntidad.Bloqueado, // lo mismo q arriba, serian las que bloquease el admin, no tiene que ver con la disponibilidad
+            IdZonaTrabajo = item.PuestoEntidad.IdZonaTrabajo,
+            IdSala = item.PuestoEntidad.IdSala,
+            IdTipoPuestoTrabajo = item.IdTipoPuestoTrabajo,
+            DisponibilidadesEnRango = item.DisponibilidadesEnRango // array de disponibilidades que cumplen los filtros
+        });
 
-            return await query.ToListAsync(); // devuelve el listado de asientos, cada asiento con sus disponibilidades acorde al filtro
-        }
+    return await query.ToListAsync(); // devuelve el listado de asientos, cada asiento con sus disponibilidades acorde al filtro
+}
 
 public async Task GenerarAsientosDeSalas()
         {
