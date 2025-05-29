@@ -84,6 +84,68 @@ namespace CoWorking.Service
            
         }
 
+  public async Task MandarCorreoFormulario(string fromName, string fromEmail, string subject, string messageBody)
+        {
+           
+                var message = new MimeMessage();
+
+                // correo de app settings, será a nosotros mismos
+                message.From.Add(new MailboxAddress(
+                    _configuration["EmailSettings:SenderName"],
+                    _configuration["EmailSettings:SenderEmail"])
+                );
+
+                // se enviara al correo del appsettings
+                message.To.Add(new MailboxAddress(
+                    _configuration["EmailSettings:ContactFormRecipientName"] ?? "Admin CoWorking",
+                    _configuration["EmailSettings:ContactFormRecipientEmail"])
+                );
+
+                message.ReplyTo.Add(new MailboxAddress(fromName, fromEmail));
+
+                message.Subject = $"Formulario de Contacto: {subject}";
+
+                var cuerpoEmail = new BodyBuilder();
+                cuerpoEmail.HtmlBody = $@"
+                    <html>
+                    <body>
+                        <h2>Nuevo Mensaje del Formulario de Contacto</h2>
+                        <p><strong>Nombre:</strong> {fromName}</p>
+                        <p><strong>Email:</strong> {fromEmail}</p>
+                        <p><strong>Asunto:</strong> {subject}</p>
+                        <p><strong>Mensaje:</strong></p>
+                        <p>{messageBody}</p>
+                        <hr>
+                        <p>Este mensaje fue enviado desde el formulario de contacto de tu sitio web.</p>
+                    </body>
+                    </html>";
+                message.Body = cuerpoEmail.ToMessageBody();
+
+                // config correo enviar
+                using var client = new SmtpClient();
+
+                string smtpHost = _configuration["EmailSettings:SmtpHost"];
+                string smtpPortString = _configuration["EmailSettings:SmtpPort"];
+                string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
+                string smtpPassword = _configuration["EmailSettings:SmtpPassword"];
+
+                int smtpPort = int.Parse(smtpPortString);
+
+                await client.ConnectAsync(
+                    smtpHost,
+                    smtpPort,
+                    SecureSocketOptions.StartTls
+                );
+                await client.AuthenticateAsync(
+                    smtpUsername,
+                    smtpPassword
+                );
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+
+           
+        }
+
         // metodo crear el email con formato HTML y todo
         private string CreateEmailTemplate(string userName, ReservationEmailData data)
         {
