@@ -22,91 +22,91 @@ namespace CoWorking.Service
         {
             using var httpClient = _httpClientFactory.CreateClient();
 
-                var message = new MimeMessage();
+            var message = new MimeMessage();
 
-                message.From.Add(new MailboxAddress(
-                    _configuration["EmailSettings:SenderName"],
-                    _configuration["EmailSettings:SenderEmail"])
-                );
-                message.To.Add(new MailboxAddress(userName, toEmail));
-                message.Subject = $"Confirmación de Reserva #{reservationData.IdReserva}";
+            message.From.Add(new MailboxAddress(
+                _configuration["EmailSettings:SenderName"],
+                _configuration["EmailSettings:SenderEmail"])
+            );
+            message.To.Add(new MailboxAddress(userName, toEmail));
+            message.Subject = $"Confirmación de Reserva #{reservationData.IdReserva}";
 
-                var cuerpoEmail = new BodyBuilder();
-                cuerpoEmail.HtmlBody = CreateEmailTemplate(userName, reservationData);
+            var cuerpoEmail = new BodyBuilder();
+            cuerpoEmail.HtmlBody = CreateEmailTemplate(userName, reservationData);
 
-                string qrCodeApiUrl = $"https://localhost:7179/api/Reservas/generarqr/{reservationData.IdReserva}"; // endpoint que genera los qr
-                byte[] qrCodeBytes = null;
+            string qrCodeApiUrl = $"https://localhost:7179/api/Reservas/generarqr/{reservationData.IdReserva}"; // endpoint que genera los qr
+            byte[] qrCodeBytes = null;
 
-               
-                    HttpResponseMessage response = await httpClient.GetAsync(qrCodeApiUrl);
-                    response.EnsureSuccessStatusCode();
 
-                    qrCodeBytes = await response.Content.ReadAsByteArrayAsync();
+            HttpResponseMessage response = await httpClient.GetAsync(qrCodeApiUrl);
+            response.EnsureSuccessStatusCode();
 
-                    if (qrCodeBytes != null && qrCodeBytes.Length > 0)
-                    {
-                        var attachment = new MimePart("image", "png")
-                        {
-                            Content = new MimeContent(new MemoryStream(qrCodeBytes)),
-                            ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
-                            ContentTransferEncoding = ContentEncoding.Base64,
-                            FileName = $"qr_reserva_{reservationData.IdReserva}.png" // nombre con id de reserva incluido
-                        };
-                        cuerpoEmail.Attachments.Add(attachment);
-                    }
-            
+            qrCodeBytes = await response.Content.ReadAsByteArrayAsync();
 
-                message.Body = cuerpoEmail.ToMessageBody();
+            if (qrCodeBytes != null && qrCodeBytes.Length > 0)
+            {
+                var attachment = new MimePart("image", "png")
+                {
+                    Content = new MimeContent(new MemoryStream(qrCodeBytes)),
+                    ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = $"qr_reserva_{reservationData.IdReserva}.png" // nombre con id de reserva incluido
+                };
+                cuerpoEmail.Attachments.Add(attachment);
+            }
 
-                using var client = new SmtpClient();
 
-                string smtpHost = _configuration["EmailSettings:SmtpHost"];
-                string smtpPortString = _configuration["EmailSettings:SmtpPort"];
-                string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
-                string smtpPassword = _configuration["EmailSettings:SmtpPassword"];
+            message.Body = cuerpoEmail.ToMessageBody();
 
-             
+            using var client = new SmtpClient();
 
-                int smtpPort = int.Parse(smtpPortString);
+            string smtpHost = _configuration["EmailSettings:SmtpHost"];
+            string smtpPortString = _configuration["EmailSettings:SmtpPort"];
+            string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
+            string smtpPassword = _configuration["EmailSettings:SmtpPassword"];
 
-                await client.ConnectAsync(
-                    smtpHost,
-                    smtpPort,
-                    SecureSocketOptions.StartTls
-                );
-                await client.AuthenticateAsync(
-                    smtpUsername,
-                    smtpPassword
-                );
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
 
-           
+
+            int smtpPort = int.Parse(smtpPortString);
+
+            await client.ConnectAsync(
+                smtpHost,
+                smtpPort,
+                SecureSocketOptions.StartTls
+            );
+            await client.AuthenticateAsync(
+                smtpUsername,
+                smtpPassword
+            );
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+
+
         }
 
-  public async Task MandarCorreoFormulario(string fromName, string fromEmail, string subject, string messageBody)
+        public async Task MandarCorreoFormulario(string fromName, string fromEmail, string subject, string messageBody)
         {
-           
-                var message = new MimeMessage();
 
-                // correo de app settings, será a nosotros mismos
-                message.From.Add(new MailboxAddress(
-                    _configuration["EmailSettings:SenderName"],
-                    _configuration["EmailSettings:SenderEmail"])
-                );
+            var message = new MimeMessage();
 
-                // se enviara al correo del appsettings
-                message.To.Add(new MailboxAddress(
-                    _configuration["EmailSettings:ContactFormRecipientName"] ?? "Admin CoWorking",
-                    _configuration["EmailSettings:ContactFormRecipientEmail"])
-                );
+            // correo de app settings, será a nosotros mismos
+            message.From.Add(new MailboxAddress(
+                _configuration["EmailSettings:SenderName"],
+                _configuration["EmailSettings:SenderEmail"])
+            );
 
-                message.ReplyTo.Add(new MailboxAddress(fromName, fromEmail));
+            // se enviara al correo del appsettings
+            message.To.Add(new MailboxAddress(
+                _configuration["EmailSettings:ContactFormRecipientName"] ?? "Admin CoWorking",
+                _configuration["EmailSettings:ContactFormRecipientEmail"])
+            );
 
-                message.Subject = $"Formulario de Contacto: {subject}";
+            message.ReplyTo.Add(new MailboxAddress(fromName, fromEmail));
 
-                var cuerpoEmail = new BodyBuilder();
-                cuerpoEmail.HtmlBody = $@"
+            message.Subject = $"Formulario de Contacto: {subject}";
+
+            var cuerpoEmail = new BodyBuilder();
+            cuerpoEmail.HtmlBody = $@"
                     <html>
                     <body>
                         <h2>Nuevo Mensaje del Formulario de Contacto</h2>
@@ -119,31 +119,31 @@ namespace CoWorking.Service
                         <p>Este mensaje fue enviado desde el formulario de contacto de tu sitio web.</p>
                     </body>
                     </html>";
-                message.Body = cuerpoEmail.ToMessageBody();
+            message.Body = cuerpoEmail.ToMessageBody();
 
-                // config correo enviar
-                using var client = new SmtpClient();
+            // config correo enviar
+            using var client = new SmtpClient();
 
-                string smtpHost = _configuration["EmailSettings:SmtpHost"];
-                string smtpPortString = _configuration["EmailSettings:SmtpPort"];
-                string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
-                string smtpPassword = _configuration["EmailSettings:SmtpPassword"];
+            string smtpHost = _configuration["EmailSettings:SmtpHost"];
+            string smtpPortString = _configuration["EmailSettings:SmtpPort"];
+            string smtpUsername = _configuration["EmailSettings:SmtpUsername"];
+            string smtpPassword = _configuration["EmailSettings:SmtpPassword"];
 
-                int smtpPort = int.Parse(smtpPortString);
+            int smtpPort = int.Parse(smtpPortString);
 
-                await client.ConnectAsync(
-                    smtpHost,
-                    smtpPort,
-                    SecureSocketOptions.StartTls
-                );
-                await client.AuthenticateAsync(
-                    smtpUsername,
-                    smtpPassword
-                );
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
+            await client.ConnectAsync(
+                smtpHost,
+                smtpPort,
+                SecureSocketOptions.StartTls
+            );
+            await client.AuthenticateAsync(
+                smtpUsername,
+                smtpPassword
+            );
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
 
-           
+
         }
 
         // metodo crear el email con formato HTML y todo
@@ -174,5 +174,71 @@ namespace CoWorking.Service
         </div>
     </div></body></html>";
         }
+        
+        public async Task SendWelcomeEmailAsync(string toEmail, string userName)
+{
+    var message = new MimeMessage();
+    message.From.Add(new MailboxAddress(
+        _configuration["EmailSettings:SenderName"],
+        _configuration["EmailSettings:SenderEmail"]
+    ));
+    message.To.Add(new MailboxAddress(userName, toEmail));
+    message.Subject = "¡Bienvenido a CoWorking!";
+
+    var cuerpo = new BodyBuilder();
+    cuerpo.HtmlBody = CreateWelcomeTemplate(userName);
+    message.Body = cuerpo.ToMessageBody();
+
+    using var client = new SmtpClient();
+    var host = _configuration["EmailSettings:SmtpHost"];
+    var port = int.Parse(_configuration["EmailSettings:SmtpPort"]);
+    var user = _configuration["EmailSettings:SmtpUsername"];
+    var pass = _configuration["EmailSettings:SmtpPassword"];
+
+    await client.ConnectAsync(host, port, SecureSocketOptions.StartTls);
+    await client.AuthenticateAsync(user, pass);
+    await client.SendAsync(message);
+    await client.DisconnectAsync(true);
+}
+
+// generar el HTML del email
+private string CreateWelcomeTemplate(string userName)
+{
+    return $@"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <style>
+    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+    .header {{ background-color: #4CAF50; color: white; padding: 20px; text-align: center; }}
+    .content {{ padding: 20px; background-color: #f9f9f9; }}
+    .footer {{ text-align: center; padding: 15px; color: #666; font-size: 0.9em; }}
+  </style>
+</head>
+<body>
+  <div class='container'>
+    <div class='header'>
+      <h1>¡Bienvenido, {userName}!</h1>
+    </div>
+    <div class='content'>
+      <p>Gracias por registrarte en <strong>CoWorking</strong>. Estamos muy contentos de tenerte con nosotros.</p>
+      <p>A continuación algunos pasos para comenzar:</p>
+      <ul>
+        <li>Explora nuestros espacios disponibles.</li>
+        <li>Reserva tu primer puesto o sala de reuniones.</li>
+        <li>Contacta con soporte si tienes cualquier duda.</li>
+      </ul>
+      <p>¡Esperamos verte pronto!</p>
+    </div>
+    <div class='footer'>
+      <p>Este es un correo automático, por favor no respondas.</p>
+      <p>&copy; 2025 CoWorking.</p>
+    </div>
+  </div>
+</body>
+</html>";
+}
+
     }
 }
