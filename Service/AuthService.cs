@@ -13,11 +13,15 @@ namespace CoWorking.Service
     {
         private readonly IConfiguration _configuration;
         private readonly IUsuariosRepository _repository;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IConfiguration configuration, IUsuariosRepository repository)
+
+        public AuthService(IConfiguration configuration, IUsuariosRepository repository,  IEmailService emailService)
         {
             _configuration = configuration;
             _repository = repository;
+            _emailService = emailService;
+
         }
 
 
@@ -51,12 +55,16 @@ namespace CoWorking.Service
             if (user == null) return null; // Error al recibir el usuario / no existe
             return await GenerateToken(user);
         }
-        
-            public async Task<string> Register(RegisterDTO register)
-            {
-                var user = await _repository.AddUserFromCredentialsAsync(register);
-                if (user == null) return null; // Error al registrar usuario
-                return await GenerateToken(user);
+
+        public async Task<string> Register(RegisterDTO register)
+        {
+            var user = await _repository.AddUserFromCredentialsAsync(register);
+            if (user == null) return null; // Error al registrar usuario
+
+            await _emailService.SendWelcomeEmailAsync(user.Email, user.Nombre); // manda un correo de bienvenida
+
+            return await GenerateToken(user);
+
             }
 
        
