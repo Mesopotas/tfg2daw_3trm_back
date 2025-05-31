@@ -43,7 +43,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: jblas7/back-2-trimestre-2-daw:v${{ github.run_number }} # ejemplo: jblas7/back-2-trimestre-2-daw:v12
+          tags: jblas7/back-3-trimestre-2-daw:v${{ github.run_number }} # ejemplo: jblas7/back-2-trimestre-2-daw:v12
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
