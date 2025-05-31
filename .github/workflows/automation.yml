@@ -30,7 +30,7 @@ jobs:
         id: docker_meta
         uses: docker/metadata-action@v5
         with:
-          images: jblas7/back-2-trimestre-2-daw
+          images: jblas7/back-3-trimestre-2-daw
           flavor: |
             latest=false
           tags: |
