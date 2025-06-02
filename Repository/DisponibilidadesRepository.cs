@@ -81,76 +81,114 @@ namespace CoWorking.Repositories
             }
         }
 
+public async Task AddDisponibilidadesAsync(int anio)
+{
+    var fechaInicio = (anio == DateTime.Now.Year) ? DateTime.Today : new DateTime(anio, 1, 1);
+    var fechaFin = new DateTime(anio, 12, 31);
 
-        public async Task AddDisponibilidadesAsync(int anio)
-        {
+    // Obtener festivos y días laborables (esto ya está optimizado)
+    var festivosEspania = DateSystem.GetPublicHoliday(anio, "ES")
+        .Select(festivo => festivo.Date)
+        .ToHashSet(); 
 
-                var fechaInicio = (anio == DateTime.Now.Year) ? DateTime.Today: new DateTime(anio, 1, 1); 
-                /* si el año introducido coincide con el actual del sistema (DateTime.Now.Year), toma como dia de inicio el actual del sistema, si es diferente,
-                 osea uno o varios años mas como 2026 el dia de inicio es 1 de enero para recorrer el año entero */
+    var diasLaborables = Enumerable.Range(0, (fechaFin - fechaInicio).Days + 1)
+        .Select(secuenciaDias => fechaInicio.AddDays(secuenciaDias))
+        .Where(fecha =>
+            fecha.DayOfWeek != DayOfWeek.Saturday &&
+            fecha.DayOfWeek != DayOfWeek.Sunday &&
+            !festivosEspania.Contains(fecha.Date))
+        .ToList();
 
-            var fechaFin = new DateTime(anio, 12, 31); // dia 31 de diciembre
-
-            // dotnet add package Nager.Date --version 1.28.0 IMPORTANTE la version, en algunas anteriores no admite el comando, que sea esa siempre
-            // Obtener festivos nacionales en España con la libreria Nager.Date
-            var festivosEspania = DateSystem.GetPublicHoliday(anio, "ES")
-                .Select(festivo => festivo.Date)
-             .ToList();
-
-            // Generar lista de días laborables (lunes a viernes, que no sean festivos)
-            var diasLaborables = Enumerable.Range(0, (fechaFin - fechaInicio).Days + 1) // resta el fechaFin al fechaInicio y le suma 1 para incluir el ultimo dia, ya se tiene el listado de los dias
-                .Select(secuenciaDias => fechaInicio.AddDays(secuenciaDias)) // transforma ese listado en un listado de fechas
-                .Where(fecha =>
-                    fecha.DayOfWeek != DayOfWeek.Saturday && // DayOfWeek es una propiedad de DateTime que devuelve el dia de la semana, en este caso que sea diferente del sabado 
-                    fecha.DayOfWeek != DayOfWeek.Sunday && // diferente del domingo
-                    !festivosEspania.Contains(fecha.Date)) // que no sea festivo, de la lista previamente obtenida arriba con Nager.Date
-                .ToList();
-
-            // Obtener los IdPuestoTrabajo disponibles para los ids de los puestos de trabajo
-    var puestosTrabajo = await _context.PuestosTrabajo.ToListAsync();
-
-        // Obtener ya existentes en BBDD para evitar duplicados
-    var existentes = await _context.Disponibilidades
-        .Where(d => d.Fecha.Year == anio && d.IdTramoHorario >= 1 && d.IdTramoHorario <= 11)
-        .Select(d => new { d.Fecha, d.IdPuestoTrabajo, d.IdTramoHorario })
+    // Obtener solo los IDs de puestos (no toda la entidad)
+    var idsPuestosTrabajo = await _context.PuestosTrabajo
+        .Select(p => p.IdPuestoTrabajo)
         .ToListAsync();
 
-    // crear nuevas disponibilidades
-    var nuevasDisponibilidades = new List<Disponibilidad>();
+    // Obtener TODOS los existentes de una vez con una sola consulta
+    var existentesDelAnio = await _context.Disponibilidades
+        .Where(d => d.Fecha.Year == anio && d.IdTramoHorario >= 1 && d.IdTramoHorario <= 11)
+        .Select(d => new { d.Fecha.Date, d.IdPuestoTrabajo, d.IdTramoHorario })
+        .ToListAsync();
 
-    // recorrer cada puesto de trabajo
-    foreach (var puesto in puestosTrabajo)
+    // Convertir a HashSet para búsquedas O(1) en lugar de O(n)
+    var existentesSet = existentesDelAnio
+        .Select(d => $"{d.Date:yyyyMMdd}_{d.IdPuestoTrabajo}_{d.IdTramoHorario}")
+        .ToHashSet();
+
+    const int tamanoLote = 50000;
+    var todasLasDisponibilidades = new List<Disponibilidad>();
+
+    // Pre-generar  disponibilidades en memoria
+    foreach (var fecha in diasLaborables)
     {
-        // recorrer cada dia laborable
-        foreach (var fecha in diasLaborables)
+        foreach (var idPuesto in idsPuestosTrabajo)
         {
-            // recorrer cada tramo horario (de 1 a 11) ya que habrá 11 tramos predefinidos en la bbdd al momento de crearla, por lo tanto 11 ids del 1 al 11
-            for (int i = 1; i <= 11; i++)
+            for (int tramoHorario = 1; tramoHorario <= 11; tramoHorario++)
             {
-                // checkear que no exista para evitar repetidos
-                if (!existentes.Any(d => d.Fecha.Date == fecha.Date && d.IdPuestoTrabajo == puesto.IdPuestoTrabajo && d.IdTramoHorario == i))
+                var clave = $"{fecha:yyyyMMdd}_{idPuesto}_{tramoHorario}";
+                
+                // Búsqueda O(1) en lugar de O(n)
+                if (!existentesSet.Contains(clave))
                 {
-                    // Crear nueva disponibilidad
-                    nuevasDisponibilidades.Add(new Disponibilidad
+                    todasLasDisponibilidades.Add(new Disponibilidad
                     {
                         Fecha = fecha,
-                        Estado = true, // siempre estarán disponibles al crearlo
-                        IdTramoHorario = i,
-                        IdPuestoTrabajo = puesto.IdPuestoTrabajo // será el id del puesto de trabajo que estamos recorriendo dentro del foreach
+                        Estado = true,
+                        IdTramoHorario = tramoHorario,
+                        IdPuestoTrabajo = idPuesto
                     });
                 }
             }
         }
     }
 
-    // Si hay nuevas disponibilidades, se añaden
-    if (nuevasDisponibilidades.Any())
+    Console.WriteLine($"Generadas {todasLasDisponibilidades.Count} disponibilidades nuevas en memoria");
+
+    // Insertar por lotes grandes
+    for (int i = 0; i < todasLasDisponibilidades.Count; i += tamanoLote)
     {
-        await _context.Disponibilidades.AddRangeAsync(nuevasDisponibilidades);
-        await _context.SaveChangesAsync();
+        var lote = todasLasDisponibilidades.Skip(i).Take(tamanoLote).ToList();
+        
+        try
+        {
+            _context.Database.SetCommandTimeout(300); // 5 minutos timeout para evitar errores de exceso de tiempo
+            
+            await _context.Disponibilidades.AddRangeAsync(lote);
+            await _context.SaveChangesAsync();
+            
+            Console.WriteLine($"Insertado lote {i/tamanoLote + 1}: {lote.Count} registros");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en lote {i/tamanoLote + 1}: {ex.Message}");
+            
+            // Si falla el lote grande, intentar con lotes más pequeños
+            await InsertarLotePequeno(lote);
+        }
     }
 }
 
+// Método auxiliar para manejar errores con lotes más pequeños
+private async Task InsertarLotePequeno(List<Disponibilidad> loteGrande)
+{
+    const int tamanoLotePequeno = 5000;
+    
+    for (int i = 0; i < loteGrande.Count; i += tamanoLotePequeno)
+    {
+        var lotePequeno = loteGrande.Skip(i).Take(tamanoLotePequeno).ToList();
+        
+        try
+        {
+            await _context.Disponibilidades.AddRangeAsync(lotePequeno);
+            await _context.SaveChangesAsync();
+            Console.WriteLine($"Recuperado con lote pequeño: {lotePequeno.Count} registros");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error crítico en lote pequeño: {ex.Message}");
+        }
+    }
+}
 public async Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId)
 {
     // Consultamos primero las fechas únicas
