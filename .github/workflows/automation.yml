@@ -2,9 +2,9 @@ name: Docker Image CI/CD backend Coworking
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [ develop, main, optimizaciones ]
   pull_request:
-    branches: [ develop, main ]
+    branches: [ develop, main, optimizaciones ]
 env:
   EKS_CLUSTER_NAME: cluster-coworking
   AWS_REGION: us-east-1
