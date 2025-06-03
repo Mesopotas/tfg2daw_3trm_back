@@ -34,7 +34,9 @@ namespace CoWorking.Service
             var cuerpoEmail = new BodyBuilder();
             cuerpoEmail.HtmlBody = CreateEmailTemplate(userName, reservationData);
 
-            string qrCodeApiUrl = $"https://localhost:7179/api/Reservas/generarqr/{reservationData.IdReserva}"; // endpoint que genera los qr
+            string qrCodeApiUrl = $"https://coworkingapi.jblas.me/api/Reservas/generarqr/{reservationData.IdReserva}"; // endpoint que genera los qr
+            /*Importante, como en el despliegue usará un dominio web, hay que cambiar el qrCodeApi, ya que localhost:7179 es en local con el compilador de C# de vscode,
+            lo ponemos con dominio, en local ya no erá, pero en cloud si que es lo que interesa, si se hacen pruebas en local se deberá ajustar y poner localhost:7179 otra vez*/
             byte[] qrCodeBytes = null;
 
 
