@@ -4,7 +4,7 @@ metadata:
   name: backend-deployment
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <ARN of your certificate from the aws create certificate command>
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:533267180903:certificate/902c9160-530c-4c32-9c04-4bd4613cc872
     # Only run TLS on the port named "https" below.
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
 spec:

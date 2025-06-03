@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: jblas7/back-2-trimestre-2-daw:latest
+        image: jblas7/back-3-trimestre-2-daw:vfinal # ya no se cambia mas
         imagePullPolicy: Always
         ports:
         - containerPort: 8080 # escuchará en el puerto 8080 y tb se mapeará al 8080 de salida
