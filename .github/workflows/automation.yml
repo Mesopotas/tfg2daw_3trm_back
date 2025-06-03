@@ -43,7 +43,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: jblas7/back-3-trimestre-2-daw:v${{ github.run_number }} # ejemplo: jblas7/back-2-trimestre-2-daw:v12
+          tags: jblas7/back-3-trimestre-2-daw:vfinal # asi siempre tendra el mismo nombre y se sobreescribira, por ello no habra q cambiar el yaml de k8s y siempre tendra el mismo dns name que sirve de ip externa, para poder asignar el dominio solo una vez y que no rote
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
