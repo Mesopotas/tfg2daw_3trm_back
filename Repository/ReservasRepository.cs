@@ -62,34 +62,61 @@ namespace CoWorking.Repositories
             return reserva;
         }
 
+      public async Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario)
+{
+    // sentencia muy optimizada para velocidad
+    var resultado = await _context.Reservas
+        .Where(r => r.IdUsuario == idUsuario)
+        .OrderByDescending(r => r.Fecha)
+        .Select(r => new GetReservasClienteDTO
+        {
+            IdReserva = r.IdReserva,
+            PrecioTotal = r.PrecioTotal,
+            
+            // Info del primer asiento, ya que son los mismos en toda la sala
+            NombreSalaPrincipal = r.Lineas.First().PuestoTrabajo.Sala.Nombre,
+            CiudadSedePrincipal = r.Lineas.First().PuestoTrabajo.Sala.Sede.Ciudad,
+            DireccionSedePrincipal = r.Lineas.First().PuestoTrabajo.Sala.Sede.Direccion,
+            ImagenSalaPrincipal = r.Lineas.First().PuestoTrabajo.Sala.URL_Imagen,
+            
+            AsientosSeleccionados = r.Lineas
+                .Select(l => l.PuestoTrabajo.NumeroAsiento)
+                .Distinct()
+                .ToList(),
+            
+            // nuevo campo en bbdd, ahorra consultar en disponibilidades sumando muchisimo tiempo
+            RangoHorarioReserva = r.TramoReservado ?? r.Fecha.ToString("dd/MM/yyyy HH:mm")
+        })
+        .ToListAsync();
+
+    return resultado;
+}
 public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDTO)
 {
-    // iniciar una transacción, esto hará que si 2 usuarios intentan comprar una o varias disponibilidades iguales simultaneamente, nunca se crearán registros vacios en la bbdd
     using (var transaction = await _context.Database.BeginTransactionAsync())
     {
         try
         {
-            // crear reserva
+            // Variables para calcular el tramo reservado
+            DateTime? fechaInicioMin = null;
+            DateTime? fechaFinMax = null;
+
             var reserva = new Reservas
             {
                 IdUsuario = reservaDTO.IdUsuario,
                 Descripcion = reservaDTO.Descripcion,
                 Fecha = reservaDTO.FechaReserva,
-                PrecioTotal = 0 // inicializado a 0 se actualizara al agregar lineas
+                PrecioTotal = 0
             };
 
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
 
-            // crear lineas de la reserva
-            decimal precioTotal = 0; // variable inicializada a 0
-
-            //  recuperar todas las disponibilidades del rango por puesto de trabajo
+            decimal precioTotal = 0;
             var disponibilidadesAProcesar = new List<LineasPostReservaDTO>();
 
             if (reservaDTO.Lineas != null && reservaDTO.Lineas.Any())
             {
-                // agrupar lineas del payload por idpuestotrabajo
                 var gruposPorPuestoTrabajo = reservaDTO.Lineas
                     .GroupBy(l => l.IdPuestoTrabajo);
 
@@ -100,18 +127,19 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
 
                     if (lineasDelGrupo.Count >= 2)
                     {
-                        // tomar primera y ultima disponibilidad del grupo para interar su rango
                         var idDisponibilidadInicio = lineasDelGrupo.First().IdDisponibilidad;
                         var idDisponibilidadFin = lineasDelGrupo.Last().IdDisponibilidad;
 
-                        // obtener disponibilidades dentro del rango para el puesto de trabajo especifico
+                        // obtener las disponibilidades y ordenarlas por fecha y hora
                         var disponibilidadesEnRango = await _context.Disponibilidades
+                            .Include(d => d.TramoHorario)
                             .Where(d => d.IdPuestoTrabajo == idPuestoTrabajo &&
                                         d.IdDisponibilidad >= idDisponibilidadInicio &&
                                         d.IdDisponibilidad <= idDisponibilidadFin)
+                            .OrderBy(d => d.Fecha)
+                            .ThenBy(d => d.TramoHorario.HoraInicio)
                             .ToListAsync();
 
-                        // convertir disponibilidades encontradas a lineapostdto para procesar
                         foreach (var disp in disponibilidadesEnRango)
                         {
                             disponibilidadesAProcesar.Add(new LineasPostReservaDTO
@@ -123,23 +151,22 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
                     }
                     else if (lineasDelGrupo.Count == 1)
                     {
-                        // si solo hay una linea para este puesto de trabajo procesarla directamente
                         disponibilidadesAProcesar.Add(lineasDelGrupo.Single());
                     }
-                    // si el grupo esta vacio no se hace nada
                 }
             }
 
-            // el bucle foreach ahora itera sobre disponibilidadesaprocesar que contendra todas las disponibilidades de todos los rangos
+            // procesar todas las disponibilidades y calcular el tramo
+            var todasLasDisponibilidades = new List<Disponibilidad>();
+
             foreach (var lineaDTO in disponibilidadesAProcesar)
             {
-                // obtener disponibilidad directamente por su iddisponibilidad
-                // incluir puestotrabajo y relaciones necesarias para calculo de precio
                 var disponibilidad = await _context.Disponibilidades
                     .Include(d => d.PuestoTrabajo)
                         .ThenInclude(p => p.Sala)
                             .ThenInclude(s => s.TipoSala)
                                 .ThenInclude(ts => ts.TipoPuestoTrabajo)
+                    .Include(d => d.TramoHorario)
                     .FirstOrDefaultAsync(d => d.IdDisponibilidad == lineaDTO.IdDisponibilidad);
 
                 if (disponibilidad == null)
@@ -147,21 +174,20 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
                     throw new ArgumentException($"No existe la disponibilidad con Id: {lineaDTO.IdDisponibilidad}");
                 }
 
-                // comprobar si esta disponible el campo estado de disponibilidad esta en true
                 if (!disponibilidad.Estado)
                 {
                     throw new InvalidOperationException($"El puesto de trabajo asociado a la disponibilidad {lineaDTO.IdDisponibilidad} no está disponible.");
                 }
 
-                // obtener puesto de trabajo de disponibilidad
-                var puestoTrabajo = disponibilidad.PuestoTrabajo;
+                // añadir a la lista para calcular el tramo total
+                todasLasDisponibilidades.Add(disponibilidad);
 
+                var puestoTrabajo = disponibilidad.PuestoTrabajo;
                 if (puestoTrabajo == null)
                 {
                     throw new ArgumentException($"La disponibilidad con Id: {lineaDTO.IdDisponibilidad} no tiene un puesto de trabajo asociado válido.");
                 }
 
-                // obtener precio base todavia no aplica extra de caracteristica para esa linea segun tipo de puesto
                 decimal precioLinea = 0;
                 if (puestoTrabajo.Sala?.TipoSala?.TipoPuestoTrabajo != null)
                 {
@@ -172,7 +198,6 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
                     throw new InvalidOperationException($"No se pudo determinar el precio base para el puesto de trabajo {puestoTrabajo.IdPuestoTrabajo}. Faltan datos de Sala/TipoSala/TipoPuestoTrabajo.");
                 }
 
-                // acceder a caracteristicas de sala ligadas a esa sala por id
                 var caracteristicasSala = await _context.SalaConCaracteristicas
                     .Include(sc => sc.Caracteristica)
                     .Where(sc => sc.IdSala == puestoTrabajo.IdSala)
@@ -180,11 +205,9 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
 
                 foreach (var caracteristica in caracteristicasSala)
                 {
-                    // aplicar precio aniadido por caracteristica
                     precioLinea += precioLinea * (caracteristica.Caracteristica.PrecioAniadido / 100m);
                 }
 
-                // creacion de linea dentro del foreach de lineas
                 var linea = new Lineas
                 {
                     IdReserva = reserva.IdReserva,
@@ -193,32 +216,46 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
                 };
 
                 _context.Lineas.Add(linea);
-
-                // poner disponibilidad en false despues de insertar linea
                 disponibilidad.Estado = false;
-
-                // sumar al precio total
                 precioTotal += precioLinea;
             }
 
-            // actualizar precio total de reserva una vez procesadas todas las lineas
+            // calcular tramo
+            if (todasLasDisponibilidades.Any())
+            {
+                // ordenar todas las disponibilidades por fecha y hora
+                var disponibilidadesOrdenadas = todasLasDisponibilidades
+                    .Where(d => d.TramoHorario != null)
+                    .OrderBy(d => d.Fecha)
+                    .ThenBy(d => d.TramoHorario.HoraInicio)
+                    .ToList();
+
+                if (disponibilidadesOrdenadas.Any())
+                {
+                    var primera = disponibilidadesOrdenadas.First();
+                    var ultima = disponibilidadesOrdenadas.Last();
+
+                    fechaInicioMin = primera.Fecha.Date.Add(primera.TramoHorario.HoraInicio);
+                    fechaFinMax = ultima.Fecha.Date.Add(ultima.TramoHorario.HoraFin);
+
+                    reserva.TramoReservado = $"{fechaInicioMin.Value:dd/MM/yyyy HH:mm} - {fechaFinMax.Value:dd/MM/yyyy HH:mm}";
+                    
+                }
+            }
+
             reserva.PrecioTotal = precioTotal;
             await _context.SaveChangesAsync();
-
-            // confirmar la transacción si todo salió bien
             await transaction.CommitAsync();
 
             return reserva;
         }
         catch
         {
-            // deshacer la transacción en caso de error
             await transaction.RollbackAsync();
             throw;
         }
     }
 }
-
         public async Task UpdateAsync(ReservasUpdateDTO reservas)
         {
             var reservaExistente = await _context.Reservas
@@ -276,140 +313,7 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
                 await _context.SaveChangesAsync();
             }
         }
-
-public async Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario)
-{
-    // en vez de traer cada entidad por separado se proyecta todo en una sola consulta
-    // seleccionamos las reservas que pertenecen al usuario usando el idUsuario
-    // se ordenan por fecha descendente para que las mas recientes salgan primero
-    var reservasConInfoBasica = await _context.Reservas
-        .Where(r => r.IdUsuario == idUsuario)
-        .OrderByDescending(r => r.Fecha)
-        .Select(r => new
-        {
-            Reserva = r, // aqui se trae toda la entidad reserva completa
-            LineasInfo = r.Lineas
-                .Select(l => new // se proyecta solo la informacion necesaria de cada linea
-                {
-                    l.IdPuestoTrabajo,
-                    NombreSala = l.PuestoTrabajo.Sala.Nombre,
-                    UrlImagenSala = l.PuestoTrabajo.Sala.URL_Imagen,
-                    CiudadSede = l.PuestoTrabajo.Sala.Sede.Ciudad,
-                    DireccionSede = l.PuestoTrabajo.Sala.Sede.Direccion,
-                    TieneInfoCompleta = l.PuestoTrabajo != null && l.PuestoTrabajo.Sala != null && l.PuestoTrabajo.Sala.Sede != null
-                })
-                .ToList()
-        })
-        .ToListAsync(); // al ejecutar esta consulta con tolistasync ya se trae todo en una sola llamada a base de datos
-                       // muchisimo mas optimo ya que no se hacen llamadas separadas para cada propiedad relacionada como sala o sede
-                       // todo se obtiene en la misma consulta gracias al select con proyeccion
-
-    if (!reservasConInfoBasica.Any())
-    {
-        return new List<GetReservasClienteDTO>(); // si no hay reservas se retorna lista vacia
-    }
-
-    // obtener todos los ids de puestos de trabajo de todas las reservas
-    var todosLosPuestoTrabajoIds = reservasConInfoBasica
-        .SelectMany(rci => rci.LineasInfo.Select(li => li.IdPuestoTrabajo))
-        .Distinct()
-        .ToList();
-
-    // se hace un solo llamado a la base de datos para traer todas las disponibilidades que correspondan
-    List<Disponibilidad> todasLasDisponibilidadesRelevantes = new List<Disponibilidad>();
-    if (todosLosPuestoTrabajoIds.Any())
-    {
-        todasLasDisponibilidadesRelevantes = await _context.Disponibilidades
-            .Where(d => todosLosPuestoTrabajoIds.Contains(d.IdPuestoTrabajo) &&
-                          d.Estado == false) // solo se traen las que estan reservadas
-            .Include(d => d.TramoHorario) // se incluye el tramo horario en la misma consulta
-            .ToListAsync(); // se ejecuta la consulta en una sola llamada
-    }
-
-    // se agrupan las disponibilidades por id de puesto de trabajo, para evitar consultas extra
-    var disponibilidadesAgrupadas = todasLasDisponibilidadesRelevantes
-        .GroupBy(d => d.IdPuestoTrabajo)
-        .ToDictionary(g => g.Key, g => g.ToList());
-
-    var resultado = new List<GetReservasClienteDTO>();
-
-    // aqui ya no hay llamadas a la base de datos porque todo se obtuvo antes
-    foreach (var reservaInfo in reservasConInfoBasica)
-    {
-        var reserva = reservaInfo.Reserva;
-        var lineasInfo = reservaInfo.LineasInfo;
-
-        var puestoTrabajoIdsDeEstaReserva = lineasInfo
-            .Select(li => li.IdPuestoTrabajo)
-            .Distinct()
-            .ToList();
-
-        var disponibilidadesAsociadas = new List<Disponibilidad>();
-        foreach (var idPuesto in puestoTrabajoIdsDeEstaReserva)
-        {
-            if (disponibilidadesAgrupadas.TryGetValue(idPuesto, out var disponibilidadesDelPuesto))
-            {
-                disponibilidadesAsociadas.AddRange(
-                    disponibilidadesDelPuesto.Where(d => d.Fecha.Date >= reserva.Fecha.Date)
-                );
-            }
-        }
-
-        // ordenar por fecha y hora
-        disponibilidadesAsociadas = disponibilidadesAsociadas
-                                    .OrderBy(d => d.Fecha)
-                                    .ThenBy(d => d.TramoHorario.HoraInicio)
-                                    .ToList();
-
-        int cantidadHorasReservadas = disponibilidadesAsociadas.Count;
-
-        string rangoHorario = "Horario no disponible";
-        if (disponibilidadesAsociadas.Any())
-        {
-            DateTime minFecha = disponibilidadesAsociadas.Min(d => d.Fecha);
-            DateTime maxFecha = disponibilidadesAsociadas.Max(d => d.Fecha);
-
-            TimeSpan minHoraInicio = disponibilidadesAsociadas
-                .Where(d => d.Fecha.Date == minFecha.Date)
-                .Min(d => d.TramoHorario.HoraInicio);
-
-            TimeSpan maxHoraFin = disponibilidadesAsociadas
-                .Where(d => d.Fecha.Date == maxFecha.Date)
-                .Max(d => d.TramoHorario.HoraFin);
-
-            if (minFecha.Date == maxFecha.Date)
-            {
-                rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxHoraFin:hh\\:mm}";
-            }
-            else
-            {
-                rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxFecha:dd/MM/yyyy} {maxHoraFin:hh\\:mm}";
-            }
-        }
-        else if (lineasInfo.Any())
-        {
-            rangoHorario = $"{reserva.Fecha:dd/MM/yyyy} (Horario no especificado)";
-        }
-
-        var primeraLineaValidaInfo = lineasInfo.FirstOrDefault(li => li.TieneInfoCompleta);
-
-        resultado.Add(new GetReservasClienteDTO
-        {
-            IdReserva = reserva.IdReserva,
-            PrecioTotal = reserva.PrecioTotal,
-            CantidadHorasReservadas = cantidadHorasReservadas,
-            NombreSalaPrincipal = primeraLineaValidaInfo?.NombreSala,
-            ImagenSalaPrincipal = primeraLineaValidaInfo?.UrlImagenSala,
-            CiudadSedePrincipal = primeraLineaValidaInfo?.CiudadSede,
-            DireccionSedePrincipal = primeraLineaValidaInfo?.DireccionSede,
-            RangoHorarioReserva = rangoHorario
-        });
-    }
-
-    return resultado;
-}
-
-
+  
 public async Task<GetDetallesReservaDTO?> GetResumenReservaAsync(int idReserva)
 {
     // obtener la reserva y sus líneas asociadas

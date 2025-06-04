@@ -17,6 +17,8 @@ namespace Models
 
         public decimal PrecioTotal { get; set; }
 
+        public string? TramoReservado { get; set; } // nullable en principio
+
         [ForeignKey("IdUsuario")]
         public Usuarios Usuario { get; set; }
         public List<Lineas> Lineas { get; set; }
@@ -30,6 +32,16 @@ namespace Models
             Fecha = fecha;
             Descripcion = descripcion;
             PrecioTotal = precioTotal;
+        }
+
+        public Reservas(int idReserva, int idUsuario, DateTime fecha, string descripcion, decimal precioTotal, string tramoReservado)
+        {
+            IdReserva = idReserva;
+            IdUsuario = idUsuario;
+            Fecha = fecha;
+            Descripcion = descripcion;
+            PrecioTotal = precioTotal;
+            TramoReservado = tramoReservado;
         }
     }
 }
