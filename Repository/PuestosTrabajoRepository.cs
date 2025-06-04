@@ -210,11 +210,112 @@ public async Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailability
 
             return result;
         }
+        
+        public async Task<PuestoTrabajoFiltroFechasDTO?> GetPuestoUnicoWithAvailabilityBySalaAsync( // solo devuelve un objeto, no una lista
+    int idSala,
+    DateTime fechaInicio,
+    DateTime fechaFin,
+    TimeSpan horaInicio,
+    TimeSpan horaFin)
+{
+    // obtener los puestos de trabajo y sus datos relacionados con sala y tipo de sala
+    // se hacen joins y se proyectan los datos necesarios en memoria
+    var puestosBaseQuery = await _context.PuestosTrabajo
+        .Where(puesto => puesto.IdSala == idSala && !puesto.Bloqueado)
+        .Join(_context.Salas,
+            puesto => puesto.IdSala,
+            sala => sala.IdSala,
+            (puesto, sala) => new { puesto, sala })
+        .Join(_context.TiposSalas,
+            ps => ps.sala.IdTipoSala,
+            tipoSala => tipoSala.IdTipoSala,
+            (ps, tipoSala) => new
+            {
+                PuestoEntidad = ps.puesto,
+                IdTipoPuestoTrabajo = tipoSala.IdTipoPuestoTrabajo
+            })
+        .ToListAsync(); // ejecutar la consulta para traer los datos basicos de puestos a memoria
+
+    // ahora para cada puesto se traen las disponibilidades y tramos horarios relacionados
+
+    // obtener todas las disponibilidades dentro del rango de fechas y horas indicado
+    var allRelevantDisponibilidades = await _context.Disponibilidades
+        .Where(disp => disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin)
+        .Join(_context.TramosHorarios,
+            disp => disp.IdTramoHorario,
+            tramo => tramo.IdTramoHorario,
+            (disp, tramo) => new
+            {
+                disp.IdDisponibilidad,
+                disp.IdPuestoTrabajo,
+                disp.Fecha,
+                disp.Estado,
+                tramo.IdTramoHorario,
+                tramo.HoraInicio,
+                tramo.HoraFin
+            })
+        .Where(pd => pd.HoraInicio >= horaInicio && pd.HoraFin <= horaFin)
+        .ToListAsync(); // ejecutar esta consulta para obtener todas las disponibilidades relevantes
+
+    // realizar el filtrado y la proyeccion final en memoria
+    var result = puestosBaseQuery
+        .Select(puestoData =>
+        {
+            // filtrar las disponibilidades del puesto actual
+            var puestoDisponibilidades = allRelevantDisponibilidades
+                .Where(d => d.IdPuestoTrabajo == puestoData.PuestoEntidad.IdPuestoTrabajo)
+                .Select(d => new DisponibilidadFiltroFechasDTO
+                {
+                    IdDisponibilidad = d.IdDisponibilidad,
+                    Fecha = d.Fecha,
+                    Estado = d.Estado,
+                    IdTramoHorario = d.IdTramoHorario,
+                    HoraInicio = d.HoraInicio,
+                    HoraFin = d.HoraFin
+                })
+                .OrderBy(d => d.IdDisponibilidad)
+                .ToList(); // convertir en lista
+
+            // calcular la primera y ultima disponibilidad en el rango
+            var disponibilidadesEnRango = puestoDisponibilidades
+                .Take(1) // seleccionar solo el primer elemento
+                .Concat(puestoDisponibilidades.OrderByDescending(d => d.IdDisponibilidad).Take(1)) // seleccionar el ultimo puesto, concat lo une para q saque el primero y luego el segundo en una list
+                .Distinct() // eliminar duplicados
+                .OrderBy(d => d.IdDisponibilidad)
+                .ToList();
+
+            return new
+            {
+                PuestoEntidad = puestoData.PuestoEntidad,
+                IdTipoPuestoTrabajo = puestoData.IdTipoPuestoTrabajo,
+                TodasDisponibilidades = puestoDisponibilidades,
+                DisponibilidadesEnRango = disponibilidadesEnRango
+            };
+        })
+        // Solo filtrar que tenga al menos una disponibilidad
+        .Where(item => item.TodasDisponibilidades.Any())
+        .Select(item => new PuestoTrabajoFiltroFechasDTO
+        {
+            IdPuestoTrabajo = item.PuestoEntidad.IdPuestoTrabajo,
+            NumeroAsiento = item.PuestoEntidad.NumeroAsiento,
+            CodigoMesa = item.PuestoEntidad.CodigoMesa,
+            URL_Imagen = item.PuestoEntidad.URL_Imagen,
+            DisponibleGeneral = item.TodasDisponibilidades.All(d => d.Estado),
+            BloqueadoGeneral = item.PuestoEntidad.Bloqueado,
+            IdZonaTrabajo = item.PuestoEntidad.IdZonaTrabajo,
+            IdSala = item.PuestoEntidad.IdSala,
+            IdTipoPuestoTrabajo = item.IdTipoPuestoTrabajo,
+            DisponibilidadesEnRango = item.DisponibilidadesEnRango
+        })
+        .FirstOrDefault(); // solo el primero
+
+    return result;
+}
 public async Task GenerarAsientosDeSalas()
         {
             var salas = await _context.Salas
             // para acceder a las capacidades de asientos y mesas
-                                    .Include(s => s.TipoSala) 
+                                    .Include(s => s.TipoSala)
                                     .Include(s => s.ZonasTrabajo)
                                     .ToListAsync();
 

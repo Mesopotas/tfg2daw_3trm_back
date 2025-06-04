@@ -88,6 +88,27 @@ namespace CoWorking.Controllers
         }
     
 
+    // igual que el de arriba pero en vez de una lista devolverá solo el primer objeto (asiento)
+     [HttpGet("puestounicodisponible")] // EJ: https://localhost:7179/api/puestostrabajo/puestounicodisponible?idSala=1&fechaInicio=2025-06-05&fechaFin=2025-06-05&horaInicio=08%3A00&horaFin=19%3A00
+        public async Task<ActionResult<PuestoTrabajoFiltroFechasDTO>> GetPuestoUnicoWithAvailabilityBySalaAsync(
+       // [FromQuery] son parametros que irán en URL
+       /*si se usa el swagger para probar este get, el campo horaInicio y horaFin deben escribirse "08:00:00" (comillas incluidas), formato HH:mm:ss */
+       [FromQuery] int idSala, // ahora irá con el id de la sala en vez de id de la sede
+       [FromQuery] DateTime fechaInicio,
+       [FromQuery] DateTime fechaFin,
+       [FromQuery] TimeSpan horaInicio,
+       [FromQuery] TimeSpan horaFin)
+        {
+
+
+            var puestosDisponibles = await _servicePuestosTrabajo.GetPuestoUnicoWithAvailabilityBySalaAsync(idSala, fechaInicio, fechaFin, horaInicio, horaFin);
+            if (puestosDisponibles == null)
+            {
+                return NotFound("No se encontraron puestos disponibles en la sede especificada para la fecha dada");
+            }
+
+            return Ok(puestosDisponibles);
+        }
 
      [HttpPost("generarAsientosDeSalas")]
         public async Task<IActionResult> GenerarAsientosDeSalas()

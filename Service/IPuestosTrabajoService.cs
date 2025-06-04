@@ -13,6 +13,7 @@ namespace CoWorking.Service
         Task DeleteAsync(int id);
 
         Task<List<PuestoTrabajoFiltroFechasDTO>> GetPuestosWithAvailabilityBySalaAsync(int idsala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
+        Task<PuestoTrabajoFiltroFechasDTO> GetPuestoUnicoWithAvailabilityBySalaAsync(int idSala, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin);
 
          Task GenerarAsientosDeSalas();
 
