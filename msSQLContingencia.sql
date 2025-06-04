@@ -165,6 +165,7 @@ CREATE TABLE Reservas ( -- reservas realizadas por los usuarios
     IdReserva INT IDENTITY(1,1) PRIMARY KEY,
     IdUsuario INT,
     Fecha DATETIME,
+    TramoReservado VARCHAR(100),
     Descripcion VARCHAR(250),
     PrecioTotal DECIMAL(10,2),
     FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
