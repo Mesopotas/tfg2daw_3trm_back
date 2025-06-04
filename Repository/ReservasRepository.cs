@@ -261,107 +261,137 @@ public async Task<Reservas> CreateReservaConLineasAsync(ReservaPostDTO reservaDT
             }
         }
 
-
-        // reestructurado el endpoint para recibir solo la info que se necesita y hacerlo mucho mas rapido
-        public async Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario)
+public async Task<List<GetReservasClienteDTO>> GetReservasUsuarioAsync(int idUsuario)
+{
+    // en vez de traer cada entidad por separado se proyecta todo en una sola consulta
+    // seleccionamos las reservas que pertenecen al usuario usando el idUsuario
+    // se ordenan por fecha descendente para que las mas recientes salgan primero
+    var reservasConInfoBasica = await _context.Reservas
+        .Where(r => r.IdUsuario == idUsuario)
+        .OrderByDescending(r => r.Fecha)
+        .Select(r => new
         {
-            // select inicial de reservas con lineas, puestoTrabajo, sala y sede, todas las tablas que se van a necesitar para ver la data
-            var reservasConLineasYDetalles = await _context.Reservas
-                .Where(r => r.IdUsuario == idUsuario)
-                .OrderByDescending(r => r.Fecha) // descendente, primero las ultimas
-                .Select(r => new
+            Reserva = r, // aqui se trae toda la entidad reserva completa
+            LineasInfo = r.Lineas
+                .Select(l => new // se proyecta solo la informacion necesaria de cada linea
                 {
-                    Reserva = r,
-                    // se juntan las columnas necesarias
-                    LineasDetalladas = r.Lineas
-                                        .Select(l => new
-                                        {
-                                            l.IdPuestoTrabajo, //ID del puesto para buscar disponibilidades
-                                            PuestoTrabajo = l.PuestoTrabajo,
-                                            Sala = l.PuestoTrabajo.Sala,
-                                            Sede = l.PuestoTrabajo.Sala.Sede
-                                        })
-                                        .ToList() // se devuelve en una lista a usar a continuacion
+                    l.IdPuestoTrabajo,
+                    NombreSala = l.PuestoTrabajo.Sala.Nombre,
+                    UrlImagenSala = l.PuestoTrabajo.Sala.URL_Imagen,
+                    CiudadSede = l.PuestoTrabajo.Sala.Sede.Ciudad,
+                    DireccionSede = l.PuestoTrabajo.Sala.Sede.Direccion,
+                    TieneInfoCompleta = l.PuestoTrabajo != null && l.PuestoTrabajo.Sala != null && l.PuestoTrabajo.Sala.Sede != null
                 })
-                .ToListAsync(); // Ejecuta la primera parte de la consulta a la base de datos
+                .ToList()
+        })
+        .ToListAsync(); // al ejecutar esta consulta con tolistasync ya se trae todo en una sola llamada a base de datos
+                       // muchisimo mas optimo ya que no se hacen llamadas separadas para cada propiedad relacionada como sala o sede
+                       // todo se obtiene en la misma consulta gracias al select con proyeccion
 
-            var resultado = new List<GetReservasClienteDTO>();
+    if (!reservasConInfoBasica.Any())
+    {
+        return new List<GetReservasClienteDTO>(); // si no hay reservas se retorna lista vacia
+    }
 
-            foreach (var reservaConLineas in reservasConLineasYDetalles) // recorrer sobre cada reserva conjuntada con el resto de campos 
+    // obtener todos los ids de puestos de trabajo de todas las reservas
+    var todosLosPuestoTrabajoIds = reservasConInfoBasica
+        .SelectMany(rci => rci.LineasInfo.Select(li => li.IdPuestoTrabajo))
+        .Distinct()
+        .ToList();
+
+    // se hace un solo llamado a la base de datos para traer todas las disponibilidades que correspondan
+    List<Disponibilidad> todasLasDisponibilidadesRelevantes = new List<Disponibilidad>();
+    if (todosLosPuestoTrabajoIds.Any())
+    {
+        todasLasDisponibilidadesRelevantes = await _context.Disponibilidades
+            .Where(d => todosLosPuestoTrabajoIds.Contains(d.IdPuestoTrabajo) &&
+                          d.Estado == false) // solo se traen las que estan reservadas
+            .Include(d => d.TramoHorario) // se incluye el tramo horario en la misma consulta
+            .ToListAsync(); // se ejecuta la consulta en una sola llamada
+    }
+
+    // se agrupan las disponibilidades por id de puesto de trabajo, para evitar consultas extra
+    var disponibilidadesAgrupadas = todasLasDisponibilidadesRelevantes
+        .GroupBy(d => d.IdPuestoTrabajo)
+        .ToDictionary(g => g.Key, g => g.ToList());
+
+    var resultado = new List<GetReservasClienteDTO>();
+
+    // aqui ya no hay llamadas a la base de datos porque todo se obtuvo antes
+    foreach (var reservaInfo in reservasConInfoBasica)
+    {
+        var reserva = reservaInfo.Reserva;
+        var lineasInfo = reservaInfo.LineasInfo;
+
+        var puestoTrabajoIdsDeEstaReserva = lineasInfo
+            .Select(li => li.IdPuestoTrabajo)
+            .Distinct()
+            .ToList();
+
+        var disponibilidadesAsociadas = new List<Disponibilidad>();
+        foreach (var idPuesto in puestoTrabajoIdsDeEstaReserva)
+        {
+            if (disponibilidadesAgrupadas.TryGetValue(idPuesto, out var disponibilidadesDelPuesto))
             {
-                var reserva = reservaConLineas.Reserva;
-                var lineasDetalladas = reservaConLineas.LineasDetalladas;
-
-                // obtener todos los IdPuestoTrabajo de las lineas de la reserva (el distintct evita los duplicados)
-                var puestoTrabajoIds = lineasDetalladas.Select(ld => ld.IdPuestoTrabajo).Distinct().ToList();
-
-                // obtener todas las disponibilidades para estos puestos de trabajo cuyo Estado = false y cuya fecha sea igual o posterior a la fecha de la reserva
-                var disponibilidadesAsociadas = await _context.Disponibilidades
-                    .Where(d => puestoTrabajoIds.Contains(d.IdPuestoTrabajo) &&
-                                d.Estado == false && // Solo disponibilidades que ya están reservadas
-                                d.Fecha.Date >= reserva.Fecha.Date) // Y que su fecha sea igual o posterior a la fecha de la reserva
-                    .Include(d => d.TramoHorario) // Incluimos TramoHorario para poder poner tramo de inicio y fin
-                    .OrderBy(d => d.Fecha)
-                    .ThenBy(d => d.TramoHorario.HoraInicio) // Luego por hora de inicio
-                    .ToListAsync();
-
-                // se cuentan todas las disponibilidades ya que cada disponibilidad es una hora
-                int cantidadHorasReservadas = disponibilidadesAsociadas.Count;
-
-                // Determinar el rango horario consolidado para toda la reserva
-                string rangoHorario = "Horario no disponible";
-                if (disponibilidadesAsociadas.Any())
-                {
-                    // Encontrar la fecha de inicio y la fecha de fin de todas las disponibilidades asociadas a la reserva
-                    DateTime minFecha = disponibilidadesAsociadas.Min(d => d.Fecha);
-                    DateTime maxFecha = disponibilidadesAsociadas.Max(d => d.Fecha);
-
-                    // Encontrar la hora de inicio
-                    TimeSpan minHoraInicio = disponibilidadesAsociadas
-                                                .Where(d => d.Fecha == minFecha)
-                                                .Min(d => d.TramoHorario.HoraInicio);
-
-                    // Encontrar la hora de fin
-                    TimeSpan maxHoraFin = disponibilidadesAsociadas
-                                                .Where(d => d.Fecha == maxFecha)
-                                                .Max(d => d.TramoHorario.HoraFin);
-
-                    if (minFecha.Date == maxFecha.Date)
-                    {
-                        // output formateado para 1 mismo dia
-                        rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxHoraFin:hh\\:mm}";
-                    }
-                    else
-                    {
-                        // Formato para reservas de varios días
-                        rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxFecha:dd/MM/yyyy} {maxHoraFin:hh\\:mm}";
-                    }
-                }
-                else if (lineasDetalladas.Any())
-                {
-                    // output formateado para varios dias
-                    rangoHorario = $"{reserva.Fecha:dd/MM/yyyy} (Horario no especificado)";
-                }
-
-                // obtener la información de la sala/sede de la primera línea valida (será la misma en todas las líneas)
-                var primeraLineaValida = lineasDetalladas.FirstOrDefault(ld => ld.Sala != null && ld.Sede != null);
-
-                resultado.Add(new GetReservasClienteDTO
-                {
-                    IdReserva = reserva.IdReserva,
-                    PrecioTotal = reserva.PrecioTotal,
-                    CantidadHorasReservadas = cantidadHorasReservadas,
-
-                    NombreSalaPrincipal = primeraLineaValida?.Sala?.Nombre,
-                    ImagenSalaPrincipal = primeraLineaValida?.Sala?.URL_Imagen,
-                    CiudadSedePrincipal = primeraLineaValida?.Sede?.Ciudad,
-                    DireccionSedePrincipal = primeraLineaValida?.Sede?.Direccion,
-                    RangoHorarioReserva = rangoHorario
-                });
+                disponibilidadesAsociadas.AddRange(
+                    disponibilidadesDelPuesto.Where(d => d.Fecha.Date >= reserva.Fecha.Date)
+                );
             }
-
-            return resultado;
         }
+
+        // ordenar por fecha y hora
+        disponibilidadesAsociadas = disponibilidadesAsociadas
+                                    .OrderBy(d => d.Fecha)
+                                    .ThenBy(d => d.TramoHorario.HoraInicio)
+                                    .ToList();
+
+        int cantidadHorasReservadas = disponibilidadesAsociadas.Count;
+
+        string rangoHorario = "Horario no disponible";
+        if (disponibilidadesAsociadas.Any())
+        {
+            DateTime minFecha = disponibilidadesAsociadas.Min(d => d.Fecha);
+            DateTime maxFecha = disponibilidadesAsociadas.Max(d => d.Fecha);
+
+            TimeSpan minHoraInicio = disponibilidadesAsociadas
+                .Where(d => d.Fecha.Date == minFecha.Date)
+                .Min(d => d.TramoHorario.HoraInicio);
+
+            TimeSpan maxHoraFin = disponibilidadesAsociadas
+                .Where(d => d.Fecha.Date == maxFecha.Date)
+                .Max(d => d.TramoHorario.HoraFin);
+
+            if (minFecha.Date == maxFecha.Date)
+            {
+                rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxHoraFin:hh\\:mm}";
+            }
+            else
+            {
+                rangoHorario = $"{minFecha:dd/MM/yyyy} {minHoraInicio:hh\\:mm} - {maxFecha:dd/MM/yyyy} {maxHoraFin:hh\\:mm}";
+            }
+        }
+        else if (lineasInfo.Any())
+        {
+            rangoHorario = $"{reserva.Fecha:dd/MM/yyyy} (Horario no especificado)";
+        }
+
+        var primeraLineaValidaInfo = lineasInfo.FirstOrDefault(li => li.TieneInfoCompleta);
+
+        resultado.Add(new GetReservasClienteDTO
+        {
+            IdReserva = reserva.IdReserva,
+            PrecioTotal = reserva.PrecioTotal,
+            CantidadHorasReservadas = cantidadHorasReservadas,
+            NombreSalaPrincipal = primeraLineaValidaInfo?.NombreSala,
+            ImagenSalaPrincipal = primeraLineaValidaInfo?.UrlImagenSala,
+            CiudadSedePrincipal = primeraLineaValidaInfo?.CiudadSede,
+            DireccionSedePrincipal = primeraLineaValidaInfo?.DireccionSede,
+            RangoHorarioReserva = rangoHorario
+        });
+    }
+
+    return resultado;
+}
 
 
 public async Task<GetDetallesReservaDTO?> GetResumenReservaAsync(int idReserva)
