@@ -21,10 +21,12 @@ public class SalasFiltradoDTO
     public string SedeObservaciones { get; set; }
     public string SedePlanta { get; set; }
     public string SedeDireccion { get; set; }
-    public string SedeCiudad { get; set; }   
+    public string SedeCiudad { get; set; }
 
     public int PuestosDisponibles { get; set; }
     public int PuestosOcupados { get; set; }
+    public List<string> Caracteristicas { get; set; } // array de nombres de caracteristicas de sala, no es el objeto completo ya que el resto de atributos no interesan aqui
+
 
  }
 
