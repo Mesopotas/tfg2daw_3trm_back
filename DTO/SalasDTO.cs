@@ -25,8 +25,13 @@ public class SalasFiltradoDTO
 
     public int PuestosDisponibles { get; set; }
     public int PuestosOcupados { get; set; }
-    public List<string> Caracteristicas { get; set; } // array de nombres de caracteristicas de sala, no es el objeto completo ya que el resto de atributos no interesan aqui
+    public List<CaracteristicaSalaArrayDTO> Caracteristicas { get; set; } // este a su vez es otro dto, para que el array list de cada sala solo tenga los 2 campos que hacen falta
 
 
  }
 
+public class CaracteristicaSalaArrayDTO
+{
+    public int IdCaracteristica { get; set; }
+    public string Nombre { get; set; }
+}

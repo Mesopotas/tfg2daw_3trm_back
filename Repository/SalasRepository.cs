@@ -192,14 +192,35 @@ public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fe
                                           join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
                                           where sala.IdSede == idSede && !sala.Bloqueado &&
                                                 puesto.Disponible && !puesto.Bloqueado &&
-                                                disp.Estado == true && 
+                                                disp.Estado == true &&
                                                 disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
                                                 tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
                                           group puesto by puesto.IdSala into g
                                           select new { IdSala = g.Key, Disponibles = g.Select(p => p.IdPuestoTrabajo).Distinct().Count() })
                                          .ToDictionaryAsync(x => x.IdSala, x => x.Disponibles);
 
-    // resultado a sacar
+    // obtener caracteristicasd e cada sala
+    var caracteristicasPorSala = await (from salaCaract in _context.SalaConCaracteristicas
+                                       join caracteristica in _context.CaracteristicasSala on salaCaract.IdCaracteristica equals caracteristica.IdCaracteristica
+                                       join sala in _context.Salas on salaCaract.IdSala equals sala.IdSala
+                                       where sala.IdSede == idSede && !sala.Bloqueado
+                                       select new
+                                       {
+                                           salaCaract.IdSala,
+                                           caracteristica.IdCaracteristica,
+                                           caracteristica.Nombre
+                                       })
+                                      .GroupBy(x => x.IdSala)
+                                      .ToDictionaryAsync(
+                                          g => g.Key,
+                                          g => g.Select(x => new CaracteristicaSalaArrayDTO
+                                          {
+                                              IdCaracteristica = x.IdCaracteristica,
+                                              Nombre = x.Nombre
+                                          }).ToList()
+                                      );
+
+    // output
     var resultado = salasBase.Select(sala => new SalasFiltradoDTO
     {
         IdSala = sala.IdSala,
@@ -213,12 +234,10 @@ public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fe
         SedeDireccion = sala.Direccion,
         SedeCiudad = sala.Ciudad,
         
-        // posible que se quite
         PuestosDisponibles = puestosDisponiblesPorSala.GetValueOrDefault(sala.IdSala, 0),
-        PuestosOcupados = totalPuestosPorSala.GetValueOrDefault(sala.IdSala, 0) - 
-                         puestosDisponiblesPorSala.GetValueOrDefault(sala.IdSala, 0),
-        
-        Caracteristicas = new List<string>() // pendiente despues
+        PuestosOcupados = totalPuestosPorSala.GetValueOrDefault(sala.IdSala, 0) -
+                          puestosDisponiblesPorSala.GetValueOrDefault(sala.IdSala, 0),
+        Caracteristicas = caracteristicasPorSala.GetValueOrDefault(sala.IdSala, new List<CaracteristicaSalaArrayDTO>())
     }).ToList();
 
     return resultado;
