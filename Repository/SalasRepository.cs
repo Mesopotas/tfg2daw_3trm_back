@@ -164,42 +164,65 @@ public async Task AddAsync(SalasDTO sala)
                 await _context.SaveChangesAsync();
             }
         }
-    public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
 {
-    var query = from sala in _context.Salas
-                join sede in _context.Sedes on sala.IdSede equals sede.IdSede
-                join puesto in _context.PuestosTrabajo on sala.IdSala equals puesto.IdSala
-                join disp in _context.Disponibilidades on puesto.IdPuestoTrabajo equals disp.IdPuestoTrabajo
-                join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
-                where sala.IdSede == idSede && !sala.Bloqueado &&
-                      puesto.Disponible && !puesto.Bloqueado &&
-                      disp.Estado == true &&
-                      disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
-                      tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
-                group puesto by new { 
-                    sala.IdSala, sala.Nombre, sala.URL_Imagen, sala.Capacidad, 
-                    sala.IdTipoSala, sala.IdSede,
-                    sede.Observaciones, sede.Planta, sede.Direccion, sede.Ciudad
-                } into g
-                select new SalasFiltradoDTO
-                {
-                    IdSala = g.Key.IdSala,
-                    Nombre = g.Key.Nombre,
-                    URL_Imagen = g.Key.URL_Imagen,
-                    Capacidad = g.Key.Capacidad,
-                    IdTipoSala = g.Key.IdTipoSala,
-                    IdSede = g.Key.IdSede,
-                    SedeObservaciones = g.Key.Observaciones,
-                    SedePlanta = g.Key.Planta,
-                    SedeDireccion = g.Key.Direccion,
-                    SedeCiudad = g.Key.Ciudad,
-                    PuestosDisponibles = g.Select(p => p.IdPuestoTrabajo).Distinct().Count(),
-                    PuestosOcupados = _context.PuestosTrabajo.Count(p => p.IdSala == g.Key.IdSala) - g.Select(p => p.IdPuestoTrabajo).Distinct().Count()
-                };
+    var salasBase = await (from sala in _context.Salas
+                          join sede in _context.Sedes on sala.IdSede equals sede.IdSede
+                          where sala.IdSede == idSede && !sala.Bloqueado
+                          select new
+                          {
+                              sala.IdSala, sala.Nombre, sala.URL_Imagen, sala.Capacidad,
+                              sala.IdTipoSala, sala.IdSede,
+                              sede.Observaciones, sede.Planta, sede.Direccion, sede.Ciudad
+                          }).ToListAsync();
 
-    return await query.ToListAsync();
+    var totalPuestosPorSala = await _context.PuestosTrabajo
+        .Where(p => p.Disponible && !p.Bloqueado)
+        .Join(_context.Salas.Where(s => s.IdSede == idSede && !s.Bloqueado),
+              p => p.IdSala,
+              s => s.IdSala,
+              (p, s) => new { s.IdSala, p.IdPuestoTrabajo })
+        .GroupBy(x => x.IdSala)
+        .Select(g => new { IdSala = g.Key, Total = g.Count() })
+        .ToDictionaryAsync(x => x.IdSala, x => x.Total);
+
+    var puestosDisponiblesPorSala = await (from puesto in _context.PuestosTrabajo
+                                          join sala in _context.Salas on puesto.IdSala equals sala.IdSala
+                                          join disp in _context.Disponibilidades on puesto.IdPuestoTrabajo equals disp.IdPuestoTrabajo
+                                          join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
+                                          where sala.IdSede == idSede && !sala.Bloqueado &&
+                                                puesto.Disponible && !puesto.Bloqueado &&
+                                                disp.Estado == true && 
+                                                disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
+                                                tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
+                                          group puesto by puesto.IdSala into g
+                                          select new { IdSala = g.Key, Disponibles = g.Select(p => p.IdPuestoTrabajo).Distinct().Count() })
+                                         .ToDictionaryAsync(x => x.IdSala, x => x.Disponibles);
+
+    // resultado a sacar
+    var resultado = salasBase.Select(sala => new SalasFiltradoDTO
+    {
+        IdSala = sala.IdSala,
+        Nombre = sala.Nombre,
+        URL_Imagen = sala.URL_Imagen,
+        Capacidad = sala.Capacidad,
+        IdTipoSala = sala.IdTipoSala,
+        IdSede = sala.IdSede,
+        SedeObservaciones = sala.Observaciones,
+        SedePlanta = sala.Planta,
+        SedeDireccion = sala.Direccion,
+        SedeCiudad = sala.Ciudad,
+        
+        // posible que se quite
+        PuestosDisponibles = puestosDisponiblesPorSala.GetValueOrDefault(sala.IdSala, 0),
+        PuestosOcupados = totalPuestosPorSala.GetValueOrDefault(sala.IdSala, 0) - 
+                         puestosDisponiblesPorSala.GetValueOrDefault(sala.IdSala, 0),
+        
+        Caracteristicas = new List<string>() // pendiente despues
+    }).ToList();
+
+    return resultado;
 }
-
         public async Task<List<SalasConCaracteristicasDTO>> GetAllWithCaracteristicasAsync()
         {
             var salasConCaracteristicas = await _context.Salas
