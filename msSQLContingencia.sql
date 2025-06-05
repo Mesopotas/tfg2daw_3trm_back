@@ -243,7 +243,7 @@ VALUES
 INSERT INTO CaracteristicasSala (Nombre, Descripcion, PrecioAniadido)
 VALUES 
 ('Ordenadores incorporados', 'Puestos con ordenadores de alta gama instalados', 0.50),
-('Asientos libres', 'Solo sillas y mesas, necesario traer portátil', 0.00),
+('Cocina equipada', 'Cocina con todo lo necesario', 0.00),
 ('Habitaciones individuales para llamadas', 'Cabinas insonorizadas para videoconferencias', 0.25),
 ('Lockers para usuarios', 'Taquillas seguras para pertenencias personales', 0.15),
 ('Puerta por llave magnética', 'Acceso seguro mediante tarjeta magnética', 0.20);
