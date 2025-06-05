@@ -164,65 +164,42 @@ public async Task AddAsync(SalasDTO sala)
                 await _context.SaveChangesAsync();
             }
         }
-public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
+    public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
 {
-    var query = _context.Salas // selecciona las salas
-          .Where(sala => sala.IdSede == idSede && !sala.Bloqueado) // filtro de sedes y que no sean salas bloqueadas
-          .Join(_context.Sedes, // inner join a sedes
-              sala => sala.IdSede,
-        sede => sede.IdSede,
-        (sala, sede) => new { sala, sede }) // resultado del join
-          .Select(item => new // proyeccion para calcular info por sala
-          {
-              SalaEntidad = item.sala, // entidad de sala
-              SedeEntidad = item.sede, // entidad de sede
+    var query = from sala in _context.Salas
+                join sede in _context.Sedes on sala.IdSede equals sede.IdSede
+                join puesto in _context.PuestosTrabajo on sala.IdSala equals puesto.IdSala
+                join disp in _context.Disponibilidades on puesto.IdPuestoTrabajo equals disp.IdPuestoTrabajo
+                join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
+                where sala.IdSede == idSede && !sala.Bloqueado &&
+                      puesto.Disponible && !puesto.Bloqueado &&
+                      disp.Estado == true &&
+                      disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
+                      tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
+                group puesto by new { 
+                    sala.IdSala, sala.Nombre, sala.URL_Imagen, sala.Capacidad, 
+                    sala.IdTipoSala, sala.IdSede,
+                    sede.Observaciones, sede.Planta, sede.Direccion, sede.Ciudad
+                } into g
+                select new SalasFiltradoDTO
+                {
+                    IdSala = g.Key.IdSala,
+                    Nombre = g.Key.Nombre,
+                    URL_Imagen = g.Key.URL_Imagen,
+                    Capacidad = g.Key.Capacidad,
+                    IdTipoSala = g.Key.IdTipoSala,
+                    IdSede = g.Key.IdSede,
+                    SedeObservaciones = g.Key.Observaciones,
+                    SedePlanta = g.Key.Planta,
+                    SedeDireccion = g.Key.Direccion,
+                    SedeCiudad = g.Key.Ciudad,
+                    PuestosDisponibles = g.Select(p => p.IdPuestoTrabajo).Distinct().Count(),
+                    PuestosOcupados = _context.PuestosTrabajo.Count(p => p.IdSala == g.Key.IdSala) - g.Select(p => p.IdPuestoTrabajo).Distinct().Count()
+                };
 
-              // subconsulta para calcular puestos OCUPADOS dentro del rango de fecha/hora
-              PuestosOcupados = _context.PuestosTrabajo // selecciona puestos
-                  .Where(p => p.IdSala == item.sala.IdSala && p.Disponible && !p.Bloqueado) // puestos que sean de la sala, esten como disponibles y no bloqueados
-                  .Join(_context.Disponibilidades, // join a disponibilidades
-                      puesto => puesto.IdPuestoTrabajo,
-                disp => disp.IdPuestoTrabajo,
-                (puesto, disp) => new { puesto, disp })
-          .Join(_context.TramosHorarios, // join a tramos horarios
-                      pd => pd.disp.IdTramoHorario,
-                tramo => tramo.IdTramoHorario,
-                (pd, tramo) => new { pd.puesto, pd.disp, tramo })
-          .Where(filtro => // filtra por disponibilidad, fecha y hora
-                      filtro.disp.Estado == false && // Estado false = ocupado (0 en la BD)
-                      filtro.disp.Fecha >= fechaInicio && // dentro del rango de fechas (inicio)
-                      filtro.disp.Fecha <= fechaFin && // dentro del rango de fechas (fin)
-                      filtro.tramo.HoraInicio >= horaInicio && // dentro del rango horario (inicio)
-                      filtro.tramo.HoraFin <= horaFin) // dentro del rango horario (fin)
-                  .Select(x => x.puesto.IdPuestoTrabajo) // selecciona el id del puesto
-                  .Distinct() // ids unicos
-                  .Count(), // cuenta los puestos distintos OCUPADOS en el rango
-
-              // calcula el total de puestos disponibles para la sala
-              TotalPuestosDisponibles = _context.PuestosTrabajo // selecciona puestos
-                  .Count(puestos => puestos.IdSala == item.sala.IdSala && puestos.Disponible && !puestos.Bloqueado) // cuenta solo puestos disponibles y no bloqueados de la sala
-          })
-          .Select(item => new SalasFiltradoDTO // proyeccion final al dto
-          {
-              // propiedades de la sala
-              IdSala = item.SalaEntidad.IdSala,
-              Nombre = item.SalaEntidad.Nombre,
-              URL_Imagen = item.SalaEntidad.URL_Imagen,
-              Capacidad = item.SalaEntidad.Capacidad,
-              IdTipoSala = item.SalaEntidad.IdTipoSala,
-              IdSede = item.SalaEntidad.IdSede,
-              // detalles de la sede
-              SedeObservaciones = item.SedeEntidad.Observaciones,
-              SedePlanta = item.SedeEntidad.Planta,
-              SedeDireccion = item.SedeEntidad.Direccion,
-              SedeCiudad = item.SedeEntidad.Ciudad,
-              // cantidades calculadas correctamente
-              PuestosDisponibles = item.TotalPuestosDisponibles - item.PuestosOcupados, // disponibles = total disponibles - ocupados
-              PuestosOcupados = item.PuestosOcupados // ocupados en el rango específico
-          });
-
-    return await query.ToListAsync(); // ejecuta la consulta async y retorna la lista
+    return await query.ToListAsync();
 }
+
         public async Task<List<SalasConCaracteristicasDTO>> GetAllWithCaracteristicasAsync()
         {
             var salasConCaracteristicas = await _context.Salas
