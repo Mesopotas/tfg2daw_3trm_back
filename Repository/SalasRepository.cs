@@ -187,51 +187,33 @@ public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fe
         .Select(g => new { IdSala = g.Key, Total = g.Count() })
         .ToDictionaryAsync(x => x.IdSala, x => x.Total);
 
-    // Calcular cuántos slots de tiempo necesitamos cubrir
-    var tramosRequeridos = await _context.TramosHorarios
-        .Where(t => t.HoraInicio >= horaInicio && t.HoraFin <= horaFin)
-        .CountAsync();
+    // Obtener disponibilidades agrupadas por fecha, tramo y sala
+    var disponibilidadesPorSlot = await (from puesto in _context.PuestosTrabajo
+                                        join sala in _context.Salas on puesto.IdSala equals sala.IdSala
+                                        join disp in _context.Disponibilidades on puesto.IdPuestoTrabajo equals disp.IdPuestoTrabajo
+                                        join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
+                                        where sala.IdSede == idSede && !sala.Bloqueado &&
+                                              puesto.Disponible && !puesto.Bloqueado &&
+                                              disp.Estado == true &&
+                                              disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
+                                              tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
+                                        group puesto by new { sala.IdSala, disp.Fecha, disp.IdTramoHorario } into g
+                                        select new
+                                        {
+                                            g.Key.IdSala,
+                                            g.Key.Fecha,
+                                            g.Key.IdTramoHorario,
+                                            PuestosDisponibles = g.Count()
+                                        })
+                                       .ToListAsync();
 
-    var diasRequeridos = (int)(fechaFin - fechaInicio).TotalDays + 1;
-    var totalSlotsRequeridos = tramosRequeridos * diasRequeridos;
-
-    // Obtener todos los puestos de trabajo de las salas de esta sede
-    var puestosEnSede = await _context.PuestosTrabajo
-        .Where(p => p.Disponible && !p.Bloqueado)
-        .Join(_context.Salas.Where(s => s.IdSede == idSede && !s.Bloqueado),
-              p => p.IdSala,
-              s => s.IdSala,
-              (p, s) => new { p.IdPuestoTrabajo, p.IdSala })
-        .ToListAsync();
-
-    // Contar disponibilidades por puesto de trabajo en el rango especificado
-    var disponibilidadesPorPuesto = await (from disp in _context.Disponibilidades
-                                          join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
-                                          join puesto in _context.PuestosTrabajo on disp.IdPuestoTrabajo equals puesto.IdPuestoTrabajo
-                                          join sala in _context.Salas on puesto.IdSala equals sala.IdSala
-                                          where sala.IdSede == idSede && !sala.Bloqueado &&
-                                                puesto.Disponible && !puesto.Bloqueado &&
-                                                disp.Estado == true &&
-                                                disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
-                                                tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
-                                          group disp by new { puesto.IdPuestoTrabajo, puesto.IdSala } into g
-                                          select new
-                                          {
-                                              g.Key.IdPuestoTrabajo,
-                                              g.Key.IdSala,
-                                              DisponibilidadesCount = g.Count()
-                                          })
-                                         .ToListAsync();
-
-    // Filtrar solo los puestos que tienen TODAS las disponibilidades requeridas
-    var puestosCompletamenteDisponibles = disponibilidadesPorPuesto
-        .Where(x => x.DisponibilidadesCount == totalSlotsRequeridos)
-        .ToList();
-
-    // Agrupar por sala para contar puestos disponibles
-    var puestosDisponiblesPorSala = puestosCompletamenteDisponibles
+    // Calcular el mínimo de puestos disponibles por sala
+    var puestosDisponiblesPorSala = disponibilidadesPorSlot
         .GroupBy(x => x.IdSala)
-        .ToDictionary(g => g.Key, g => g.Count());
+        .ToDictionary(
+            g => g.Key,
+            g => g.Any() ? g.Min(slot => slot.PuestosDisponibles) : 0
+        );
 
     // obtener caracteristicas de cada sala
     var caracteristicasPorSala = await (from salaCaract in _context.SalaConCaracteristicas
