@@ -168,67 +168,119 @@ public async Task AddDisponibilidadesAsync(int anio)
     }
 }
 
-// Método auxiliar para manejar errores con lotes más pequeños
-private async Task InsertarLotePequeno(List<Disponibilidad> loteGrande)
-{
-    const int tamanoLotePequeno = 5000;
-    
-    for (int i = 0; i < loteGrande.Count; i += tamanoLotePequeno)
-    {
-        var lotePequeno = loteGrande.Skip(i).Take(tamanoLotePequeno).ToList();
-        
-        try
+        // Método auxiliar para manejar errores con lotes más pequeños
+        private async Task InsertarLotePequeno(List<Disponibilidad> loteGrande)
         {
-            await _context.Disponibilidades.AddRangeAsync(lotePequeno);
-            await _context.SaveChangesAsync();
-            Console.WriteLine($"Recuperado con lote pequeño: {lotePequeno.Count} registros");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error crítico en lote pequeño: {ex.Message}");
-        }
-    }
-}
-public async Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId)
-{
-    // Consultamos primero las fechas únicas
-    var fechasUnicas = await _context.Disponibilidades
-        .Where(d => d.Estado &&
-                d.PuestoTrabajo.Disponible &&
-                !d.PuestoTrabajo.Bloqueado &&
-                d.PuestoTrabajo.Sala.IdSala == salaId)
-        .Select(d => d.Fecha.Date) // se elige la fecha obtenida de disponibilidad
-        .Distinct() // igual que en sql, evita duplicados, ya que cada fecha puede tener varios puestos de trabajo de esa misma sala
-        .OrderBy(fecha => fecha) // primero cargará las fechas mas recientes en orden ascendente
-        .ToListAsync();
-    
-    // para cada fecha única, se elige su primera disponibilidad, sino cada fecha aparecería varias veces
-    var output = new List<FechasDisponiblesDTO>();
-    
-    foreach (var fecha in fechasUnicas)
-    {
-        // select de esa fecha para tener el id del puesto de trabajo al que corresponde y su id de disponibilidad
-        var disponibilidad = await _context.Disponibilidades
-            .Where(d => d.Estado &&
-                    d.PuestoTrabajo.Disponible &&
-                    !d.PuestoTrabajo.Bloqueado &&
-                    d.PuestoTrabajo.Sala.IdSala == salaId &&
-                    d.Fecha.Date == fecha)
-            .FirstOrDefaultAsync();
-        
-        if (disponibilidad != null) // si existe la disponibilidad
-        {
-            output.Add(new FechasDisponiblesDTO // añade esa info al dato de salida con las propiedades del DTO
+            const int tamanoLotePequeno = 5000;
+
+            for (int i = 0; i < loteGrande.Count; i += tamanoLotePequeno)
             {
-                IdDisponibilidad = disponibilidad.IdDisponibilidad,
-                Fecha = disponibilidad.Fecha,
-                IdPuestoTrabajo = disponibilidad.IdPuestoTrabajo
-            });
+                var lotePequeno = loteGrande.Skip(i).Take(tamanoLotePequeno).ToList();
+
+                try
+                {
+                    await _context.Disponibilidades.AddRangeAsync(lotePequeno);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"Recuperado con lote pequeño: {lotePequeno.Count} registros");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error crítico en lote pequeño: {ex.Message}");
+                }
+            }
+        }
+
+
+public async Task AddDisponibilidadesParaDiaAsync(DateTime fechaObjetivo)
+{
+    var idsPuestosTrabajo = await _context.PuestosTrabajo
+        .Select(p => p.IdPuestoTrabajo)
+        .ToListAsync();
+
+    var existentes = await _context.Disponibilidades
+        .Where(d => d.Fecha == fechaObjetivo && d.IdTramoHorario >= 1 && d.IdTramoHorario <= 11)
+        .Select(d => new { d.IdPuestoTrabajo, d.IdTramoHorario })
+        .ToListAsync();
+
+    var existentesSet = existentes
+        .Select(e => $"{e.IdPuestoTrabajo}_{e.IdTramoHorario}")
+        .ToHashSet();
+
+    var nuevasDisponibilidades = new List<Disponibilidad>();
+
+    foreach (var idPuesto in idsPuestosTrabajo)
+    {
+        for (int tramo = 1; tramo <= 11; tramo++)
+        {
+            var clave = $"{idPuesto}_{tramo}";
+
+            if (!existentesSet.Contains(clave))
+            {
+                nuevasDisponibilidades.Add(new Disponibilidad
+                {
+                    Fecha = fechaObjetivo,
+                    Estado = true,
+                    IdPuestoTrabajo = idPuesto,
+                    IdTramoHorario = tramo
+                });
+            }
         }
     }
-    
-    return output;
+
+    if (nuevasDisponibilidades.Count > 0)
+    {
+        await _context.Disponibilidades.AddRangeAsync(nuevasDisponibilidades);
+        await _context.SaveChangesAsync();
+        Console.WriteLine($"Generadas {nuevasDisponibilidades.Count} disponibilidades nuevas para el día {fechaObjetivo:yyyy-MM-dd}");
+    }
+    else
+    {
+        Console.WriteLine($"Ya existen todas las disponibilidades para el día {fechaObjetivo:yyyy-MM-dd}");
+    }
 }
+
+
+
+        public async Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId)
+        {
+            // Consultamos primero las fechas únicas
+            var fechasUnicas = await _context.Disponibilidades
+                .Where(d => d.Estado &&
+                        d.PuestoTrabajo.Disponible &&
+                        !d.PuestoTrabajo.Bloqueado &&
+                        d.PuestoTrabajo.Sala.IdSala == salaId)
+                .Select(d => d.Fecha.Date) // se elige la fecha obtenida de disponibilidad
+                .Distinct() // igual que en sql, evita duplicados, ya que cada fecha puede tener varios puestos de trabajo de esa misma sala
+                .OrderBy(fecha => fecha) // primero cargará las fechas mas recientes en orden ascendente
+                .ToListAsync();
+
+            // para cada fecha única, se elige su primera disponibilidad, sino cada fecha aparecería varias veces
+            var output = new List<FechasDisponiblesDTO>();
+
+            foreach (var fecha in fechasUnicas)
+            {
+                // select de esa fecha para tener el id del puesto de trabajo al que corresponde y su id de disponibilidad
+                var disponibilidad = await _context.Disponibilidades
+                    .Where(d => d.Estado &&
+                            d.PuestoTrabajo.Disponible &&
+                            !d.PuestoTrabajo.Bloqueado &&
+                            d.PuestoTrabajo.Sala.IdSala == salaId &&
+                            d.Fecha.Date == fecha)
+                    .FirstOrDefaultAsync();
+
+                if (disponibilidad != null) // si existe la disponibilidad
+                {
+                    output.Add(new FechasDisponiblesDTO // añade esa info al dato de salida con las propiedades del DTO
+                    {
+                        IdDisponibilidad = disponibilidad.IdDisponibilidad,
+                        Fecha = disponibilidad.Fecha,
+                        IdPuestoTrabajo = disponibilidad.IdPuestoTrabajo
+                    });
+                }
+            }
+
+            return output;
+        }
 
 
 }

@@ -92,6 +92,28 @@ namespace CoWorking.Controllers
                 return StatusCode(500, new { message = "Hubo un error al agregar las disponibilidades.", error = ex.Message });
             }
         }
+
+   // POST api/disponibilidades/add-dia?fecha=2025-06-06
+[HttpPost("add-dia")]
+public async Task<IActionResult> AddDisponibilidadesParaDia([FromQuery] DateTime fecha)
+{
+    try
+    {
+        if (fecha < DateTime.Today)
+        {
+            return BadRequest(new { message = "No se puede generar disponibilidades para fechas pasadas." });
+        }
+
+        await _serviceDisponibilidad.AddDisponibilidadesParaDiaAsync(fecha);
+        return Ok(new { message = $"Disponibilidades generadas para el día {fecha:yyyy-MM-dd}." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error al generar disponibilidades para el día indicado.", error = ex.Message });
+    }
+}
+
+
         
         [HttpGet("dias/{salaId}")]
         public async Task<ActionResult<List<Disponibilidad>>> GetDiasBySala(int salaId)

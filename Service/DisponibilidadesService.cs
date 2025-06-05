@@ -43,6 +43,11 @@ namespace CoWorking.Service
         {
             await _disponibilidadesRepository.AddDisponibilidadesAsync(anio);
         }
+    public async Task AddDisponibilidadesParaDiaAsync(DateTime fechaObjetivo)
+        {
+            await _disponibilidadesRepository.AddDisponibilidadesParaDiaAsync(fechaObjetivo);
+        }
+
         public async Task<List<FechasDisponiblesDTO>> GetDiasBySalaAsync(int salaId)
         {
             return await _disponibilidadesRepository.GetDiasBySalaAsync(salaId);
