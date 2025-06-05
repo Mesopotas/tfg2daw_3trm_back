@@ -164,6 +164,7 @@ public async Task AddAsync(SalasDTO sala)
                 await _context.SaveChangesAsync();
             }
         }
+
 public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fechaInicio, DateTime fechaFin, TimeSpan horaInicio, TimeSpan horaFin)
 {
     var salasBase = await (from sala in _context.Salas
@@ -186,20 +187,53 @@ public async Task<List<SalasFiltradoDTO>> GetSalasBySede(int idSede, DateTime fe
         .Select(g => new { IdSala = g.Key, Total = g.Count() })
         .ToDictionaryAsync(x => x.IdSala, x => x.Total);
 
-    var puestosDisponiblesPorSala = await (from puesto in _context.PuestosTrabajo
-                                          join sala in _context.Salas on puesto.IdSala equals sala.IdSala
-                                          join disp in _context.Disponibilidades on puesto.IdPuestoTrabajo equals disp.IdPuestoTrabajo
+    // Calcular cuántos slots de tiempo necesitamos cubrir
+    var tramosRequeridos = await _context.TramosHorarios
+        .Where(t => t.HoraInicio >= horaInicio && t.HoraFin <= horaFin)
+        .CountAsync();
+
+    var diasRequeridos = (int)(fechaFin - fechaInicio).TotalDays + 1;
+    var totalSlotsRequeridos = tramosRequeridos * diasRequeridos;
+
+    // Obtener todos los puestos de trabajo de las salas de esta sede
+    var puestosEnSede = await _context.PuestosTrabajo
+        .Where(p => p.Disponible && !p.Bloqueado)
+        .Join(_context.Salas.Where(s => s.IdSede == idSede && !s.Bloqueado),
+              p => p.IdSala,
+              s => s.IdSala,
+              (p, s) => new { p.IdPuestoTrabajo, p.IdSala })
+        .ToListAsync();
+
+    // Contar disponibilidades por puesto de trabajo en el rango especificado
+    var disponibilidadesPorPuesto = await (from disp in _context.Disponibilidades
                                           join tramo in _context.TramosHorarios on disp.IdTramoHorario equals tramo.IdTramoHorario
+                                          join puesto in _context.PuestosTrabajo on disp.IdPuestoTrabajo equals puesto.IdPuestoTrabajo
+                                          join sala in _context.Salas on puesto.IdSala equals sala.IdSala
                                           where sala.IdSede == idSede && !sala.Bloqueado &&
                                                 puesto.Disponible && !puesto.Bloqueado &&
                                                 disp.Estado == true &&
                                                 disp.Fecha >= fechaInicio && disp.Fecha <= fechaFin &&
                                                 tramo.HoraInicio >= horaInicio && tramo.HoraFin <= horaFin
-                                          group puesto by puesto.IdSala into g
-                                          select new { IdSala = g.Key, Disponibles = g.Select(p => p.IdPuestoTrabajo).Distinct().Count() })
-                                         .ToDictionaryAsync(x => x.IdSala, x => x.Disponibles);
+                                          group disp by new { puesto.IdPuestoTrabajo, puesto.IdSala } into g
+                                          select new
+                                          {
+                                              g.Key.IdPuestoTrabajo,
+                                              g.Key.IdSala,
+                                              DisponibilidadesCount = g.Count()
+                                          })
+                                         .ToListAsync();
 
-    // obtener caracteristicasd e cada sala
+    // Filtrar solo los puestos que tienen TODAS las disponibilidades requeridas
+    var puestosCompletamenteDisponibles = disponibilidadesPorPuesto
+        .Where(x => x.DisponibilidadesCount == totalSlotsRequeridos)
+        .ToList();
+
+    // Agrupar por sala para contar puestos disponibles
+    var puestosDisponiblesPorSala = puestosCompletamenteDisponibles
+        .GroupBy(x => x.IdSala)
+        .ToDictionary(g => g.Key, g => g.Count());
+
+    // obtener caracteristicas de cada sala
     var caracteristicasPorSala = await (from salaCaract in _context.SalaConCaracteristicas
                                        join caracteristica in _context.CaracteristicasSala on salaCaract.IdCaracteristica equals caracteristica.IdCaracteristica
                                        join sala in _context.Salas on salaCaract.IdSala equals sala.IdSala
