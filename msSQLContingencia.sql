@@ -47,9 +47,9 @@ CREATE TABLE TiposPuestosTrabajo ( -- define los tipos de puestos como silla, me
 );
 
 INSERT INTO TiposPuestosTrabajo(Nombre, Imagen_URL, Descripcion, Precio) -- insert inicial de silla, tendrá id 1, link de imagen provisional, pendiente cambiarlo
-VALUES ('Silla comun en sala publica', 'https://e7.pngegg.com/pngimages/488/752/png-clipart-chair-desk-table-school-chair-angle-furniture-thumbnail.png', 'Silla comun', 10.00);
+VALUES ('Silla comun en sala publica', 'https://e7.pngegg.com/pngimages/488/752/png-clipart-chair-desk-table-school-chair-angle-furniture-thumbnail.png', 'Silla comun', 1.00);
 INSERT INTO TiposPuestosTrabajo(Nombre, Imagen_URL, Descripcion, Precio) -- insert inicial de silla, tendrá id 1, link de imagen provisional, pendiente cambiarlo
-VALUES ('Silla comun en sala privada', 'https://e7.pngegg.com/pngimages/488/752/png-clipart-chair-desk-table-school-chair-angle-furniture-thumbnail.png', 'Silla comun', 15.00);
+VALUES ('Silla comun en sala privada', 'https://e7.pngegg.com/pngimages/488/752/png-clipart-chair-desk-table-school-chair-angle-furniture-thumbnail.png', 'Silla comun', 2.00);
 
 CREATE TABLE TiposSalas ( -- privada o comun
     IdTipoSala INT IDENTITY(1,1) PRIMARY KEY,
@@ -223,13 +223,13 @@ INSERT INTO Sedes (Pais, Ciudad, Direccion, CodigoPostal, Planta, URL_Imagen, La
 VALUES 
 ('España', 'Madrid', 'Calle Gran Vía 28', '28013', 'Planta 4', 'https://example.com/images/madrid.jpg', '40.4200', '-3.7025', 'Edificio histórico con vistas a Gran Vía'),
 ('España', 'Barcelona', 'Passeig de Gràcia 92', '08008', 'Planta 2', 'https://example.com/images/barcelona.jpg', '41.3950', '2.1534', 'Junto a Casa Milà'),
-('España', 'Valencia', 'Calle Colón 60', '46004', 'Planta 3', 'https://example.com/images/valencia.jpg', '39.4697', '-0.3774', 'Zona comercial principal'),
-('España', 'Sevilla', 'Avenida de la Constitución 12', '41004', 'Planta 1', 'https://example.com/images/sevilla.jpg', '37.3886', '-5.9953', 'Cerca de la Catedral'),
+('España', 'Zaragoza', 'Paseo Independencia 24', '50004', 'Planta 2', 'https://example.com/images/zaragoza-centro.jpg', '41.6488', '-0.8891', 'Zona centro junto a Plaza Aragón'),
+('España', 'Zaragoza', 'Calle del Coso 128', '50002', 'Planta baja', 'https://example.com/images/zaragoza-coso.jpg', '41.6545', '-0.8773', 'Ubicación próxima al Teatro Principal'),
 ('España', 'Bilbao', 'Gran Vía Don Diego López de Haro 38', '48009', 'Planta 5', 'https://example.com/images/bilbao.jpg', '43.2630', '-2.9350', 'Vista al río Nervión');
 
 -- ACTUALIZAR TIPOS DE PUESTOS DE TRABAJO (ajustar precios según requerimientos)
-UPDATE TiposPuestosTrabajo SET Precio = 2.00 WHERE IdTipoPuestoTrabajo = 1; -- Publica 2€/hora
-UPDATE TiposPuestosTrabajo SET Precio = 5.00 WHERE IdTipoPuestoTrabajo = 2; -- Privada 5€/hora
+UPDATE TiposPuestosTrabajo SET Precio = 0.50 WHERE IdTipoPuestoTrabajo = 1; 
+UPDATE TiposPuestosTrabajo SET Precio = 0.75 WHERE IdTipoPuestoTrabajo = 2; 
 
 -- INSERTAR TIPOS DE SALAS (4 tipos según requerimientos)
 INSERT INTO TiposSalas (Nombre, NumeroMesas, CapacidadAsientos, EsPrivada, Descripcion, IdTipoPuestoTrabajo)
@@ -252,34 +252,34 @@ VALUES
 -- Para la sede de Madrid (IdSede = 1)
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
 VALUES 
-('Madrid Grande', 'https://example.com/images/madrid_grande.jpg', 40, 1, 1),
-('Madrid Mediana', 'https://example.com/images/madrid_mediana.jpg', 32, 2, 1),
-('Madrid Pequeña', 'https://example.com/images/madrid_pequena.jpg', 12, 3, 1),
+('Madrid Grande marketing', 'https://example.com/images/madrid_grande.jpg', 40, 1, 1),
+('Madrid Mediana informatica', 'https://example.com/images/madrid_mediana.jpg', 32, 2, 1),
+('Madrid Pequeña RRHH', 'https://example.com/images/madrid_pequena.jpg', 12, 3, 1),
 ('Madrid Privada', 'https://example.com/images/madrid_privada.jpg', 20, 4, 1);
 
 -- Para la sede de Barcelona (IdSede = 2)
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
 VALUES 
-('Barcelona Grande', 'https://example.com/images/barcelona_grande.jpg', 40, 1, 2),
-('Barcelona Mediana', 'https://example.com/images/barcelona_mediana.jpg', 32, 2, 2),
-('Barcelona Pequeña', 'https://example.com/images/barcelona_pequena.jpg', 12, 3, 2),
+('Barcelona Grande marketing', 'https://example.com/images/barcelona_grande.jpg', 40, 1, 2),
+('Barcelona Mediana informatica', 'https://example.com/images/barcelona_mediana.jpg', 32, 2, 2),
+('Barcelona Pequeña RRHH', 'https://example.com/images/barcelona_pequena.jpg', 12, 3, 2),
 ('Barcelona Privada', 'https://example.com/images/barcelona_privada.jpg', 20, 4, 2);
 
--- Para la sede de Valencia (IdSede = 3)
+-- Para la sede de Zaragoza (IdSede = 3)
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
 VALUES 
-('Valencia Grande', 'https://example.com/images/valencia_grande.jpg', 40, 1, 3),
-('Valencia Mediana', 'https://example.com/images/valencia_mediana.jpg', 32, 2, 3),
-('Valencia Pequeña', 'https://example.com/images/valencia_pequena.jpg', 12, 3, 3),
-('Valencia Privada', 'https://example.com/images/valencia_privada.jpg', 20, 4, 3);
+('Zaragoza Grande RRHH', 'https://example.com/images/Zaragoza_grande.jpg', 40, 1, 3),
+('Zaragoza Mediana informatica', 'https://example.com/images/Zaragoza_mediana.jpg', 32, 2, 3),
+('Zaragoza Pequeña marketing', 'https://example.com/images/Zaragoza_pequena.jpg', 12, 3, 3),
+('Zaragoza Privada', 'https://example.com/images/Zaragoza_privada.jpg', 20, 4, 3);
 
--- Para la sede de Sevilla (IdSede = 4)
+-- Para la sede de Zaragoza (IdSede = 4)
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
 VALUES 
-('Sevilla Grande', 'https://example.com/images/sevilla_grande.jpg', 40, 1, 4),
-('Sevilla Mediana', 'https://example.com/images/sevilla_mediana.jpg', 32, 2, 4),
-('Sevilla Pequeña', 'https://example.com/images/sevilla_pequena.jpg', 12, 3, 4),
-('Sevilla Privada', 'https://example.com/images/sevilla_privada.jpg', 20, 4, 4);
+('Zaragoza Grande informatica', 'https://example.com/images/Zaragoza_grande.jpg', 40, 1, 4),
+('Zaragoza Mediana marketing', 'https://example.com/images/Zaragoza_mediana.jpg', 32, 2, 4),
+('Zaragoza Pequeña RRHH', 'https://example.com/images/Zaragoza_pequena.jpg', 12, 3, 4),
+('Zaragoza Privada', 'https://example.com/images/Zaragoza_privada.jpg', 20, 4, 4);
 
 -- Para la sede de Bilbao (IdSede = 5)
 INSERT INTO Salas (Nombre, URL_Imagen, Capacidad, IdTipoSala, IdSede)
@@ -309,22 +309,22 @@ VALUES
 (7, 2), -- Barcelona Pequeña: Asientos libres
 (8, 5); -- Barcelona Privada: Puerta por llave magnética
 
--- Para Valencia
+-- Para Zaragoza
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
 VALUES 
-(9, 1),  -- Valencia Grande: Ordenadores incorporados
-(10, 2), -- Valencia Mediana: Asientos libres
-(11, 3), -- Valencia Pequeña: Habitaciones individuales para llamadas
-(12, 4), -- Valencia Privada: Lockers para usuarios
-(12, 5); -- Valencia Privada: Puerta por llave magnética
+(9, 1),  -- Zaragoza Grande: Ordenadores incorporados
+(10, 2), -- Zaragoza Mediana: Asientos libres
+(11, 3), -- Zaragoza Pequeña: Habitaciones individuales para llamadas
+(12, 4), -- Zaragoza Privada: Lockers para usuarios
+(12, 5); -- Zaragoza Privada: Puerta por llave magnética
 
--- Para Sevilla
+-- Para Zaragoza
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
 VALUES 
-(13, 1), -- Sevilla Grande: Ordenadores incorporados
-(14, 2), -- Sevilla Mediana: Asientos libres
-(15, 3), -- Sevilla Pequeña: Habitaciones individuales para llamadas
-(16, 5); -- Sevilla Privada: Puerta por llave magnética
+(13, 1), -- Zaragoza Grande: Ordenadores incorporados
+(14, 2), -- Zaragoza Mediana: Asientos libres
+(15, 3), -- Zaragoza Pequeña: Habitaciones individuales para llamadas
+(16, 5); -- Zaragoza Privada: Puerta por llave magnética
 
 -- Para Bilbao
 INSERT INTO SalaConCaracteristicas (IdSala, IdCaracteristica)
@@ -348,12 +348,12 @@ VALUES
 ('Zona céntrica con mesas medianas', 6),
 ('Zona tranquila y acogedora', 7),
 ('Zona privada para reuniones de equipo', 8),
--- Valencia
+-- Zaragoza
 ('Zona amplia con luz natural', 9),
 ('Zona mediterránea con mesas medianas', 10),
 ('Zona compacta y funcional', 11),
 ('Zona privada con decoración moderna', 12),
--- Sevilla
+-- Zaragoza
 ('Zona amplia con estilo andaluz', 13),
 ('Zona acogedora con mesas medianas', 14),
 ('Zona íntima con pocas mesas', 15),
