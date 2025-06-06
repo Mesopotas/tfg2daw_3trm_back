@@ -169,7 +169,7 @@ public async Task<ActionResult<GetDetallesReservaDTO>> GetResumenReserva(int id)
             }
 
             // construir el enlace al que deberá apuntar el QR, con los campos a validar siendo variables obtenidad del getbyid
-            string urlEndpointValidador = $"https://localhost:7179/api/Reservas/validarReservaQR" +
+            string urlEndpointValidador = $"https://coworkingapi.jblas.me/api/Reservas/validarReservaQR" +
                                    $"?idReserva={reservaDTO.IdReserva}" +
                                    $"&idUsuario={reservaDTO.UsuarioId}" +
                                    $"&fecha={reservaDTO.Fecha.ToString("yyyy-MM-dd")}"; // formato que el endpoint acepta
