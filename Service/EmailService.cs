@@ -161,7 +161,7 @@ namespace CoWorking.Service
                 <h3>Detalles de tu Reserva</h3>
                 <p><strong>Número de Reserva:</strong> #{data.IdReserva}</p>
                 <p><strong>Fecha de Reserva:</strong> {data.Fecha:dd/MM/yyyy}</p>
-                <p><strong>Precio Total:</strong> {data.PrecioTotal}€</p>
+                <p><strong>Precio Total:</strong> {data.PrecioTotal:C}€</p>
 
                                 {(string.IsNullOrEmpty(data.NombreSala) ? "" : $"<p><strong>Sala:</strong> {data.NombreSala}</p>")}
                 {(string.IsNullOrEmpty(data.CiudadSede) ? "" : $"<p><strong>Ubicación:</strong> {data.CiudadSede}</p>")}
